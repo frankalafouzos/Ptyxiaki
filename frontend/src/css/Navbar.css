@@ -1,0 +1,56 @@
+header {
+    background-color: rgb(207, 203, 203);
+    /* display: flex; */
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    padding-bottom: 20px;
+    padding-top: 20px;
+  }
+  
+  .navbar-brand {
+    font-family: 'Balsamiq Sans', cursive;
+    font-size: 40px;
+    padding-top: 1.5%;
+  }
+  
+  .navbar-brand a {
+    text-decoration: none;
+    color: rgb(86, 72, 168);
+  }
+  
+  .navbar-brand a span {
+    color: rgb(224, 86, 21);
+  }
+  
+  .navbar-links {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding-top: 4%;
+    font-family: Arial;
+  }
+  
+  .nav-link {
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+    color: #1b1b1b;
+  }
+
+  .navbar-nav {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .navbar-nav .nav-item {
+    display: inline-block; /* For horizontal alignment */
+  }
+  
+  
+  /* You can add more custom styles as needed */
+  

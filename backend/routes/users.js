@@ -9,44 +9,32 @@ router.route("/").get((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-router.route("/add").post(async (req, res) => {
-  const firstname = req.body.firstname;
-  const lastname = req.body.lastname;
-  const username = nanoid(10);
-  const password = req.body.password;
-  const email = req.body.email;
+// Sign Up
+router.post('/signup', async (req, res) => {
+  try {
+    const { username, password, email, firstname, lastname } = req.body;
+    
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already exists.' });
+    }
 
-  
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-     return res.json("Email already exists.")
+    // Create a new user
+    const newUser = new User({ username, password, email, firstname, lastname });
+    await newUser.save();
+
+    res.status(201).json({ message: 'User created successfully.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating user.' });
   }
-  
-
-  const hashedPassword = await bcrypt.hash(password, 12);
-  const newUser = new User({
-    firstname: firstname,
-    lastname: lastname,
-    username: username,
-    password: hashedPassword,
-    email: email,
-    admin:false
-  });
-  
-  await newUser
-    .save()
-    .then(() => {
-        res.json("User added!")    
-    })
-    .catch((err) => res.status(400).json("Error: " + err));
 });
 
-
 router.route("/editprofile").post(async (req, res) => {
-  const { firstname, lastname, username, password, email } = req.body;
+  const { username, password, firstname, lastname, email, location } = req.body;
 
   try {
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ username: username });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -54,7 +42,8 @@ router.route("/editprofile").post(async (req, res) => {
 
     user.firstname = firstname;
     user.lastname = lastname;
-    user.username = username;
+    user.email = email;
+    user.location = location;
 
     // Update the password if provided
     if (password) {

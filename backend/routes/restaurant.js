@@ -18,22 +18,31 @@ router.route('/:id', async (req, res) => {
     }
   });
 
-// router.route('/add').post((req, res) => {
-//     const title = req.body.title;
-//     const location = req.body.location;
-//     const duration = Number(req.body.duration);
-//     const date = Date.parse(req.body.date);
+router.route('/add').post((req, res) => {
+    const name = req.body.name
+    const price = req.body.price
+    const category = req.body.category
+    const location = req.body.location
+    const imageID = req.body.imageID
+    const phone = req.body.phone
+    const email = req.body.email
+    const description = req.body.description
+    
 
-//     const newBooking = new Booking({
-//         title,
-//         location,
-//         duration,
-//         date,
-//     });
+    const newRestaurant = new Restaurant({
+      name,
+      price,
+      category,
+      location,
+      imageID,
+      phone,
+      email,
+      description
+    });
 
-//     newBooking.save()
-//         .then(() => res.json('Restaurant added!'))
-//         .catch(err => res.status(400).json ('Error: '+ err));
-// });
+    newRestaurant.save()
+        .then(() => res.json('Restaurant added!'))
+        .catch(err => res.status(400).json ('Error: '+ err));
+});
 
 module.exports = router;
