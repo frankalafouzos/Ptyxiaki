@@ -2,11 +2,21 @@ const router = require("express").Router();
 let Restaurant = require('../models/restaurant.model');
 
 
-router.route('/').get((req, res) => {
+router.route('/').get(async(req, res) => {
     Restaurant.find()
         .then(Restaurants => res.json(Restaurants))
         .catch(err => res.status(400).json ('Error: '+ err));
+    const restaurants = await Restaurant.find({});
+    const images = await Image.find()
+    res.render('Restaurants', { restaurants, images})
 });
+
+app.get('/Restaurants', async(req, res) => {
+  const restaurants = await Restaurant.find({});
+  const images = await Image.find()
+  res.render('Restaurants', { restaurants, images, cities })
+
+})
 
 // New route for fetching a single Restaurant by ID
 router.route('/:id', async (req, res) => {

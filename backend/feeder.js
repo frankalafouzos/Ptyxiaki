@@ -18,44 +18,48 @@ console.log("MongoDB database connection established successfully");
 }) 
 
 const seedDB = async() => {
-    // await Restaurants.deleteMany({});
-    // await Image.deleteMany({});
+        try{
+        await Restaurants.deleteMany({});
+        await Image.deleteMany({});
 
-    for (let name of names) {
-        let randomCity = Math.floor(Math.random() * 141)
-        let id = crypto.randomUUID()
-        let randomCategory = Math.floor(Math.random() * 9)
-        let AveragePrice = Math.floor(Math.random() * 100) + 1
+        for (let name of names) {
+            let randomCity = Math.floor(Math.random() * 141)
+            let id = crypto.randomUUID()
+            let randomCategory = Math.floor(Math.random() * 9)
+            let AveragePrice = Math.floor(Math.random() * 100) + 1
 
-        let phoneNumber = Math.floor(Math.random() * 9999999);
-        let emailString = name.split(" ").join("");
-        emailString = emailString.toLowerCase()
-        const restaurants = new Restaurants({
-            name: `${name}`,
-            price: `${AveragePrice}`,
-            category: `${categories[randomCategory]}`,
-            location: `${cities[randomCity]}`,
-            imageID: id,
-            phone: `210${phoneNumber}`,
-            email: `${emailString}@gmail.com`,
-            description: `${descriptions[randomCategory]}`
-        })
-
-        let numberofphotos = Math.floor(Math.random() * 6)
-        for (let number = 0; number <= numberofphotos; number++) {
-            let photo = Math.floor(Math.random() * 31) + 1
-
-            const image = new Image({
-                ImageID: id,
-                link: `../imgs/photo${photo}.avif`
+            let phoneNumber = Math.floor(Math.random() * 9999999);
+            let emailString = name.split(" ").join("");
+            emailString = emailString.toLowerCase()
+            const restaurants = new Restaurants({
+                name: `${name}`,
+                price: `${AveragePrice}`,
+                category: `${categories[randomCategory]}`,
+                location: `${cities[randomCity]}`,
+                imageID: id,
+                phone: `210${phoneNumber}`,
+                email: `${emailString}@gmail.com`,
+                description: `${descriptions[randomCategory]}`
             })
-            await image.save()
+
+            let numberofphotos = Math.floor(Math.random() * 6)
+            for (let number = 0; number <= numberofphotos; number++) {
+                let photo = Math.floor(Math.random() * 31) + 1
+
+                const image = new Image({
+                    ImageID: id,
+                    link: `../imgs/photo${photo}.avif`
+                })
+                await image.save()
+            }
+
+
+            await restaurants.save()
         }
-
-
-        await restaurants.save()
+        console.log("Data added!!")
+    } catch (error) {
+        console.error("Error adding data:", error);
     }
-    console.log("Data added!!")
 }
 
 
