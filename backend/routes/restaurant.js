@@ -1,17 +1,22 @@
 const router = require("express").Router();
 let Restaurant = require('../models/restaurant.model');
-
+let Image = require('../models/images.model');
+const { Types: { ObjectId } } = require('mongoose');
 
 router.route('/').get(async(req, res) => {
-    Restaurant.find()
-        .then(Restaurants => res.json(Restaurants))
-        .catch(err => res.status(400).json ('Error: '+ err));
-    const restaurants = await Restaurant.find({});
-    const images = await Image.find()
-    res.render('Restaurants', { restaurants, images})
+  try {
+      const restaurants = await Restaurant.find({});
+      const images = await Image.find();
+
+      // Send the data as JSON
+      res.json({ restaurants, images });
+  } catch (err) {
+      // Handle any errors
+      res.status(400).json('Error: ' + err);
+  }
 });
 
-app.get('/Restaurants', async(req, res) => {
+router.route('/Restaurants', async(req, res) => {
   const restaurants = await Restaurant.find({});
   const images = await Image.find()
   res.render('Restaurants', { restaurants, images, cities })
@@ -19,14 +24,20 @@ app.get('/Restaurants', async(req, res) => {
 })
 
 // New route for fetching a single Restaurant by ID
-router.route('/:id', async (req, res) => {
-    const restaurant = await Restaurant.findById(req.params.id);
-    if (!restaurant) {
-      res.status(404).json({ message: 'Restaurant not found' });
-    } else {
-      res.json(restaurant);
-    }
-  });
+router.route('/:id').get( async (req, res) => {
+  const id = new ObjectId(req.params.id);
+
+  console.log("In"); // Ensure this line is executed
+
+  const restaurant = await Restaurant.findById(id);
+  if (!restaurant) {
+    console.log("In");
+    res.status(404).json({ message: 'Restaurant not found' });
+  } else {
+    res.json(restaurant);
+  }
+});
+
 
 router.route('/add').post((req, res) => {
     const name = req.body.name
