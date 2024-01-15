@@ -30,11 +30,12 @@ router.route('/:id').get( async (req, res) => {
   console.log("In"); // Ensure this line is executed
 
   const restaurant = await Restaurant.findById(id);
+  const images = await Image.find({"ImageID": restaurant.imageID});
   if (!restaurant) {
     console.log("In");
     res.status(404).json({ message: 'Restaurant not found' });
   } else {
-    res.json(restaurant);
+    res.json({restaurant, images});
   }
 });
 

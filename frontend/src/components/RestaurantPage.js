@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 
 const RestaurantPage = ({ restaurantId }) => {
   const [restaurant, setRestaurant] = useState([]);
+  const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
@@ -21,8 +22,9 @@ const RestaurantPage = ({ restaurantId }) => {
       })
       .then(data => {
         console.log('Received restaurant data:', data);
-        setRestaurant(data);
+        setRestaurant(data.restaurant);
         setLoading(false);
+        setImages(data.images)
       })
       .catch(error => {
         console.error('Error fetching restaurant data:', error);
@@ -38,8 +40,9 @@ const RestaurantPage = ({ restaurantId }) => {
 
   // JSX code to display restaurant details
   return (
-    <div className="container">
-      <h1 id="name">{restaurant.name}</h1>
+    <div className="home-container ">
+      
+      <h1 className=""id="name">{restaurant.name}</h1>
       <h2 className="info">Average price per person: {restaurant.price}</h2>
       <h3 className="info">About us: {restaurant.description}</h3>
       <h4 className="info">Category: {restaurant.category}</h4>
@@ -54,6 +57,15 @@ const RestaurantPage = ({ restaurantId }) => {
           {restaurant.email}
         </a>
       </h4>
+      {images.map((img, idx) => (
+          <div key={idx} className={`carousel-item ${idx === 0 ? 'active' : ''}`}>
+              <img 
+                  
+                  src={require(`../imgs/${img.link.split('/').pop()}`)} // Adjust path as necessary
+                  alt={`Slide ${idx}`} 
+              />
+          </div>
+      ))}
     </div>
   );
 };
