@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useRef } from 'react';
 import { useParams } from 'react-router-dom'; 
+import '../css/RestaurantPage.css';
 
 
-const RestaurantPage = ({ restaurantId }) => {
+
+const RestaurantPage = () => {
   const [restaurant, setRestaurant] = useState([]);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
+  const [maxImageHeight, setMaxImageHeight] = useState(0);
+  const imageRefs = useRef([]);
 
   useEffect(() => {
     console.log('Fetching restaurant data for ID:', id);
@@ -32,6 +36,27 @@ const RestaurantPage = ({ restaurantId }) => {
         setLoading(false);
       });
   }, [id]);
+
+  useEffect(() => {
+    // Ensure the images array is not empty
+    if (images.length === 0) return;
+
+    // Calculate the tallest image height
+    const imageHeights = imageRefs.current.map(ref => ref?.offsetHeight || 0);
+    const tallestImageHeight = Math.max(...imageHeights);
+    setMaxImageHeight(tallestImageHeight);
+  }, [images]); // Dependency on 'images'
+
+  
+  const [activeImage, setActiveImage] = useState(0);
+
+  const nextImage = () => {
+    setActiveImage((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setActiveImage((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+  };
   
 
   if (loading) return <div>Loading...</div>;
@@ -40,32 +65,41 @@ const RestaurantPage = ({ restaurantId }) => {
 
   // JSX code to display restaurant details
   return (
-    <div className="home-container ">
-      
-      <h1 className=""id="name">{restaurant.name}</h1>
-      <h2 className="info">Average price per person: {restaurant.price}</h2>
-      <h3 className="info">About us: {restaurant.description}</h3>
-      <h4 className="info">Category: {restaurant.category}</h4>
-      <h4 className="info">Location: {restaurant.location}</h4>
-      <h4 className="info">Phone number: 
-        <a className="text-decoration-none text-info" href={`tel:+${restaurant.phone}`}>
-          {restaurant.phone}
-        </a>
-      </h4>
-      <h4 className="info">Email:
-        <a className="text-decoration-none text-info" href={`mailto:${restaurant.email}`}>
-          {restaurant.email}
-        </a>
-      </h4>
-      {images.map((img, idx) => (
-          <div key={idx} className={`carousel-item ${idx === 0 ? 'active' : ''}`}>
-              <img 
-                  
-                  src={require(`../imgs/${img.link.split('/').pop()}`)} // Adjust path as necessary
-                  alt={`Slide ${idx}`} 
+    <div className="restaurant-container">
+      <div className="content-layout">
+        <div className="carousel-container">
+          <div className="image-wrapper">
+            {images.map((img, idx) => (
+              <img
+                key={idx}
+                className={`carousel-image ${idx === activeImage ? 'active' : ''}`}
+                src={require(`../imgs/${img.link.split('/').pop()}`)}
+                alt={`Restaurant ${idx}`}
               />
+            ))}
           </div>
-      ))}
+          <button className="carousel-control prev" onClick={prevImage}>&lt;</button>
+          <button className="carousel-control next" onClick={nextImage}>&gt;</button>
+        </div>
+
+        <div className="info-container">
+          <h1 id="name">{restaurant.name}</h1>
+          <h2 className="info">Average price per person: {restaurant.price}</h2>
+          <h3 className="info">About us: {restaurant.description}</h3>
+          <h4 className="info">Category: {restaurant.category}</h4>
+          <h4 className="info">Location: {restaurant.location}</h4>
+          <h4 className="info">Phone number: 
+            <a className="text-decoration-none text-info" href={`tel:+${restaurant.phone}`}>
+              {restaurant.phone}
+            </a>
+          </h4>
+          <h4 className="info">Email:
+            <a className="text-decoration-none text-info" href={`mailto:${restaurant.email}`}>
+              {restaurant.email}
+            </a>
+          </h4>
+        </div>
+      </div>
     </div>
   );
 };
