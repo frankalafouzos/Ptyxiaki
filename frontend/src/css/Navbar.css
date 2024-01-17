@@ -8,23 +8,24 @@ header {
     justify-content: space-between;
     align-items: center;
     flex-direction: row;
-    padding-bottom: 20px;
-    padding-top: 20px;
-    height: 8rem;
+    padding-bottom: 1%;
+    padding-top: 1%;
+    height: 9rem;
   }
 
   
   .navbar-brand {
     font-family: 'Balsamiq Sans', cursive;
-    font-size: 40px;
-    padding-top: 1.5%;
+    font-size: 60px;
+    padding-top: 47%;
+    padding-left: 15%;
    
   }
 
   .navbar-brand img{
     padding: 1rem;
     /* transform: scale(1); */
-    height: 9rem;
+    height: 12rem;
     width: auto;
   }
   
