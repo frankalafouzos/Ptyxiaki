@@ -54,9 +54,11 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    flex-wrap: wrap;
+    align-content: space-between;
     text-align: left;
     padding: 10px;
+    height: 50rem;
 }
 
 .carousel-control {
@@ -77,4 +79,19 @@
 
 .next {
     right: 10px;
+}
+
+
+
+.booking-button{
+    
+    margin-top: auto;
+    align-self: flex-end; /* Align to the right of the flex container */
+    padding-bottom: 3.5rem;
+    
+}
+.booking-button .btn{
+    margin-right: 0;
+    height: 4rem;
+    width: 15rem;
 }

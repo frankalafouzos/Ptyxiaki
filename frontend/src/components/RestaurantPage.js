@@ -83,22 +83,28 @@ const RestaurantPage = () => {
         </div>
 
         <div className="info-container">
-          <h1 id="name">{restaurant.name}</h1>
-          <h2 className="info">Average price per person: {restaurant.price}</h2>
-          <h3 className="info">About us: {restaurant.description}</h3>
-          <h4 className="info">Category: {restaurant.category}</h4>
-          <h4 className="info">Location: {restaurant.location}</h4>
-          <h4 className="info">Phone number: 
-            <a className="text-decoration-none text-info" href={`tel:+${restaurant.phone}`}>
-              {restaurant.phone}
-            </a>
-          </h4>
-          <h4 className="info">Email:
-            <a className="text-decoration-none text-info" href={`mailto:${restaurant.email}`}>
-              {restaurant.email}
-            </a>
-          </h4>
+          <div className='info-top'>
+            <h1 id="name">{restaurant.name}</h1>
+            <h2 className="info">Average price per person: {restaurant.price}</h2>
+            <h3 className="info">About us: {restaurant.description}</h3>
+            <h4 className="info">Category: {restaurant.category}</h4>
+            <h4 className="info">Location: {restaurant.location}</h4>
+            <h4 className="info">Phone number: 
+              <a className="text-decoration-none text-info" href={`tel:+${restaurant.phone}`}>
+                {restaurant.phone}
+              </a>
+            </h4>
+            <h4 className="info">Email:
+              <a className="text-decoration-none text-info" href={`mailto:${restaurant.email}`}>
+                {restaurant.email}
+              </a>
+            </h4>
+          </div>
+          <div className='booking-button'>
+              <button className='btn btn-outline-success '>Book a table</button>
+          </div>
         </div>
+        
       </div>
     </div>
   );

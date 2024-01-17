@@ -9,10 +9,31 @@ router.route("/").get((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
+//Log in
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password} = req.body;
+    console.log(req.body)
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    
+    const result = await existingUser.isValidPassword(password)
+
+    // Create a new user
+    if (!result){
+      throw Error("Not authenticated")
+    }
+
+    res.status(201).json({ message: 'User created successfully.' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 // Sign Up
 router.post('/signup', async (req, res) => {
   try {
-    const { username, password, email, firstname, lastname } = req.body;
+    const { firstname, lastname, email, password, location} = req.body;
     
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -21,7 +42,7 @@ router.post('/signup', async (req, res) => {
     }
 
     // Create a new user
-    const newUser = new User({ username, password, email, firstname, lastname });
+    const newUser = new User({ firstname, lastname, email, password, location });
     await newUser.save();
 
     res.status(201).json({ message: 'User created successfully.' });

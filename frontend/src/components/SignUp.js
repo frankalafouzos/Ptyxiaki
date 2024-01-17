@@ -10,12 +10,39 @@ const SignUp = () => {
     password: '',
     location: '',
   });
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // Perform the sign-up logic
-    console.log('Signing up with', formData);
-    // Redirect or update UI upon successful sign-up
+    try {
+      
+      const response = await fetch('http://localhost:5000/users/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstname: formData.firstname,
+          lastname: formData.lastname,
+          email: formData.email,
+          password: formData.password,
+          // Note: If your backend doesn't handle 'location', you might not need to send it
+          location: formData.location
+        })
+      });
+  
+      const data = await response.json();
+      
+      if (response.status === 400) {
+        throw new Error(data.message || 'Failed to sign up');
+      }
+      
+  
+      
+    } catch (error) {
+      console.error('Signup error:', error);
+      
+    }
   };
 
   const handleChange = (e) => {
@@ -24,6 +51,7 @@ const SignUp = () => {
 
   return (
     <form onSubmit={handleSubmit} className="auth-form">
+      <h1 className='title'>Sign up</h1>
       <input
         name="firstname"
         value={formData.firstname}
@@ -61,6 +89,7 @@ const SignUp = () => {
         placeholder="Location"
       />
       <button type="submit">Sign Up</button>
+      <p className='pt-2 '>Already registered? <a  href="/login">Log in</a></p>
     </form>
   );
 };

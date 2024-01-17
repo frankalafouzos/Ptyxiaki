@@ -1,14 +1,17 @@
 .auth-form {
     background-color: #fff;
-    padding: 40px;
-    max-width: 400px;
+    padding: 2% 0%;
+    width: 50%;
     margin: 50px auto;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   
   .auth-form input {
-    width: 100%;
+    width: 50%;
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #ddd;
@@ -16,7 +19,7 @@
   }
   
   .auth-form button {
-    width: 100%;
+    width: 50%;
     padding: 10px;
     background-color: #007bff;
     color: white;
@@ -29,3 +32,7 @@
     background-color: #0056b3;
   }
   
+.title{
+  align-self: center;
+  margin-bottom: 2rem;
+}
