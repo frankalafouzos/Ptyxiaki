@@ -2,6 +2,7 @@ const router = require("express").Router();
 let User = require("../models/users.model");
 const bcrypt = require("bcrypt");
 const { nanoid } = require("nanoid");
+const jwt = require("jsonwebtoken");
 
 router.route("/").get((req, res) => {
   User.find()
@@ -14,21 +15,29 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password} = req.body;
     console.log(req.body)
-    // Check if user already exists
+    // Check if user exists
     const existingUser = await User.findOne({ email });
-    
-    const result = await existingUser.isValidPassword(password)
+    if(existingUser){
+      const result = await existingUser.isValidPassword(password)
 
-    // Create a new user
-    if (!result){
-      throw Error("Not authenticated")
+      
+      if (!result){
+        throw Error("Not authenticated")
+      }
+
+      const jwtToken = jwt.sign(
+        {id: existingUser._id, email: existingUser.email},
+        process.env.JWT_SECRET
+      )
+    }else{
+      throw Error("Email does not correspond to a user!")
     }
-
-    res.status(201).json({ message: 'User created successfully.' });
+    res.status(201).json({ message: 'User created successfully.', token: jwtToken });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
+
 
 // Sign Up
 router.post('/signup', async (req, res) => {
