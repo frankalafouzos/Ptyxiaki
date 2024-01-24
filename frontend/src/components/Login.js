@@ -1,9 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
+// import { useContext } from 'react';
 import '../css/AuthForm.css';
-import AuthContext from '../context/AuthProvider'
+// import AuthContext from '../context/AuthProvider'
+import {useSignIn} from "react-auth-kit";
 
 const Login = () => {
-  const { setAuth } = useContext(AuthContext)
+  // const { setAuth } = useContext(AuthContext)
+  const signIn = useSignIn();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -28,9 +31,16 @@ const Login = () => {
   
       const data = await response.json();
       
-      if (response.status == 400) {
+      if (response.status === 400) {
         throw new Error(data.message || 'Failed to Authenticate');
       }
+
+      signIn({
+        token: response.data.token,
+        expiresIn: 60,
+        tokenType: "Bearer",
+        authState: {email: formData.email}
+      });
 
       alert("You have successfully logged in")
       

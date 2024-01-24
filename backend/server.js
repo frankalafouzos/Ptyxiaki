@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose")
+const cookieParser = require("cookie-parser");
 
 require("dotenv").config();
 
@@ -13,6 +14,8 @@ const connection = mongoose.connection;
 connection.once('open', () => {
 console.log("MongoDB database connection established successfully");
 }) 
+
+app.use(cookieParser());
 
 app.use(cors());
 app.use(express.json());

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../css/AuthForm.css';
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -36,18 +37,25 @@ const SignUp = () => {
       if (response.status === 400) {
         throw new Error(data.message || 'Failed to sign up');
       }
+      toast.success("Sign up successful", {
+        position: "top-center",
+        autoClose: 2000,
+        onClose: () => window.location.replace('http://localhost:3000/')
+      })
       
-  
       
     } catch (error) {
       console.error('Signup error:', error);
-      
+      toast.error(error.message, {
+        position: "top-center",
+        autoClose: 2000,
+        });
     }
   };
 
-  const handleChange = (e) => {
+  function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit} className="auth-form">
