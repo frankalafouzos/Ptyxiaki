@@ -31,7 +31,6 @@ const SignUp = () => {
           lastname: formData.lastname,
           email: formData.email,
           password: formData.password,
-          // Note: If your backend doesn't handle 'location', you might not need to send it
           location: formData.location
         })
       });
@@ -52,7 +51,7 @@ const SignUp = () => {
       console.error('Signup error:', error);
       toast.error(error.message, {
         position: "top-center",
-        autoClose: 2000,
+        autoClose: 2000
         });
     }
   };
@@ -101,7 +100,7 @@ const SignUp = () => {
         placeholder="Location"
       />
       <button type="submit">Sign Up</button>
-      <p className='pt-2 '>Already registered? <a  href="/login">Log in</a></p>
+      <p className='pt-2'>Already registered? <a  href="/login">Log in</a></p>
     </form>
   );
 };
