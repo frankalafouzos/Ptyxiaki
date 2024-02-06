@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 // import { useContext } from 'react';
 import '../css/AuthForm.css';
-// import AuthContext from '../context/AuthProvider'
-import {useSignIn} from "react-auth-kit";
+import AuthProvider from '../context/AuthProvider'
+import useSignIn from 'react-auth-kit/hooks/useSignIn';
 
 const Login = () => {
   // const { setAuth } = useContext(AuthContext)
@@ -31,18 +31,21 @@ const Login = () => {
   
       const data = await response.json();
       
-      if (response.status === 400) {
+      if (response.status === 200) {
+        signIn({
+          token: data.token,
+          expiresIn: 60,
+          tokenType: "Bearer",
+          authState: {email: formData.email}
+        });
+        alert("You have successfully logged in")
+        // Redirect to home page or dashboard after successful login
+        // Use history.push('/dashboard') or similar based on your routing setup
+      } else {
+        // Handle errors
         throw new Error(data.message || 'Failed to Authenticate');
       }
-
-      signIn({
-        token: response.data.token,
-        expiresIn: 60,
-        tokenType: "Bearer",
-        authState: {email: formData.email}
-      });
-
-      alert("You have successfully logged in")
+      
       
   
       

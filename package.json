@@ -1,0 +1,28 @@
+{
+  "name": "ptyxiaki",
+  "version": "1.0.0",
+  "description": "Ptyxiaki ergasia (Book a Bite)",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "cd backend && nodemon server.js",
+    "client": "npm start --prefix frontend",
+    "dev": "concurrently \"npm run server\" \"npm run client\" "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frankalafouzos/Ptyxiaki.git"
+  },
+  "author": "Frank Alafouzos",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/frankalafouzos/Ptyxiaki/issues"
+  },
+  "homepage": "https://github.com/frankalafouzos/Ptyxiaki#readme",
+  "dependencies": {
+    "concurrently": "^8.2.2",
+    "express": "^4.18.2",
+    "nodemon": "^3.0.3"
+  }
+}

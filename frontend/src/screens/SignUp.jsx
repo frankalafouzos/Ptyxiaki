@@ -3,6 +3,8 @@ import '../css/AuthForm.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
+
 const SignUp = () => {
   const [formData, setFormData] = useState({
     firstname: '',
@@ -11,6 +13,8 @@ const SignUp = () => {
     password: '',
     location: '',
   });
+
+  
   
 
   const handleSubmit = async (event) => {

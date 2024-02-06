@@ -1,14 +1,19 @@
-html {
+#html {
     font-size: 100%;
     box-sizing: border-box;
 }
 
-body {
+#root {
     background-color: #bdce4e;
     min-height: 100vh;
     margin: 0px;
     padding: 0px;
     font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+main {
+  flex-grow: 1;
 }
 
 
