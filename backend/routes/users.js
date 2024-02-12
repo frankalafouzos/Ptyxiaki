@@ -127,8 +127,8 @@ router.route("/userprofile").post(async(req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
-    res.json(user);
+    console.log(user)
+    res.status(200).json({ message: 'User retrieved successfully.', user: user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });

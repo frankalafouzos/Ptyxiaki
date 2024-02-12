@@ -33,7 +33,7 @@ const Header = () => {
               {isAuthenticated() ? (
                  // Elements to render when user is authenticated
                 <>
-                <Nav.Link href="/profile">Profile</Nav.Link>
+                <Nav.Link href="/profilePage">Profile</Nav.Link>
                 <Button onClick={()=>{
                   signout();
                   window.location.href = "/"

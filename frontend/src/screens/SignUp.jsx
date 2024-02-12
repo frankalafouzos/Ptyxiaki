@@ -44,7 +44,7 @@ const SignUp = () => {
       toast.success("Sign up successful", {
         position: "top-center",
         autoClose: 2000,
-        onClose: () => window.location.replace('http://localhost:3000/')
+        onClose: () => window.location.replace('http://localhost:3000/login')
       })
       
       

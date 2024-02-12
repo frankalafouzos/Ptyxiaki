@@ -10,6 +10,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Restaurants from './screens/Restaurants'
 import RestaurantPage from './screens/Restaurant'
+import ProfilePage from './screens/ProfilePage'
 import './App.css';
 import './css/Header.css'
 
@@ -29,6 +30,7 @@ function App() {
             <Route path="/search" element={<SearchBar/>} />
             <Route path="/restaurants" element={<Restaurants/>} />
             <Route path="/restaurant/:id" element={<RestaurantPage/>} />
+            <Route path="/profilePage" element={<ProfilePage/>} />
           </Routes>
           
         </main>

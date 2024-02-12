@@ -42,7 +42,7 @@ const Login = () => {
               type: 'Bearer'
             },
             userState: {
-              name: formData.email
+              email: formData.email
             }
           }
         );
