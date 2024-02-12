@@ -14,25 +14,34 @@ router.route("/").get((req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password} = req.body;
-    console.log(req.body)
+    // console.log(req.body)
     // Check if user exists
     const existingUser = await User.findOne({ email });
+    let jwtToken=""
     if(existingUser){
       const result = await existingUser.isValidPassword(password)
-
+      console.log(result)
       
       if (!result){
+        console.log("error")
         throw Error("Not authenticated")
       }
-
+      console.log(existingUser._id, existingUser.email)
+      
+      let id = existingUser._id
       const jwtToken = jwt.sign(
-        {id: existingUser._id, email: existingUser.email},
+        {
+          id: id, 
+          email: existingUser.email,
+          exp: Math.floor(Date.now() / 1000) + (60 * 60) // Sets the expiration time to 1 hour from now
+        },
         process.env.JWT_SECRET
-      )
+      );
+      res.status(200).json({ message: 'User logged in successfully.', token: jwtToken });
     }else{
       throw Error("Email does not correspond to a user!")
     }
-    res.status(201).json({ message: 'User created successfully.', token: jwtToken });
+    
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

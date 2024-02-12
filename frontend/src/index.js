@@ -23,6 +23,7 @@ const store = createStore({
 
 ReactDOM.render(
   <React.StrictMode>
+    <ToastContainer />
     <AuthProvider store={store}>
       <App />
     </AuthProvider>

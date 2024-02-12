@@ -40,6 +40,7 @@ const SignUp = () => {
       if (response.status === 400) {
         throw new Error(data.message || 'Failed to sign up');
       }
+      console.log("Sign up successful")
       toast.success("Sign up successful", {
         position: "top-center",
         autoClose: 2000,
@@ -51,7 +52,8 @@ const SignUp = () => {
       console.error('Signup error:', error);
       toast.error(error.message, {
         position: "top-center",
-        autoClose: 2000
+        autoClose: 2000,
+        onClose: () => window.location.replace('http://localhost:3000/signup')
         });
     }
   };

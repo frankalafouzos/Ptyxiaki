@@ -24,11 +24,13 @@ function App() {
           <Routes>
             <Route path="/" element={<Home/>} /> 
             <Route path="/login" element={<Login/>} />
+            <Route path="/signout" element={<Login/>} />
             <Route path="/signup" element={<SignUp/>} />
             <Route path="/search" element={<SearchBar/>} />
             <Route path="/restaurants" element={<Restaurants/>} />
             <Route path="/restaurant/:id" element={<RestaurantPage/>} />
           </Routes>
+          
         </main>
         <Footer/>
     </Router>

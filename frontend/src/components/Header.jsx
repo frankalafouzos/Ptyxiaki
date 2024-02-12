@@ -3,20 +3,17 @@ import {
   Navbar,
   Nav,
   Container,
-  Form,
-  Col,
-  Row,
   Button,
 } from "react-bootstrap";
-import { FaUser, FaSearch } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import { FaUserPen } from "react-icons/fa6";
 import logo from "../imgs/Logo.png";
 import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated';
-
+import useSignOut from 'react-auth-kit/hooks/useSignOut'
 
 const Header = () => {
   const isAuthenticated = useIsAuthenticated();
-
+  const signout = useSignOut();
 
   return (
     <header>
@@ -34,8 +31,16 @@ const Header = () => {
               <Nav.Link href="/offers"> Offers</Nav.Link>
 
               {isAuthenticated() ? (
-                // Elements to render when user is authenticated
+                 // Elements to render when user is authenticated
+                <>
                 <Nav.Link href="/profile">Profile</Nav.Link>
+                <Button onClick={()=>{
+                  signout();
+                  window.location.href = "/"
+                  }}>
+                    Sign out
+                </Button>
+                </>
               ) : (
                 // Elements to render when user is not authenticated
                 <>

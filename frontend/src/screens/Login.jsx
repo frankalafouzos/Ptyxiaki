@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 // import { useContext } from 'react';
 import '../css/AuthForm.css';
-import AuthProvider from '../context/AuthProvider'
+// import AuthProvider from '../context/AuthProvider'
 import useSignIn from 'react-auth-kit/hooks/useSignIn';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
   // const { setAuth } = useContext(AuthContext)
@@ -28,19 +30,27 @@ const Login = () => {
           password: formData.password
         })
       });
-  
-      const data = await response.json();
       
+      const data = await response.json();
+      console.log(formData.email)
+      console.log(data.token)
       if (response.status === 200) {
-        signIn({
-          token: data.token,
-          expiresIn: 60,
-          tokenType: "Bearer",
-          authState: {email: formData.email}
-        });
-        alert("You have successfully logged in")
-        // Redirect to home page or dashboard after successful login
-        // Use history.push('/dashboard') or similar based on your routing setup
+        signIn(
+          {
+            auth : {
+              token: data.token,
+              type: 'Bearer'
+            },
+            userState: {
+              name: formData.email
+            }
+          }
+        );
+        toast.success("Sign in successful", {
+          position: "top-center",
+          autoClose: 2000,
+          onClose: () => window.location.replace('http://localhost:3000/')
+        })
       } else {
         // Handle errors
         throw new Error(data.message || 'Failed to Authenticate');
@@ -51,14 +61,17 @@ const Login = () => {
       
     } catch (error) {
       console.error('Log in error:', error.message);
-      alert("Not authenticated. Email or password are wrong.")
+      toast.error("Not authenticated. Email or password are wrong.", {
+        position: "top-center",
+        autoClose: 2000
+        });
       window.location.reload(true);
     }
   };
 
   const handleChange = (e) => {
     const updatedFormData = { ...formData, [e.target.name]: e.target.value };
-    console.log(updatedFormData);
+    // console.log(updatedFormData);
     setFormData(updatedFormData)
   };
 
