@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Restaurant from '../components/Restaurant';
+import Restaurant from '../components/Restaurant.component';
 import { Col, Row } from "react-bootstrap";
 
 const Restaurants = () => {

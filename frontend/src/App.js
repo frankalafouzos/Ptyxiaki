@@ -4,13 +4,14 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './screens/Login';
 import SignUp from './screens/SignUp';
-import SearchBar from './components/SearchBar';
+import SearchBar from './components/SearchBar.component';
 import Home from './screens/Home';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import Header from './components/Header.component';
+import Footer from './components/Footer.component';
 import Restaurants from './screens/Restaurants'
 import RestaurantPage from './screens/Restaurant'
 import ProfilePage from './screens/ProfilePage'
+import EditProfile from './screens/EditProfile'
 import './App.css';
 import './css/Header.css'
 
@@ -31,6 +32,7 @@ function App() {
             <Route path="/restaurants" element={<Restaurants/>} />
             <Route path="/restaurant/:id" element={<RestaurantPage/>} />
             <Route path="/profilePage" element={<ProfilePage/>} />
+            <Route path="/editProfile" element={<EditProfile/>} />
           </Routes>
           
         </main>

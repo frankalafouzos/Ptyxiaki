@@ -1,7 +1,7 @@
 import React from "react";
 
 import "../css/Home.css";
-import SearchBar from "../components/SearchBar";
+import SearchBar from "../components/SearchBar.component";
 
 // In your Home component, comment out the styles to test:
 const Home = () => {
