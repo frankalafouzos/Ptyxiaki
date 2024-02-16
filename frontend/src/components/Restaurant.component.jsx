@@ -11,27 +11,27 @@ const Restaurant = ({ restaurant, index, images }) => {
   const restaurantImages = getImagesForRestaurant(restaurant.imageID);
 
   return (
-    <Card className="my-3 p-3 rounded" style={{ width: "20rem", borderRadius: "10%" }}>
+    <Card className=" Restaurant rounded">
       <Link to={`/restaurant/${restaurant._id}`}>
-        <Carousel variant="top" style={{ height: '250px' }}>
+        <Carousel variant="top" style={{ height: '25rem' }}>
           {restaurantImages.length > 0 ? (
             restaurantImages.map((img, idx) => (
-              <Carousel.Item key={idx} style={{ height: '250px' }}>
+              <Carousel.Item key={idx} style={{ height: '25rem' }}>
                 <img
-                  className="d-block w-100"
+                  className="d-block w-100 rounded"
                   src={require(`../imgs/${img.link.split('/').pop()}`)}
                   alt={`Slide ${idx}`}
-                  style={{ objectFit: 'cover', height: '250px',width:'100%' }}
+                  style={{ objectFit: 'cover', height: '25rem',width:'100%' }}
                 />
               </Carousel.Item>
             ))
           ) : (
-            <Carousel.Item style={{ height: '250px' }}>
+            <Carousel.Item style={{ height: '25rem' }}>
               <img
-                className="d-block w-100"
+                className="d-block w-100 rounded"
                 src={Logo}
-                alt="Placeholder image"
-                style={{ objectFit: 'cover', height: '250px' }}
+                alt="Not Available"
+                style={{ objectFit: 'cover', height: '25rem' }}
               />
             </Carousel.Item>
           )}
@@ -39,23 +39,24 @@ const Restaurant = ({ restaurant, index, images }) => {
       </Link>
 
       <Card.Body>
-        <Link to={`/restaurant/${restaurant._id}`}>
-          <Card.Title as="div" className="restaurant-title">
+        <Link className="Link" to={`/restaurant/${restaurant._id}`}>
+          <Card.Title as="h3" className="restaurant-title">
             <strong>{restaurant.name}</strong>
           </Card.Title>
         </Link>
 
-        <Card.Text as="h3">Price per person: ${restaurant.price}</Card.Text>
+        <Card.Text as="h5">Price per person: ${restaurant.price}</Card.Text>
         <Card.Text>Category: {restaurant.category}</Card.Text>
         <Card.Text>Location: {restaurant.location}</Card.Text>
 
-        {/* Additional buttons or links can be added here */}
-        <Link to={`/restaurant/${restaurant._id}`} className="btn btn-primary">
-          Go to Restaurant's Page
-        </Link>
-        <button type="button" className="btn btn-success">
-          Book a Table
-        </button>
+        <div className="Buttons-container">
+          <Link to={`/restaurant/${restaurant._id}`} className="btn btn-primary">
+            Go to Restaurant's Page
+          </Link>
+          <button type="button" className="btn btn-success">
+            Book a Table
+          </button>
+        </div>
       </Card.Body>
     </Card>
   );

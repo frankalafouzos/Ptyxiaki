@@ -1,0 +1,117 @@
+.main-container {
+  text-align: center;
+  padding: 50px;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.row {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Changed from space-around to center */
+}
+
+.restaurants-header {
+  font-size: 2.5em;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.filters {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  width: 30%;
+}
+
+.filters .form-group label {
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+.categories {
+  height: 3rem;
+  font-size: 2rem;
+}
+
+.locations {
+  height: 3rem;
+  font-size: 2rem;
+}
+
+.price {
+  height: 3rem;
+  font-size: 2rem;
+}
+
+.restaurants-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-left: 1rem;
+}
+
+.Restaurant {
+  /* padding: 20px; */
+  /* padding:20px 40px; */
+  /* margin: 4rem 2rem 4rem 2rem; */
+  /* width: 30rem; */
+}
+
+.restaurant-title {
+  width: 100%;
+}
+
+.Link {
+  text-decoration: none;
+  transition: color 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.Link:hover {
+  color: lightgreen;
+
+  transform: scale(1.05); /* Slightly enlarges the link on hover */
+  text-decoration: none; /* Ensures no underline appears */
+}
+
+.Buttons-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.Buttons-container .btn {
+  font-size: 0.8rem;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.filters .form-group label {
+  /* Add your styles here */
+}
+
+.filters .form-group select {
+  /* Add your styles here */
+}
+
+.filters .form-group input[type="number"] {
+  /* Add your styles here */
+}
+
+.wrapped {
+  /* Add your styles here */
+}
+
+.wrapped .restaurant {
+  /* Add your styles here */
+}
