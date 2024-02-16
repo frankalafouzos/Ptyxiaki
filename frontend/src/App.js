@@ -12,6 +12,7 @@ import Restaurants from './screens/Restaurants'
 import RestaurantPage from './screens/Restaurant'
 import ProfilePage from './screens/ProfilePage'
 import EditProfile from './screens/EditProfile'
+import EditPassword from './screens/EditPassword';
 import './App.css';
 import './css/Header.css'
 
@@ -33,6 +34,7 @@ function App() {
             <Route path="/restaurant/:id" element={<RestaurantPage/>} />
             <Route path="/profilePage" element={<ProfilePage/>} />
             <Route path="/editProfile" element={<EditProfile/>} />
+            <Route path="/editPassword" element={<EditPassword/>} />
           </Routes>
           
         </main>

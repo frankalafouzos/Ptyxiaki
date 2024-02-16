@@ -77,7 +77,7 @@ const Login = () => {
 
   return (
     <form onSubmit={handleSubmit} className="auth-form">
-      <h1 className='title'>Log in</h1>
+      <h1 className='title'>Sign in</h1>
       <input
         type="email"
         name="email"

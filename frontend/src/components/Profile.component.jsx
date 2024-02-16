@@ -3,7 +3,6 @@ import { Container, Row, Col, Card, Button } from "react-bootstrap";
 // import { useParams } from "react-router-dom";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
-
 const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null); // Initialize user as null
@@ -13,7 +12,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       console.log("Fetching user data for email:", email);
-
+      setLoading(true);
       try {
         const response = await fetch(
           `http://localhost:5000/users/userprofile`,
@@ -32,7 +31,9 @@ const Profile = () => {
 
         let data = await response.json(); // Await the JSON conversion
         console.log("Received user data:", data);
-        setUser(data.user);
+
+        setUser(data);
+        console.log(data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -46,27 +47,39 @@ const Profile = () => {
     return <div>Loading...</div>;
   }
 
-  // Check if user is loaded
-  if (!user) {
-    return <div>No user data</div>;
-  }
+  // // Check if user is loaded
+  // if (!user) {
+  //   return <div>User not found</div>;
+  // }
 
-  return(
+  return (
     <Container className="my-5">
       <Row className="justify-content-center">
         <Col md={6}>
           <Card>
             <Card.Body>
-              <Card.Title style={{ color: "black", fontSize: "2rem"}}>Profile</Card.Title>
+              <Card.Title style={{ color: "black", fontSize: "2rem" }}>
+                Profile
+              </Card.Title>
               <Card.Text>
-                <strong>Username:</strong> {user.username}<br />
-                <strong>First Name:</strong> {user.firstname}<br />
-                <strong>Last Name:</strong> {user.lastname}<br />
-                <strong>Email:</strong> {user.email}<br />
-                <strong>Location:</strong> {user.location}<br />
+                <strong>First Name:</strong> {user.firstname}
+                <br />
+                <strong>Last Name:</strong> {user.lastname}
+                <br />
+                <strong>Email:</strong> {user.email}
+                <br />
+                <strong>Location:</strong> {user.location}
+                <br />
                 {user.admin && <span className="badge bg-success">Admin</span>}
               </Card.Text>
-              <Button variant="primary" href="/editProfile">Edit Profile</Button>
+              <div className="d-flex justify-content-between">
+                <Button variant="primary" href="/editProfile">
+                  Edit Profile
+                </Button>
+                <Button  variant="primary" href="/editPassword">
+                  Edit Password
+                </Button>
+              </div>
             </Card.Body>
           </Card>
         </Col>
