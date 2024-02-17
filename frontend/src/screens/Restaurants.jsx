@@ -8,11 +8,28 @@ import "../css/Restaurants.css";
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [images, setImages] = useState([]);
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
-  const [priceFilter, setPriceFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(
+    localStorage.getItem("categoryFilter") || ""
+  );
+  const [locationFilter, setLocationFilter] = useState(
+    localStorage.getItem("locationFilter") || ""
+  );
+  const [priceFilter, setPriceFilter] = useState(
+    Number(localStorage.getItem("priceFilter")) || ""
+  );
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
+
+  useEffect(() => {
+    localStorage.setItem("categoryFilter", categoryFilter);
+    localStorage.setItem("locationFilter", locationFilter);
+    localStorage.setItem("priceFilter", priceFilter);
+  }, [categoryFilter, locationFilter, priceFilter]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
 
   useEffect(() => {
     console.log(

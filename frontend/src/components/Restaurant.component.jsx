@@ -53,9 +53,9 @@ const Restaurant = ({ restaurant, index, images }) => {
           <Link to={`/restaurant/${restaurant._id}`} className="btn btn-primary">
             Go to Restaurant's Page
           </Link>
-          <button type="button" className="btn btn-success">
+          <Link to={`/booking/${restaurant._id}`} className="btn btn-success">
             Book a Table
-          </button>
+          </Link>
         </div>
       </Card.Body>
     </Card>
