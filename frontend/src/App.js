@@ -34,8 +34,8 @@ function App() {
             <Route path="/restaurants" element={<Restaurants/>} />
             <Route path="/restaurant/:id" element={<RestaurantPage/>} />
             <Route path="/profilePage" element={<ProtectedRoute element={<ProfilePage/>} />} />
-            <Route path="/editProfile" element={<EditProfile/>} />
-            <Route path="/editPassword" element={<EditPassword/>} />
+            <Route path="/editProfile" element={<ProtectedRoute  element={<EditProfile/>} />} />
+            <Route path="/editPassword" element={<ProtectedRoute  element={<EditPassword/>} />} />
           </Routes>
           
         </main>
