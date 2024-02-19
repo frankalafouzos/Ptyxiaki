@@ -20,14 +20,25 @@
   margin-bottom: 20px;
 }
 
+.Subconteiner{
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  margin-bottom: 2rem;
+}
+
+
+
+
 .filters {
   display: flex;
   justify-content: space-around;
   margin-bottom: 2rem;
+  width: 75%;
 }
 
 .form-group {
-  width: 30%;
+  width: 25%;
 }
 
 .filters .form-group label {
@@ -45,7 +56,21 @@
   font-size: 2rem;
 }
 
-.price {
+.SortContainer{
+  width: 25%;
+}
+
+.Sort {
+  height: 3rem;
+  font-size: 2rem;
+  width: 100%;
+}
+
+.maxPrice {
+  height: 3rem;
+  font-size: 2rem;
+}
+.minPrice {
   height: 3rem;
   font-size: 2rem;
 }

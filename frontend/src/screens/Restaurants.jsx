@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import Restaurant from "../components/Restaurant.component";
 import PaginationComponent from "../components/Pagination.component";
 import FilterRestaurants from "../components/FilterRestaurants.component";
-import { Col, Row, Form, Pagination } from "react-bootstrap";
+import SortForm from "../components/SortRestaurants.component";
+import { Col, Row } from "react-bootstrap";
 import "../css/Restaurants.css";
 
 const Restaurants = () => {
@@ -14,28 +15,27 @@ const Restaurants = () => {
   const [locationFilter, setLocationFilter] = useState(
     localStorage.getItem("locationFilter") || ""
   );
-  const [priceFilter, setPriceFilter] = useState(
-    Number(localStorage.getItem("priceFilter")) || ""
+  const [Sort, setSort] = useState(localStorage.getItem("Sort") || "");
+  const [minPriceFilter, setMinPriceFilter] = useState(
+    Number(localStorage.getItem("minPriceFilter")) || ""
   );
-
+  const [maxPriceFilter, setMaxPriceFilter] = useState(
+    Number(localStorage.getItem("maxPriceFilter")) || ""
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
 
   useEffect(() => {
     localStorage.setItem("categoryFilter", categoryFilter);
     localStorage.setItem("locationFilter", locationFilter);
-    localStorage.setItem("priceFilter", priceFilter);
-  }, [categoryFilter, locationFilter, priceFilter]);
+    localStorage.setItem("minPriceFilter", minPriceFilter);
+    localStorage.setItem("maxPriceFilter", maxPriceFilter);
+    localStorage.setItem("Sort", Sort);
+  }, [categoryFilter, locationFilter, minPriceFilter, maxPriceFilter, Sort]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentPage]);
-
-  useEffect(() => {
-    console.log(
-      `Category: ${categoryFilter}, Location: ${locationFilter}, Price: ${priceFilter}`
-    );
-  }, [categoryFilter, locationFilter, priceFilter]);
 
   useEffect(() => {
     fetch("http://localhost:5000/restaurants")
@@ -57,7 +57,8 @@ const Restaurants = () => {
     return (
       (categoryFilter ? restaurant.category === categoryFilter : true) &&
       (locationFilter ? restaurant.location === locationFilter : true) &&
-      (priceFilter ? priceAsNumber <= priceFilter : true)
+      (minPriceFilter ? priceAsNumber >= minPriceFilter : true) &&
+      (maxPriceFilter ? priceAsNumber <= maxPriceFilter : true)
     );
   });
 
@@ -70,19 +71,47 @@ const Restaurants = () => {
   );
   const totalPages = Math.ceil(filteredRestaurants.length / itemsPerPage);
 
+  //Sorting the restaurants
+  const sortRestaurants = (e) => {
+    const sortType = e.target.value;
+    if (sortType === "price") {
+      filteredRestaurants.sort((a, b) => {
+        return (
+          parseFloat(a.price.replace(/[^0-9.-]+/g, "")) -
+          parseFloat(b.price.replace(/[^0-9.-]+/g, ""))
+        );
+      });
+    } else if (sortType === "location") {
+      filteredRestaurants.sort((a, b) => {
+        return b.location - a.location;
+      });
+    } else if (sortType === "category") {
+      filteredRestaurants.sort((a, b) => {
+        return a.location - b.location;
+      });
+    }
+  };
+
   return (
     <div className="main-container">
       <h1 className="restaurants-header">Our Restaurants:</h1>
+      <div className="Subconteiner">
+        {/* Filter UI */}
+        <FilterRestaurants
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          locationFilter={locationFilter}
+          setLocationFilter={setLocationFilter}
+          maxPriceFilter={maxPriceFilter}
+          setMaxPriceFilter={setMaxPriceFilter}
+          minPriceFilter={minPriceFilter}
+          setMinPriceFilter={setMinPriceFilter}
+        />
 
-      {/* Filter UI */}
-      <FilterRestaurants
-        categoryFilter={categoryFilter}
-        setCategoryFilter={setCategoryFilter}
-        locationFilter={locationFilter}
-        setLocationFilter={setLocationFilter}
-        priceFilter={priceFilter}
-        setPriceFilter={setPriceFilter}
-      />
+        {/* Sort UI */}
+        <SortForm Sort={Sort} setSort={setSort} />
+      </div>
+
       {/* Pagination */}
       <PaginationComponent
         totalPages={totalPages}
