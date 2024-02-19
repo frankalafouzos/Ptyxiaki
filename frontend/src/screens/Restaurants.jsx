@@ -49,6 +49,8 @@ const Restaurants = () => {
       });
   }, []);
 
+  
+
   // Filter restaurants based on selected criteria
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const priceAsNumber = parseFloat(
