@@ -10,10 +10,10 @@ const SortForm = ({ Sort, setSort }) => {
         <Form.Control
           className="Sort"
           as="select"
-          value={Sort}
+          value={ Sort }
           onChange={(e) => setSort(e.target.value)}
         >
-          <option value="">Default</option>
+          <option value="Default">Default</option>
           <option value="Category Asc">Category Asc</option>
           <option value="Category Dsc">Category Dsc</option>
           <option value="Location Asc">Location Asc</option>

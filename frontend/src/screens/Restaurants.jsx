@@ -24,14 +24,8 @@ const Restaurants = () => {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-
-  useEffect(() => {
-    localStorage.setItem("categoryFilter", categoryFilter);
-    localStorage.setItem("locationFilter", locationFilter);
-    localStorage.setItem("minPriceFilter", minPriceFilter);
-    localStorage.setItem("maxPriceFilter", maxPriceFilter);
-    localStorage.setItem("Sort", Sort);
-  }, [categoryFilter, locationFilter, minPriceFilter, maxPriceFilter, Sort]);
+  const [sortedAndFilteredRestaurants, setSortedAndFilteredRestaurants] =
+    useState([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -43,56 +37,164 @@ const Restaurants = () => {
       .then((data) => {
         setRestaurants(data.restaurants);
         setImages(data.images);
+        setSortedAndFilteredRestaurants(data.restaurants);
       })
       .catch((error) => {
         console.error("Error:", error);
       });
   }, []);
 
-  
+  useEffect(() => {
+    const updateRestaurants = () => {
+      let updatedRestaurants = restaurants;
+      if (Sort !== "Default") {
+        switch (Sort) {
+          case "Price Asc":
+            // console.log(updatedRestaurants);
+            // updatedRestaurants.price = parseFloat(updatedRestaurants.price)
+            // updatedRestaurants.sort();
+            updatedRestaurants = updatedRestaurants.sort(
+              (a, b) =>
+                parseFloat(a.price.replace(/[^0-9.-]+/g, "")) -
+                parseFloat(b.price.replace(/[^0-9.-]+/g, ""))
+            );
+            break;
+          case "Price Dsc":
+            console.log("Price Dsc");
+            updatedRestaurants = updatedRestaurants.sort(
+              (a, b) =>
+                parseFloat(b.price.replace(/[^0-9.-]+/g, "")) -
+                parseFloat(a.price.replace(/[^0-9.-]+/g, ""))
+            );
+            break;
+          case "Location Asc":
+            console.log("Location Asc");
+            updatedRestaurants = updatedRestaurants.sort((a, b) =>
+              a.location.localeCompare(b.location)
+            );
+            break;
+          case "Location Dsc":
+            console.log("Location Dsc");
+            updatedRestaurants = updatedRestaurants.sort((a, b) =>
+              b.location.localeCompare(a.location)
+            );
+            break;
+          case "Category Asc":
+            console.log("Category Asc");
+            updatedRestaurants = updatedRestaurants.sort((a, b) =>
+              a.category.localeCompare(b.category)
+            );
+            break;
+          case "Category Dsc":
+            console.log("Category Dsc");
+            updatedRestaurants = updatedRestaurants.sort((a, b) =>
+              b.category.localeCompare(a.category)
+            );
+            break;
+          case "A-Z":
+            console.log("A-Z");
+            updatedRestaurants = updatedRestaurants.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+          case "Z-A":
+            console.log("Z-A");
+            updatedRestaurants = updatedRestaurants.sort((a, b) => b.name.localeCompare(a.name));
+            break;
+          default:
+            console.log("Default");
+            // No sorting or default sorting logic
+            break;
+        }
+        updatedRestaurants = updatedRestaurants.filter((restaurant) => {
+          const priceAsNumber = parseFloat(
+            restaurant.price.replace(/[^0-9.-]+/g, "")
+          );
+          return (
+            (categoryFilter ? restaurant.category === categoryFilter : true) &&
+            (locationFilter ? restaurant.location === locationFilter : true) &&
+            (minPriceFilter ? priceAsNumber >= minPriceFilter : true) &&
+            (maxPriceFilter ? priceAsNumber <= maxPriceFilter : true)
+          );
+        });
+        // console.log(updatedRestaurants)
 
-  // Filter restaurants based on selected criteria
-  const filteredRestaurants = restaurants.filter((restaurant) => {
-    const priceAsNumber = parseFloat(
-      restaurant.price.replace(/[^0-9.-]+/g, "")
-    );
-    return (
-      (categoryFilter ? restaurant.category === categoryFilter : true) &&
-      (locationFilter ? restaurant.location === locationFilter : true) &&
-      (minPriceFilter ? priceAsNumber >= minPriceFilter : true) &&
-      (maxPriceFilter ? priceAsNumber <= maxPriceFilter : true)
-    );
-  });
+        return updatedRestaurants;
+      }
+    };
+    setSortedAndFilteredRestaurants(updateRestaurants());
+  }, [
+    Sort,
+    restaurants,
+    categoryFilter,
+    locationFilter,
+    minPriceFilter,
+    maxPriceFilter,
+  ]);
 
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredRestaurants.slice(
+  const currentItems = sortedAndFilteredRestaurants.slice(
     indexOfFirstItem,
     indexOfLastItem
   );
-  const totalPages = Math.ceil(filteredRestaurants.length / itemsPerPage);
+  const totalPages = Math.ceil(
+    sortedAndFilteredRestaurants.length / itemsPerPage
+  );
 
-  //Sorting the restaurants
-  const sortRestaurants = (e) => {
-    const sortType = e.target.value;
-    if (sortType === "price") {
-      filteredRestaurants.sort((a, b) => {
-        return (
-          parseFloat(a.price.replace(/[^0-9.-]+/g, "")) -
-          parseFloat(b.price.replace(/[^0-9.-]+/g, ""))
-        );
-      });
-    } else if (sortType === "location") {
-      filteredRestaurants.sort((a, b) => {
-        return b.location - a.location;
-      });
-    } else if (sortType === "category") {
-      filteredRestaurants.sort((a, b) => {
-        return a.location - b.location;
-      });
-    }
-  };
+  // // Sorting the restaurants
+  // const sortRestaurants = (e) => {
+  //   const sortType = e;
+  //   console.log(sortType);
+  //   switch (sortType) {
+  //     case "Price Asc":
+  //       filteredRestaurants.sort(
+  //         (a, b) =>
+  //           parseFloat(a.price.replace(/[^0-9.-]+/g, "")) -
+  //           parseFloat(b.price.replace(/[^0-9.-]+/g, ""))
+  //       );
+  //       break;
+  //     case "Price Dsc":
+  //       filteredRestaurants.sort(
+  //         (a, b) =>
+  //           parseFloat(b.price.replace(/[^0-9.-]+/g, "")) -
+  //           parseFloat(a.price.replace(/[^0-9.-]+/g, ""))
+  //       );
+  //       break;
+  //     case "Location Asc":
+  //       filteredRestaurants.sort((a, b) =>
+  //         a.location.localeCompare(b.location)
+  //       );
+  //       break;
+  //     case "Location Dsc":
+  //       filteredRestaurants.sort((a, b) =>
+  //         b.location.localeCompare(a.location)
+  //       );
+  //       break;
+  //     case "Category Asc":
+  //       filteredRestaurants.sort((a, b) =>
+  //         a.category.localeCompare(b.category)
+  //       );
+  //       break;
+  //     case "Category Dsc":
+  //       filteredRestaurants.sort((a, b) =>
+  //         b.category.localeCompare(a.category)
+  //       );
+  //       break;
+  //     case "A-Z":
+  //       filteredRestaurants.sort((a, b) => a.name.localeCompare(b.name));
+  //       break;
+  //     case "Z-A":
+  //       filteredRestaurants.sort((a, b) => b.name.localeCompare(a.name));
+  //       break;
+  //     default:
+  //       // No sorting or default sorting logic
+  //       break;
+  //   }
+  // };
+
+  // Sort && sortRestaurants(Sort);
+
+  // Ensure you use 'restaurants' state in your render method, not 'filteredRestaurants'
 
   return (
     <div className="main-container">
@@ -125,7 +227,7 @@ const Restaurants = () => {
       <div className="restaurants-container">
         <Row className="row">
           {currentItems.map((restaurant, index) => (
-            <Col sm={12} md={6} lg={6} xl={4} xxl={4}>
+            <Col key={restaurant._id} sm={12} md={6} lg={6} xl={4} xxl={4}>
               <Restaurant
                 restaurant={restaurant}
                 index={index}

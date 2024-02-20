@@ -14,6 +14,7 @@
   justify-content: center; /* Changed from space-around to center */
 }
 
+
 .restaurants-header {
   font-size: 2.5em;
   color: #333;
@@ -83,10 +84,7 @@
 }
 
 .Restaurant {
-  /* padding: 20px; */
-  /* padding:20px 40px; */
-  /* margin: 4rem 2rem 4rem 2rem; */
-  /* width: 30rem; */
+  margin-bottom: 2rem;
 }
 
 .restaurant-title {
@@ -119,24 +117,4 @@
   display: flex;
   justify-content: center;
   margin: 1rem 0;
-}
-
-.filters .form-group label {
-  /* Add your styles here */
-}
-
-.filters .form-group select {
-  /* Add your styles here */
-}
-
-.filters .form-group input[type="number"] {
-  /* Add your styles here */
-}
-
-.wrapped {
-  /* Add your styles here */
-}
-
-.wrapped .restaurant {
-  /* Add your styles here */
 }

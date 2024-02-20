@@ -1,4 +1,5 @@
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import ReactDOM from 'react-dom';
 import './index.css';
 import AuthProvider from 'react-auth-kit';
@@ -13,7 +14,8 @@ import './css/Home.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
+const container = document.getElementById('root');
+const root = createRoot(container);
 
 const store = createStore({
   authName: '_auth',
@@ -22,12 +24,12 @@ const store = createStore({
   cookieSecure: window.location.protocol === 'https:'
 });
 
-ReactDOM.render(
+root.render(
   <React.StrictMode>
     <ToastContainer />
     <AuthProvider store={store}>
       <App />
     </AuthProvider>
   </React.StrictMode>,
-  document.getElementById('root')
+ 
 );
