@@ -1,7 +1,7 @@
 import { Card, Carousel } from "react-bootstrap";
 import { Link } from "react-router-dom";
 // import Rating from './Rating';
-import Logo from"../imgs/Logo.png";
+import Logo from "../imgs/Logo.png";
 
 const Restaurant = ({ restaurant, index, images }) => {
   const getImagesForRestaurant = (restaurantId) => {
@@ -13,25 +13,25 @@ const Restaurant = ({ restaurant, index, images }) => {
   return (
     <Card className=" Restaurant rounded">
       <Link to={`/restaurant/${restaurant._id}`}>
-        <Carousel variant="top" style={{ height: '25rem' }}>
+        <Carousel variant="top" style={{ height: "25rem" }}>
           {restaurantImages.length > 0 ? (
             restaurantImages.map((img, idx) => (
-              <Carousel.Item key={idx} style={{ height: '25rem' }}>
+              <Carousel.Item key={idx} style={{ height: "25rem" }}>
                 <img
                   className="d-block w-100 rounded"
-                  src={require(`../imgs/${img.link.split('/').pop()}`)}
+                  src={require(`../imgs/${img.link.split("/").pop()}`)}
                   alt={`Slide ${idx}`}
-                  style={{ objectFit: 'cover', height: '25rem',width:'100%' }}
+                  style={{ objectFit: "cover", height: "25rem", width: "100%" }}
                 />
               </Carousel.Item>
             ))
           ) : (
-            <Carousel.Item style={{ height: '25rem' }}>
+            <Carousel.Item style={{ height: "25rem" }}>
               <img
                 className="d-block w-100 rounded"
                 src={Logo}
                 alt="Not Available"
-                style={{ objectFit: 'cover', height: '25rem' }}
+                style={{ objectFit: "cover", height: "25rem" }}
               />
             </Carousel.Item>
           )}
@@ -50,7 +50,10 @@ const Restaurant = ({ restaurant, index, images }) => {
         <Card.Text>Location: {restaurant.location}</Card.Text>
 
         <div className="Buttons-container">
-          <Link to={`/restaurant/${restaurant._id}`} className="btn btn-primary">
+          <Link
+            to={`/restaurant/${restaurant._id}`}
+            className="btn btn-primary"
+          >
             Go to Restaurant's Page
           </Link>
           <Link to={`/booking/${restaurant._id}`} className="btn btn-success">
@@ -61,8 +64,6 @@ const Restaurant = ({ restaurant, index, images }) => {
     </Card>
   );
 };
-
-
 
 // old code
 
