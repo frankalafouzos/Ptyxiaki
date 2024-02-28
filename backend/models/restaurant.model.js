@@ -9,7 +9,10 @@ const RestaurantSchema = new Schema({
     imageID: String,
     phone: String,
     email: String,
-    description: String
+    description: String,
+    tables: Number,
+    seatsPerTable: Number,
+    Bookingduration: Number,
 })
 
 

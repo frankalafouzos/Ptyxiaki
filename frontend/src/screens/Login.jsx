@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 // import { useContext } from 'react';
-import '../css/AuthForm.css';
+import '../css/Form.css';
 // import AuthProvider from '../context/AuthProvider'
 import useSignIn from 'react-auth-kit/hooks/useSignIn';
 import { toast } from 'react-toastify';
@@ -76,7 +76,7 @@ const Login = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="auth-form">
+    <form onSubmit={handleSubmit} className="form">
       <h1 className='title'>Sign in</h1>
       <input
         type="email"

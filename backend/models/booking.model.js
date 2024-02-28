@@ -9,6 +9,8 @@ const BookingSchema = new Schema({
     partySize: String,
     phone: String,
     duration: String,
+    numberOfGuests: Number,
+
 })
 
 
