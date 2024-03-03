@@ -63,9 +63,10 @@ const Login = () => {
       console.error('Log in error:', error.message);
       toast.error("Not authenticated. Email or password are wrong.", {
         position: "top-center",
-        autoClose: 2000
-        });
-      window.location.reload(true);
+        autoClose: 2000,
+        onClose: () => window.location.reload(true)
+      });
+      
     }
   };
 

@@ -13,7 +13,7 @@ const Restaurant = ({ restaurant, index, images }) => {
   return (
     <Card className=" Restaurant rounded">
       <Link to={`/restaurant/${restaurant._id}`}>
-        <Carousel variant="top" style={{ height: "25rem" }}>
+        <Carousel fade variant="top" style={{ height: "25rem" }}>
           {restaurantImages.length > 0 ? (
             restaurantImages.map((img, idx) => (
               <Carousel.Item key={idx} style={{ height: "25rem" }}>
