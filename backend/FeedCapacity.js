@@ -13,6 +13,10 @@ connection.once('open', () => {
 
 async function seedCapacities() {
     try {
+
+        await RestaurantCapacity.deleteMany({});
+        console.log("All existing capacities have been deleted.");
+
         // Fetch all restaurants
         const restaurants = await Restaurant.find({});
         for (const restaurant of restaurants) {
