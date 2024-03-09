@@ -1,0 +1,60 @@
+To implement this feature considering your requirements, you will need to create a method or service that interacts with your `BookingSchema` and `restaurantCapacitySchema`. This method will calculate available tables by checking against current bookings, considering party sizes, table type preferences, the 2-hour booking duration limit, and restaurant opening hours. Here’s a streamlined approach to achieve this:
+
+### Step 1: Define Table Types and Capacities
+Ensure your `restaurantCapacitySchema` can distinguish between different table types (e.g., tables for two, four, six, eight). This could be a structure within your schema that specifies the table type and its total count.
+
+### Step 2: Calculate Total Available Capacity by Table Type
+Create a method within `restaurantCapacitySchema` or a separate service to calculate the total available tables for each type at any given time. This will require:
+
+1. **Fetching current bookings**: Retrieve all bookings for a given time frame from the `BookingSchema`.
+2. **Aggregating bookings by table type**: Group these bookings by table type and count the number of tables booked.
+3. **Calculating available tables**: Subtract the number of booked tables from the total tables of each type available in the restaurant.
+
+### Step 3: Check for Specific Time Slots and Duration
+Ensure your availability check considers the specific time slot requested by the user and validates it against the 2-hour booking limit and the restaurant's opening hours. This involves:
+
+1. **Validating requested booking time**: Check if the booking time falls within the restaurant's operating hours.
+2. **Checking existing bookings**: Ensure there are no overlapping bookings that exceed the 2-hour duration limit for the requested table type.
+
+### Step 4: Implement Availability Logic
+Combine the steps above into a cohesive method or service that:
+
+- Takes input parameters like desired time slot, party size, and table type.
+- Uses these parameters to calculate and return available table options.
+
+### Step 5: Expose an Endpoint for Frontend Access
+Create an API endpoint that the frontend can call to get table availability information. This endpoint should accept necessary parameters (e.g., booking time, party size, table type) and return information about available tables.
+
+#### Sample Endpoint
+`GET /api/table-availability?date=2024-03-10&time=19:00&partySize=4&tableType=four`
+
+This endpoint would invoke your availability logic and return a response indicating the number of available tables that fit the criteria.
+
+### Code Example (Pseudocode)
+```python
+class TableAvailabilityService:
+    def get_available_tables(self, date, time, party_size, table_type):
+        # Check if requested time is within opening hours
+        if not self.is_within_opening_hours(date, time):
+            return "Requested time is outside opening hours."
+        
+        # Calculate total capacity for the requested table type
+        total_capacity = restaurantCapacitySchema.get_total_capacity(table_type)
+        
+        # Fetch current bookings
+        current_bookings = BookingSchema.get_bookings(date, time, table_type)
+        
+        # Calculate available tables
+        available_tables = total_capacity - len(current_bookings)
+        
+        # Consider the 2-hour booking duration rule
+        if not self.check_booking_duration(date, time):
+            return "No available tables due to booking duration limit."
+        
+        return available_tables
+
+    # Additional methods for checking opening hours and booking duration
+```
+
+### Conclusion
+This approach provides a structured way to calculate table availability based on multiple factors. Adjust the logic and methods according to your specific database schema and application architecture.

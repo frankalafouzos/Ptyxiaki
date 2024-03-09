@@ -9,23 +9,14 @@ import "../css/Restaurants.css";
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [images, setImages] = useState([]);
-  const [categoryFilter, setCategoryFilter] = useState(
-    localStorage.getItem("categoryFilter") || ""
-  );
-  const [locationFilter, setLocationFilter] = useState(
-    localStorage.getItem("locationFilter") || ""
-  );
-  const [Sort, setSort] = useState(localStorage.getItem("Sort") || "");
-  const [minPriceFilter, setMinPriceFilter] = useState(
-    Number(localStorage.getItem("minPriceFilter")) || ""
-  );
-  const [maxPriceFilter, setMaxPriceFilter] = useState(
-    Number(localStorage.getItem("maxPriceFilter")) || ""
-  );
+  const [categoryFilter, setCategoryFilter] = useState(localStorage.getItem("categoryFilter") || "");
+  const [locationFilter, setLocationFilter] = useState(localStorage.getItem("locationFilter") || "");
+  const [sort, setSort] = useState(localStorage.getItem("Sort") || "Default");
+  const [minPriceFilter, setMinPriceFilter] = useState(localStorage.getItem("minPriceFilter") || "");
+  const [maxPriceFilter, setMaxPriceFilter] = useState(localStorage.getItem("maxPriceFilter") || "");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-  const [sortedAndFilteredRestaurants, setSortedAndFilteredRestaurants] =
-    useState([]);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -36,183 +27,40 @@ const Restaurants = () => {
     localStorage.setItem("locationFilter", locationFilter);
     localStorage.setItem("minPriceFilter", minPriceFilter);
     localStorage.setItem("maxPriceFilter", maxPriceFilter);
-    localStorage.setItem("Sort", Sort);
-  }, [categoryFilter, locationFilter, minPriceFilter, maxPriceFilter, Sort]);
+    localStorage.setItem("Sort", sort);
+  }, [categoryFilter, locationFilter, minPriceFilter, maxPriceFilter, sort]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/restaurants")
-      .then((response) => response.json())
-      .then((data) => {
+    const fetchRestaurants = async () => {
+      const queryParams = new URLSearchParams({
+        page: currentPage,
+        itemsPerPage: itemsPerPage,
+        sortField: sort === "Default" ? undefined : sort.split(" ")[0].toLowerCase(),
+        sortOrder: sort.includes("Asc") ? "asc" : "dsc",
+        categoryFilter: categoryFilter,
+        locationFilter: locationFilter,
+        minPrice: minPriceFilter,
+        maxPrice: maxPriceFilter,
+      }).toString();
+
+      try {
+        const response = await fetch(`http://localhost:5000/restaurants?${queryParams}`);
+        const data = await response.json();
         setRestaurants(data.restaurants);
         setImages(data.images);
-        setSortedAndFilteredRestaurants(data.restaurants);
-      })
-      .catch((error) => {
+        setTotalPages(data.totalPages);
+      } catch (error) {
         console.error("Error:", error);
-      });
-  }, []);
-
-  useEffect(() => {
-    const updateRestaurants = () => {
-      let updatedRestaurants = [...restaurants];
-      console.log(updatedRestaurants);
-      
-      if (Sort !== "Default") {
-        switch (Sort) {
-          case "Price Asc":
-            // console.log(updatedRestaurants);
-            // updatedRestaurants.price = parseFloat(updatedRestaurants.price)
-            // updatedRestaurants.sort();
-            updatedRestaurants = updatedRestaurants.sort(
-              (a, b) =>
-                parseFloat(a.price.replace(/[^0-9.-]+/g, "")) -
-                parseFloat(b.price.replace(/[^0-9.-]+/g, ""))
-            );
-            break;
-          case "Price Dsc":
-            console.log("Price Dsc");
-            updatedRestaurants = updatedRestaurants.sort(
-              (a, b) =>
-                parseFloat(b.price.replace(/[^0-9.-]+/g, "")) -
-                parseFloat(a.price.replace(/[^0-9.-]+/g, ""))
-            );
-            break;
-          case "Location Asc":
-            console.log("Location Asc");
-            updatedRestaurants = updatedRestaurants.sort((a, b) =>
-              a.location.localeCompare(b.location)
-            );
-            break;
-          case "Location Dsc":
-            console.log("Location Dsc");
-            updatedRestaurants = updatedRestaurants.sort((a, b) =>
-              b.location.localeCompare(a.location)
-            );
-            break;
-          case "Category Asc":
-            console.log("Category Asc");
-            updatedRestaurants = updatedRestaurants.sort((a, b) =>
-              a.category.localeCompare(b.category)
-            );
-            break;
-          case "Category Dsc":
-            console.log("Category Dsc");
-            updatedRestaurants = updatedRestaurants.sort((a, b) =>
-              b.category.localeCompare(a.category)
-            );
-            break;
-          case "A-Z":
-            console.log("A-Z");
-            updatedRestaurants = updatedRestaurants.sort((a, b) =>
-              a.name.localeCompare(b.name)
-            );
-            break;
-          case "Z-A":
-            console.log("Z-A");
-            updatedRestaurants = updatedRestaurants.sort((a, b) =>
-              b.name.localeCompare(a.name)
-            );
-            break;
-        }
-        
       }
-      updatedRestaurants = updatedRestaurants.filter((restaurant) => {
-        const priceAsNumber = parseFloat(
-          restaurant.price.replace(/[^0-9.-]+/g, "")
-        );
-        return (
-          (categoryFilter ? restaurant.category === categoryFilter : true) &&
-          (locationFilter ? restaurant.location === locationFilter : true) &&
-          (minPriceFilter ? priceAsNumber >= minPriceFilter : true) &&
-          (maxPriceFilter ? priceAsNumber <= maxPriceFilter : true)
-        );
-      });
-      // console.log(updatedRestaurants)
-
-      return updatedRestaurants;
     };
-    const updatedList = updateRestaurants();
-    setSortedAndFilteredRestaurants(updatedList ? updatedList : []);
-  }, [
-    Sort,
-    restaurants,
-    categoryFilter,
-    locationFilter,
-    minPriceFilter,
-    maxPriceFilter,
-  ]);
 
-  // Pagination calculations
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = sortedAndFilteredRestaurants.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalPages = Math.ceil(
-    sortedAndFilteredRestaurants.length / itemsPerPage
-  );
-
-  // // Sorting the restaurants
-  // const sortRestaurants = (e) => {
-  //   const sortType = e;
-  //   console.log(sortType);
-  //   switch (sortType) {
-  //     case "Price Asc":
-  //       filteredRestaurants.sort(
-  //         (a, b) =>
-  //           parseFloat(a.price.replace(/[^0-9.-]+/g, "")) -
-  //           parseFloat(b.price.replace(/[^0-9.-]+/g, ""))
-  //       );
-  //       break;
-  //     case "Price Dsc":
-  //       filteredRestaurants.sort(
-  //         (a, b) =>
-  //           parseFloat(b.price.replace(/[^0-9.-]+/g, "")) -
-  //           parseFloat(a.price.replace(/[^0-9.-]+/g, ""))
-  //       );
-  //       break;
-  //     case "Location Asc":
-  //       filteredRestaurants.sort((a, b) =>
-  //         a.location.localeCompare(b.location)
-  //       );
-  //       break;
-  //     case "Location Dsc":
-  //       filteredRestaurants.sort((a, b) =>
-  //         b.location.localeCompare(a.location)
-  //       );
-  //       break;
-  //     case "Category Asc":
-  //       filteredRestaurants.sort((a, b) =>
-  //         a.category.localeCompare(b.category)
-  //       );
-  //       break;
-  //     case "Category Dsc":
-  //       filteredRestaurants.sort((a, b) =>
-  //         b.category.localeCompare(a.category)
-  //       );
-  //       break;
-  //     case "A-Z":
-  //       filteredRestaurants.sort((a, b) => a.name.localeCompare(b.name));
-  //       break;
-  //     case "Z-A":
-  //       filteredRestaurants.sort((a, b) => b.name.localeCompare(a.name));
-  //       break;
-  //     default:
-  //       // No sorting or default sorting logic
-  //       break;
-  //   }
-  // };
-
-  // Sort && sortRestaurants(Sort);
-
-  // Ensure you use 'restaurants' state in your render method, not 'filteredRestaurants'
+    fetchRestaurants();
+  }, [currentPage, itemsPerPage, sort, categoryFilter, locationFilter, minPriceFilter, maxPriceFilter]);
 
   return (
     <div className="main-container">
       <h1 className="restaurants-header">Our Restaurants:</h1>
       <div className="Subconteiner">
-        {/* Filter UI */}
         <FilterRestaurants
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}
@@ -224,35 +72,29 @@ const Restaurants = () => {
           setMinPriceFilter={setMinPriceFilter}
         />
 
-        {/* Sort UI */}
-        <SortForm Sort={Sort} setSort={setSort} />
+        <SortForm Sort={sort} setSort={setSort} />
       </div>
 
-      {/* Pagination */}
       <PaginationComponent
         totalPages={totalPages}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
       />
 
-      {/* Restaurants */}
       <div className="restaurants-container">
         <Row className="row">
-          {
-            currentItems.map((restaurant, index) => (
-              <Col key={restaurant._id} sm={12} md={6} lg={6} xl={4} xxl={4}>
-                <Restaurant
-                  restaurant={restaurant}
-                  index={index}
-                  images={images}
-                />
-              </Col>
-            ))
-          }
+          {restaurants.map((restaurant, index) => (
+            <Col key={restaurant._id} sm={12} md={6} lg={6} xl={4} xxl={4}>
+              <Restaurant
+                restaurant={restaurant}
+                index={index}
+                images={images}
+              />
+            </Col>
+          ))}
         </Row>
       </div>
 
-      {/* Pagination */}
       <PaginationComponent
         totalPages={totalPages}
         currentPage={currentPage}
