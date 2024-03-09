@@ -3,6 +3,8 @@ let Restaurant = require('../models/restaurant.model');
 let Image = require('../models/images.model');
 const { Types: { ObjectId } } = require('mongoose');
 
+
+// Old code
 // router.route('/').get(async(req, res) => {
 //   try {
 //       const restaurants = await Restaurant.find({});
