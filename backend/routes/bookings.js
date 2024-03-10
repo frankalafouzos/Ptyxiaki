@@ -1,6 +1,8 @@
 const router = require("express").Router();
 let Booking = require("../models/booking.model");
 let RestaurantCapacity = require("../models/restaurantCapacity.model");
+const Restaurant = mongoose.model('Restaurant');
+
 
 router.route("/").get((req, res) => {
   Booking.find()
@@ -67,15 +69,6 @@ router.route("/").get((req, res) => {
 
 // });
 
-
-
-const express = require('express');
-const router = express.Router();
-const mongoose = require('mongoose');
-const Restaurant = mongoose.model('Restaurant');
-const Booking = mongoose.model('Booking');
-const RestaurantCapacity = mongoose.model('RestaurantCapacity');
-
 // Helper function to add minutes to a given time string
 function addMinutesToTime(time, minutes) {
     const [hours, mins] = time.split(':').map(Number);
@@ -130,8 +123,6 @@ router.get("/availability/:restaurantId", async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
-
-module.exports = router;
 
 
 module.exports = router;
