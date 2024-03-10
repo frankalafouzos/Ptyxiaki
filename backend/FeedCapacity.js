@@ -31,7 +31,7 @@ async function seedCapacities() {
             const existingCapacity = await RestaurantCapacity.findOne({ restaurant: restaurant._id });
             if (!existingCapacity) {
                 const newCapacity = new RestaurantCapacity({
-                    restaurant: restaurant._id,
+                    restaurantid: restaurant._id,
                     tablesForTwo,
                     tablesForFour,
                     tablesForSix,

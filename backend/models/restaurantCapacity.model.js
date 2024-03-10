@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const restaurantCapacitySchema = new Schema({
-    restaurant: {
+    restaurantid: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Restaurant',
         required: true

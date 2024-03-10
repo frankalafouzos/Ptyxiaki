@@ -13,6 +13,8 @@ const RestaurantSchema = new Schema({
     tables: Number,
     seatsPerTable: Number,
     Bookingduration: Number,
+    openHour: String,
+    closeHour: String
 })
 
 
