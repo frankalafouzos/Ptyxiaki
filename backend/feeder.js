@@ -15,7 +15,6 @@ const connection = mongoose.connection;
 connection.once('open', () => {
   console.log("MongoDB database connection established successfully");
 });
-
 const seedDB = async () => {
   try {
     await Restaurants.deleteMany({});
@@ -28,6 +27,11 @@ const seedDB = async () => {
 
       let phoneNumber = Math.floor(Math.random() * 9000000) + 1000000;
       let emailString = name.replace(/\s+/g, '').toLowerCase();
+
+      // Adjusting for the schema change
+      const openHourMinutes = 540; // 9:00 AM in minutes past midnight (9 * 60)
+      const closeHourMinutes = 1320; // 10:00 PM in minutes past midnight (22 * 60)
+
       const restaurant = new Restaurants({
         name: name,
         price: AveragePrice,
@@ -37,9 +41,11 @@ const seedDB = async () => {
         phone: `210${phoneNumber}`,
         email: `${emailString}@gmail.com`,
         description: descriptions[randomCategory],
+        tables: Math.floor(Math.random() * 10) + 1, // Assuming a random number of tables
+        seatsPerTable: Math.floor(Math.random() * 4) + 2, // Assuming a random number of seats per table, at least 2
         Bookingduration: 30, // Example: 30 minutes booking duration
-        openHour: '09:00', // Example: opens at 9 AM
-        closeHour: '22:00' // Example: closes at 10 PM
+        openHour: openHourMinutes, // Now using minutes past midnight
+        closeHour: closeHourMinutes // Now using minutes past midnight
       });
 
       let numberOfPhotos = Math.floor(Math.random() * 6);
@@ -54,10 +60,11 @@ const seedDB = async () => {
 
       await restaurant.save();
     }
-    console.log("Data added!!");
+    return(console.log("Data added!!"));
   } catch (error) {
     console.error("Error adding data:", error);
   }
 };
+
 
 seedDB();
