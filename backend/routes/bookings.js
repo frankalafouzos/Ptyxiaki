@@ -9,23 +9,21 @@ router.route("/").get((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-
 function generateTimeSlots(startTime, endTime, interval) {
   const timeArray = [];
   console.log(startTime);
   for (let time = startTime; time < endTime; time += interval) {
-
-      timeArray.push(time);
+    timeArray.push(time);
   }
   console.log(timeArray);
   return timeArray;
 }
 
 const getAvailability = async (restaurantId, date, partyNumber) => {
-  
   try {
-
-    let Capacity = await RestaurantCapacity.find({ restaurantid: restaurantId });
+    let Capacity = await RestaurantCapacity.find({
+      restaurantid: restaurantId,
+    });
     console.log(Capacity);
     let restaurant = await Restaurant.find({ _id: restaurantId });
     console.log(restaurant);
@@ -36,19 +34,33 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
         .json({ message: "Restaurant or capacity not found" });
     }
     let interval = 30;
-    let slots = generateTimeSlots(restaurant[0].openHour, restaurant[0].closeHour, interval);
+    let slots = generateTimeSlots(
+      restaurant[0].openHour,
+      restaurant[0].closeHour,
+      interval
+    );
 
     availabilityPerSlot = [];
     // console.log(slots);
     for (let slot of slots) {
-      console.log("Slot: "+slot);
-      let bookings = await Booking.find({ 
-        restaurantid: restaurantId, 
+      console.log("Slot: " + slot);
+      let bookings = await Booking.find({
+        restaurantid: restaurantId,
         date: date,
         $or: [
-          { startingTime: { $gte: slot, $lt: slot + restaurant[0].Bookingduration } },
-          { endingTime: { $gt: slot, $lte: slot + restaurant[0].Bookingduration } }
-        ]
+          {
+            startingTime: {
+              $gte: slot,
+              $lt: slot + restaurant[0].Bookingduration,
+            },
+          },
+          {
+            endingTime: {
+              $gt: slot,
+              $lte: slot + restaurant[0].Bookingduration,
+            },
+          },
+        ],
       });
       console.log(bookings);
       let booked = {
@@ -81,30 +93,67 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
       console.log(`True Capacity ${trueCapacityFor4}`);
       if (partyNumber <= 2) {
         if (trueCapacityFor2 > 0) {
-          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: true });
+          availabilityPerSlot.push({
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
+            available: true,
+          });
         } else {
-          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: false });
+          availabilityPerSlot.push({
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
+            available: false,
+          });
         }
-      }
-      else if (partyNumber <= 4) {
+      } else if (partyNumber <= 4) {
         if (trueCapacityFor4 > 0) {
-          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: true });
+          availabilityPerSlot.push({
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
+            available: true,
+          });
         } else {
-          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: false });
+          availabilityPerSlot.push({
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
+            available: false,
+          });
         }
-      }
-      else if (partyNumber <= 6) {
+      } else if (partyNumber <= 6) {
         if (trueCapacityFor6 > 0) {
-          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: true });
+          availabilityPerSlot.push({
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
+            available: true,
+          });
         } else {
-          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: false });
+          availabilityPerSlot.push({
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
+            available: false,
+          });
         }
-      }
-      else if (partyNumber <= 8) {
+      } else if (partyNumber <= 8) {
         if (trueCapacityFor8 > 0) {
-          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: true });
+          availabilityPerSlot.push({
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
+            available: true,
+          });
         } else {
-          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: false });
+          availabilityPerSlot.push({
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
+            available: false,
+          });
         }
       }
     }
@@ -118,18 +167,16 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
 
 router.route("/availability/:restaurantId").get(async (req, res) => {
   const restaurantId = req.params.restaurantId;
-  const partyNumber = req.query.partyNumber// Ensure partyNumber is an integer
-
+  const partyNumber = req.query.partyNumber; // Ensure partyNumber is an integer
 
   // Assuming the date string is in "YYYY-MM-DD" format
-const dateString = req.query.date; // e.g., "2023-03-15"
-const parts = dateString.split("-");
+  const dateString = req.query.date; // e.g., "2023-03-15"
+  const parts = dateString.split("-");
 
-// Note: parts[1] - 1 because months are 0-indexed in JavaScript Date objects
-console.log(parts);
-const date = new Date(parts[0], parts[1] - 1, parts[2]);
-console.log(date);
-
+  // Note: parts[1] - 1 because months are 0-indexed in JavaScript Date objects
+  console.log(parts);
+  const date = new Date(parts[0], parts[1] - 1, parts[2]);
+  console.log(date);
 
   try {
     // Call the getAvailability function and await its result
@@ -146,7 +193,61 @@ console.log(date);
   } catch (error) {
     // Handle any errors that occur during the process
     console.error("Error retrieving availability:", error);
-    return res.status(500).json({ message: "An error occurred while fetching availability" });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while fetching availability" });
+  }
+});
+
+router.route("/create").post(async (req, res) => {
+  console.log(req.body);
+  const { userid, restaurantId, date, time, partySize, phone } = req.body;
+  console.log(partySize);
+  try {
+    const restaurant = await Restaurant.find({ _id: restaurantId });
+
+    if (restaurant.length === 0) {
+      return res.status(404).json({ message: "Restaurant not found" });
+    }
+
+    const [hours, minutes] = time.split(":").map(Number); // Convert to numbers
+
+    const startingTimeMinutes = hours * 60 + minutes;
+    // Ensure Bookingduration is a number and add it correctly
+    const endingTimeMinutes =
+      startingTimeMinutes + Number(restaurant[0].Bookingduration);
+
+    // Determine table capacity based on party size
+    let tableCapacity=0;
+    if (partySize <= 2) {
+      tableCapacity = 2;
+    } else if (partySize <= 4) {
+      tableCapacity = 4;
+    } else if (partySize <= 6) {
+      tableCapacity = 6;
+    } else {
+      tableCapacity = 8; // Assuming the max party size does not exceed 8 for a single table
+    }
+
+    const newBooking = new Booking({
+      userid: userid,
+      restaurantid: restaurantId,
+      date: date,
+      startingTime: startingTimeMinutes,
+      endingTime: endingTimeMinutes,
+      partySize: partySize,
+      tableCapacity: tableCapacity,
+      phone: phone,
+      duration: restaurant[0].Bookingduration,
+    });
+
+    await newBooking.save();
+    return res.status(201).json({ message: "Booking created successfully" });
+  } catch (error) {
+    console.error("Error creating booking:", error);
+    return res
+      .status(500)
+      .json({ message: "An error occurred while creating the booking" });
   }
 });
 

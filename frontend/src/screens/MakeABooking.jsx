@@ -78,6 +78,7 @@ const MakeABooking = () => {
         date: bookingData.date,
         time: time,
         partySize: bookingData.partySize,
+        restaurantId: restaurantId,
       }
     });
   };
@@ -95,6 +96,7 @@ const MakeABooking = () => {
           onChange={handleInputChange}
           value={bookingData.partySize}
         />
+         <p className="note">Note: We can only make reservations for up to 8 people. Contact the restaurant/coffee shop for booking your table if your party is larger.</p>
         <button type="submit">Search for available hours</button>
       </form>
       {/* Render available times */}

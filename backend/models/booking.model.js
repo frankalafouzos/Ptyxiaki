@@ -11,7 +11,6 @@ const BookingSchema = new Schema({
     partySize: Number,
     phone: String,
     duration: Number, //in minutes
-    numberOfGuests: Number,
     tableCapacity: Number
 })
 

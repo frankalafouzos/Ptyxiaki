@@ -54,3 +54,12 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+
+
+  .note {
+    color: #6c757d; /* Gray text color for the note */
+    font-size: 0.9rem; /* Smaller font size for subtlety */
+    margin-top: 8px; /* Margin to create space between the input and the note */
+    margin-bottom: 20px; /* Additional space before the submit button */
+    width: 50%; /* Width of the note */
+  }
