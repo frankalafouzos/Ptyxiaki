@@ -14,6 +14,7 @@ import ProfilePage from './screens/ProfilePage'
 import EditProfile from './screens/EditProfile'
 import EditPassword from './screens/EditPassword';
 import ProtectedRoute from './components/ProtectedRoute.component';
+import ConfirmBooking from './screens/ConfirmBooking';
 import MakeABooking from './screens/MakeABooking';
 import './App.css';
 import './css/Header.css'
@@ -38,6 +39,7 @@ function App() {
             <Route path="/profilePage" element={<ProtectedRoute element={<ProfilePage/>} />} />
             <Route path="/editProfile" element={<ProtectedRoute element={<EditProfile/>} />} />
             <Route path="/editPassword" element={<ProtectedRoute element={<EditPassword/>} />} />
+            <Route path="/restaurant/:id/confirmBooking" element={<ProtectedRoute element={<ConfirmBooking/>} />} />
           </Routes>
           
         </main>

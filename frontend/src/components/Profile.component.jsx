@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 // import { useParams } from "react-router-dom";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { fetchUser } from '../scripts/fetchUser';  // Import the fetchUser function
 
 const Profile = () => {
   const [loading, setLoading] = useState(true);
@@ -10,37 +11,7 @@ const Profile = () => {
   const email = authUser.email;
 
   useEffect(() => {
-    const fetchUser = async () => {
-      console.log("Fetching user data for email:", email);
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `http://localhost:5000/users/userprofile`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email: email }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("User not found");
-        }
-
-        let data = await response.json(); // Await the JSON conversion
-        console.log("Received user data:", data);
-
-        setUser(data);
-        console.log(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
+    fetchUser(email, setLoading, setUser);
   }, [email]);
 
   if (loading) {
@@ -48,9 +19,9 @@ const Profile = () => {
   }
 
   // // Check if user is loaded
-  // if (!user) {
-  //   return <div>User not found</div>;
-  // }
+  if (!user) {
+    return <div>User not found</div>;
+  }
 
   return (
     <Container className="my-5">
@@ -85,7 +56,7 @@ const Profile = () => {
         </Col>
       </Row>
     </Container>
-  ); // Now safely accessing user.name
+  ); 
 };
 
 export default Profile;

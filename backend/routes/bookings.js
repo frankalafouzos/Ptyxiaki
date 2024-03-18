@@ -9,159 +9,145 @@ router.route("/").get((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-function generateTimeSlots(openMinutes, closeMinutes, interval = 30) {
-  let slots = [];
-  let currentTime = openMinutes;
 
-  while (currentTime < closeMinutes) {
-    // Convert currentTime back to HH:MM format for display
-    let hours = Math.floor(currentTime / 60);
-    let minutes = currentTime % 60;
-    let timeString = `${String(hours).padStart(2, "0")}:${String(
-      minutes
-    ).padStart(2, "0")}`;
-    slots.push(timeString);
+function generateTimeSlots(startTime, endTime, interval) {
+  const timeArray = [];
+  console.log(startTime);
+  for (let time = startTime; time < endTime; time += interval) {
 
-    // Increment the currentTime by the interval
-    currentTime += interval;
+      timeArray.push(time);
   }
-
-  return slots;
+  console.log(timeArray);
+  return timeArray;
 }
 
-// Old code
-router.route("availability/:restaurantId").get(async (req, res) => {
-  const restaurantId = req.params.restaurantId;
-  const date = req.query.date;
-  const partyNumber = req.query.partyNumber;
-  let bookings = await Booking.find({ restaurantid: restaurantId, date: date });
-  let Capacity = await RestaurantCapacity.find({ restaurantid: restaurantId });
-  let restaurant = await Restaurant.find({ _id: restaurantId });
+const getAvailability = async (restaurantId, date, partyNumber) => {
+  
+  try {
 
-  if (!capacity || !restaurant) {
-    return res
-      .status(404)
-      .json({ message: "Restaurant or capacity not found" });
+    let Capacity = await RestaurantCapacity.find({ restaurantid: restaurantId });
+    console.log(Capacity);
+    let restaurant = await Restaurant.find({ _id: restaurantId });
+    console.log(restaurant);
+
+    if (!Capacity || !restaurant) {
+      return res
+        .status(404)
+        .json({ message: "Restaurant or capacity not found" });
+    }
+    let interval = 30;
+    let slots = generateTimeSlots(restaurant[0].openHour, restaurant[0].closeHour, interval);
+
+    availabilityPerSlot = [];
+    // console.log(slots);
+    for (let slot of slots) {
+      console.log("Slot: "+slot);
+      let bookings = await Booking.find({ 
+        restaurantid: restaurantId, 
+        date: date,
+        $or: [
+          { startingTime: { $gte: slot, $lt: slot + restaurant[0].Bookingduration } },
+          { endingTime: { $gt: slot, $lte: slot + restaurant[0].Bookingduration } }
+        ]
+      });
+      console.log(bookings);
+      let booked = {
+        time: slot,
+        bookingsfor2: 0,
+        bookingsfor4: 0,
+        bookingsfor6: 0,
+        bookingsfor8: 0,
+      };
+
+      bookings.forEach((booking) => {
+        bookings.forEach((booking) => {
+          console.log(`Table Capacity: ${booking.tableCapacity}`);
+          if (booking.tableCapacity === 2) {
+            booked.bookingsfor2 += 1;
+          } else if (booking.tableCapacity === 4) {
+            booked.bookingsfor4 += 1;
+          } else if (booking.tableCapacity === 6) {
+            booked.bookingsfor6 += 1;
+          } else if (booking.tableCapacity === 8) {
+            booked.bookingsfor8 += 1;
+          }
+        });
+      });
+
+      let trueCapacityFor2 = Capacity[0].tablesForTwo - booked.bookingsfor2;
+      let trueCapacityFor4 = Capacity[0].tablesForFour - booked.bookingsfor4;
+      let trueCapacityFor6 = Capacity[0].tablesForSix - booked.bookingsfor6;
+      let trueCapacityFor8 = Capacity[0].tablesForEight - booked.bookingsfor8;
+      console.log(`True Capacity ${trueCapacityFor4}`);
+      if (partyNumber <= 2) {
+        if (trueCapacityFor2 > 0) {
+          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: true });
+        } else {
+          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: false });
+        }
+      }
+      else if (partyNumber <= 4) {
+        if (trueCapacityFor4 > 0) {
+          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: true });
+        } else {
+          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: false });
+        }
+      }
+      else if (partyNumber <= 6) {
+        if (trueCapacityFor6 > 0) {
+          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: true });
+        } else {
+          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: false });
+        }
+      }
+      else if (partyNumber <= 8) {
+        if (trueCapacityFor8 > 0) {
+          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: true });
+        } else {
+          availabilityPerSlot.push({ time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? '00' : slot % 60}`, available: false });
+        }
+      }
+    }
+    console.log("Out of loop");
+    console.log(availabilityPerSlot);
+    return availabilityPerSlot;
+  } catch (error) {
+    console.error("Error retrieving availability:", error);
   }
+};
 
-  let slots = generateTimeSlots(
-    restaurant.openHour,
-    restaurant.closeHour,
-    30
-  );
+router.route("/availability/:restaurantId").get(async (req, res) => {
+  const restaurantId = req.params.restaurantId;
+  const partyNumber = req.query.partyNumber// Ensure partyNumber is an integer
 
-  availabilityPerSlot = [];
 
-  for (let slot in slots) {
-    let booked = {
-      time: slot,
-      bookingsfor2: 0,
-      bookingsfor4: 0,
-      bookingsfor6: 0,
-      bookingsfor8: 0,
-    };
+  // Assuming the date string is in "YYYY-MM-DD" format
+const dateString = req.query.date; // e.g., "2023-03-15"
+const parts = dateString.split("-");
 
-    bookings.forEach((booking) => {
-      if (booking.tableCapacity === "2") {
-        booked.bookingsfor2 += 1;
-      } else if (booking.tableCapacity === "4") {
-        booked.bookingsfor4 += 1;
-      } else if (booking.tableCapacity === "6") {
-        booked.bookingsfor6 += 1;
-      } else if (booking.tableCapacity === "8") {
-        booked.bookingsfor8 += 1;
-      }
-    });
+// Note: parts[1] - 1 because months are 0-indexed in JavaScript Date objects
+console.log(parts);
+const date = new Date(parts[0], parts[1] - 1, parts[2]);
+console.log(date);
 
-    let trueCapacityFor2 = Capacity.tablesForTwo - booked.bookingsfor2;
-    let trueCapacityFor4 = Capacity.tablesForFour - booked.bookingsfor4;
-    let trueCapacityFor6 = Capacity.tablesForSix - booked.bookingsfor6;
-    let trueCapacityFor8 = Capacity.tablesForEight - booked.bookingsfor8;
 
-    if (partyNumber <= 2) {
-      if (trueCapacityFor2 > 0) {
-        res.json(true);
-      } else {
-        res.json(false);
-      }
+  try {
+    // Call the getAvailability function and await its result
+    const availability = await getAvailability(restaurantId, date, partyNumber);
+
+    // Check if the availability array is empty or not
+    if (availability.length === 0) {
+      // No available slots
+      return res.status(404).json({ message: "No available slots found" });
     }
-    if (partyNumber <= 4) {
-      if (trueCapacityFor4 > 0) {
-        res.json(true);
-      } else {
-        res.json(false);
-      }
-    }
-    if (partyNumber <= 6) {
-      if (trueCapacityFor6 > 0) {
-        res.json(true);
-      } else {
-        res.json(false);
-      }
-    }
-    if (partyNumber <= 8) {
-      if (trueCapacityFor8 > 0) {
-        res.json(true);
-      } else {
-        res.json(false);
-      }
-    }
+
+    // If available slots are found, return them
+    return res.json(availability);
+  } catch (error) {
+    // Handle any errors that occur during the process
+    console.error("Error retrieving availability:", error);
+    return res.status(500).json({ message: "An error occurred while fetching availability" });
   }
 });
-
-// // Helper function to add minutes to a given time string
-// function addMinutesToTime(time, minutes) {
-//     const [hours, mins] = time.split(':').map(Number);
-//     const date = new Date();
-//     date.setHours(hours, mins + minutes, 0, 0);
-//     return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-// }
-
-// // Function to check slot availability against existing bookings
-// function isSlotAvailable(slot, bookings, bookingDuration) {
-//     return !bookings.some(booking => {
-//         const bookingEnd = addMinutesToTime(booking.time, parseInt(booking.duration));
-//         const slotEnd = addMinutesToTime(slot, bookingDuration);
-//         // Check if slot overlaps with booking time
-//         return (slot < bookingEnd && slotEnd > booking.time);
-//     });
-// }
-
-// router.get("/availability/:restaurantId", async (req, res) => {
-//     const restaurantId = req.params.restaurantId;
-//     const date = req.query.date; // Expecting format YYYY-MM-DD
-//     const partyNumber = parseInt(req.query.partyNumber, 10);
-
-//     try {
-//         const restaurant = await Restaurant.findById(restaurantId);
-//         if (!restaurant) return res.status(404).send('Restaurant not found');
-
-//         const capacity = await RestaurantCapacity.findOne({ restaurantid: restaurantId });
-//         if (!capacity) return res.status(404).send('Capacity information not found');
-
-//         const bookings = await Booking.find({ restaurantid: restaurantId, date: new Date(date) });
-
-//         // Generate slots based on restaurant operating hours at 30-minute intervals
-//         let slots = [];
-//         let currentTime = restaurant.openHour;
-//         while (currentTime < restaurant.closeHour) {
-//             slots.push(currentTime);
-//             currentTime = addMinutesToTime(currentTime, 30); // Increment by 30 minutes
-//         }
-
-//         // Filter slots based on existing bookings and party size
-//         const bookingDuration = restaurant.Bookingduration; // Assuming this is in minutes
-//         let availableSlots = slots.filter(slot => isSlotAvailable(slot, bookings, bookingDuration));
-
-//         // Adjust the response based on the party size and capacity
-//         // Here, you might want to further filter `availableSlots` based on the party size and actual table capacity
-//         // This part of logic is omitted for brevity and needs to be adjusted based on how you want to handle capacity vs. party size
-
-//         res.json({ availableSlots });
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ message: "Server error" });
-//     }
-// });
 
 module.exports = router;

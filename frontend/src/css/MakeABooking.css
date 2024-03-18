@@ -1,0 +1,56 @@
+.availability-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.time-slots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 0;
+}
+
+.time-slot {
+  flex: 0 1 calc(33.333% - 20px);
+  list-style-type: none;
+}
+
+.time-slot button {
+  width: 100%;
+  background-color: #4caf50;
+  border: none;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.time-slot button:hover {
+  background-color: #45a049;
+}
+
+/* .loading-indicator {
+  text-align: center;
+  Additional styling here
+} */
+
+
+.loader {
+    border: 5px solid #f3f3f3; /* Light grey background */
+    border-top: 5px solid #3498db; /* Blue color */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }

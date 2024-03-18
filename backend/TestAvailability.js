@@ -19,7 +19,7 @@ async function generateBookings() {
     {
       userid: "65c2b146e88cd065d885b41a",
       restaurantid: "65f5e0bdcae164a47210aa30",
-      date: new Date(2023, 2, 31), 
+      date: new Date(2024, 2, 31), 
       startingTime: 600, // 10:00 AM
       endingTime: 720, // 12:00 PM
       partySize: 2,
@@ -31,7 +31,7 @@ async function generateBookings() {
   {
       userid: "65c2b146e88cd065d885b41a",
       restaurantid: "65f5e0bdcae164a47210aa30",
-      date: new Date(2023, 2, 31), 
+      date: new Date(2024, 2, 31), 
       startingTime: 720, // 12:00 PM
       endingTime: 840, // 2:00 PM
       partySize: 4,
@@ -43,7 +43,7 @@ async function generateBookings() {
   {
       userid: "65c2b146e88cd065d885b41a",
       restaurantid: "65f5e0bdcae164a47210aa30",
-      date: new Date(2023, 2, 31), 
+      date: new Date(2024, 2, 31), 
       startingTime: 840, // 2:00 PM
       endingTime: 960, // 4:00 PM
       partySize: 2,
@@ -55,7 +55,7 @@ async function generateBookings() {
   {
       userid: "65c2b146e88cd065d885b41a",
       restaurantid: "65f5e0bdcae164a47210aa30",
-      date: new Date(2023, 2, 31), 
+      date: new Date(2024, 2, 31), 
       startingTime: 960, // 4:00 PM
       endingTime: 1080, // 6:00 PM
       partySize: 4,
@@ -67,7 +67,7 @@ async function generateBookings() {
   {
       userid: "65c2b146e88cd065d885b41a",
       restaurantid: "65f5e0bdcae164a47210aa30",
-      date: new Date(2023, 2, 31), 
+      date: new Date(2024, 2, 31), 
       startingTime: 1080, // 6:00 PM
       endingTime: 1200, // 8:00 PM
       partySize: 6,
@@ -79,7 +79,7 @@ async function generateBookings() {
   {
       userid: "65c2b146e88cd065d885b41a",
       restaurantid: "65f5e0bdcae164a47210aa30",
-      date: new Date(2023, 2, 31), 
+      date: new Date(2024, 2, 31), 
       startingTime: 1200, // 8:00 PM
       endingTime: 1320, // 10:00 PM
       partySize: 3,
@@ -91,7 +91,7 @@ async function generateBookings() {
   {
       userid: "65c2b146e88cd065d885b41a",
       restaurantid: "65f5e0bdcae164a47210aa30",
-      date: new Date(2023, 2, 31), 
+      date: new Date(2024, 2, 31), 
       startingTime: 1320, // 10:00 PM
       endingTime: 1440, // 12:00 AM
       partySize: 2,
@@ -103,7 +103,7 @@ async function generateBookings() {
   {
     userid: "65c2b146e88cd065d885b41a",
     restaurantid: "65f5e0bdcae164a47210aa30",
-    date: new Date(2023, 2, 31), 
+    date: new Date(2024, 2, 31), 
     startingTime: 780, // 1:00 PM overlaps with previous
     endingTime: 900, // 3:00 PM
     partySize: 2,
@@ -115,7 +115,7 @@ async function generateBookings() {
 {
     userid: "65c2b146e88cd065d885b41a",
     restaurantid: "65f5e0bdcae164a47210aa30",
-    date: new Date(2023, 2, 31), 
+    date: new Date(2024, 2, 31), 
     startingTime: 870, // 2:30 PM overlaps with previous
     endingTime: 990, // 4:30 PM
     partySize: 4,
@@ -127,7 +127,7 @@ async function generateBookings() {
 {
     userid: "65c2b146e88cd065d885b41a",
     restaurantid: "65f5e0bdcae164a47210aa30",
-    date: new Date(2023, 2, 31), 
+    date: new Date(2024, 2, 31), 
     startingTime: 960, // 4:00 PM overlaps with previous
     endingTime: 1080, // 6:00 PM
     partySize: 6,
@@ -139,7 +139,7 @@ async function generateBookings() {
 {
     userid: "65c2b146e88cd065d885b41a",
     restaurantid: "65f5e0bdcae164a47210aa30",
-    date: new Date(2023, 2, 31), 
+    date: new Date(2024, 2, 31), 
     startingTime: 1050, // 5:30 PM overlaps with previous
     endingTime: 1170, // 7:30 PM
     partySize: 3,
@@ -151,7 +151,7 @@ async function generateBookings() {
 {
     userid: "65c2b146e88cd065d885b41a",
     restaurantid: "65f5e0bdcae164a47210aa30",
-    date: new Date(2023, 2, 31), 
+    date: new Date(2024, 2, 31), 
     startingTime: 1140, // 7:00 PM overlaps with previous
     endingTime: 1260, // 9:00 PM
     partySize: 2,
@@ -163,7 +163,7 @@ async function generateBookings() {
 {
     userid: "65c2b146e88cd065d885b41a",
     restaurantid: "65f5e0bdcae164a47210aa30",
-    date: new Date(2023, 2, 31), 
+    date: new Date(2024, 2, 31), 
     startingTime: 1230, // 8:30 PM overlaps with previous
     endingTime: 1350, // 10:30 PM
     partySize: 4,
@@ -175,7 +175,7 @@ async function generateBookings() {
 {
     userid: "65c2b146e88cd065d885b41a",
     restaurantid: "65f5e0bdcae164a47210aa30",
-    date: new Date(2023, 2, 31), 
+    date: new Date(2024, 2, 31), 
     startingTime: 1320, // 10:00 PM overlaps with previous
     endingTime: 1440, // 12:00 AM
     partySize: 5,
@@ -187,7 +187,7 @@ async function generateBookings() {
 {
     userid: "65c2b146e88cd065d885b41a",
     restaurantid: "65f5e0bdcae164a47210aa30",
-    date: new Date(2023, 2, 31), 
+    date: new Date(2024, 2, 31), 
     startingTime: 1410, // 11:30 PM overlaps with previous
     endingTime: 1530, // 1:30 AM
     partySize: 3,
@@ -199,7 +199,7 @@ async function generateBookings() {
 {
     userid: "65c2b146e88cd065d885b41a",
     restaurantid: "65f5e0bdcae164a47210aa30",
-    date: new Date(2023, 2, 31), 
+    date: new Date(2024, 2, 31), 
     startingTime: 1500, // 1:00 AM, starts after previous ends
     endingTime: 1620, // 3:00 AM
     partySize: 2,
@@ -211,7 +211,7 @@ async function generateBookings() {
 {
     userid: "65c2b146e88cd065d885b41a",
     restaurantid: "65f5e0bdcae164a47210aa30",
-    date: new Date(2023, 2, 31), 
+    date: new Date(2024, 2, 31), 
     startingTime: 1590, // 2:30 AM, overlaps with previous
     endingTime: 1710, // 4:30 AM
     partySize: 4,
@@ -253,7 +253,7 @@ function generateTimeSlots(startTime, endTime, interval) {
 }
 
 const getAvailability = async (restaurantId, date, partyNumber) => {
-  
+  console.log(date);
   try {
 
     let Capacity = await RestaurantCapacity.find({ restaurantid: restaurantId });
@@ -348,6 +348,6 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
   }
 };
 
-let Availability = getAvailability("65f5e0bdcae164a47210aa30", new Date(2023, 2, 31), 4);
-console.log(Availability);
-// generateBookings();
+// let Availability = getAvailability("65f5e0bdcae164a47210aa30", new Date(2024, 2, 31), 4);
+// console.log(Availability);
+generateBookings();
