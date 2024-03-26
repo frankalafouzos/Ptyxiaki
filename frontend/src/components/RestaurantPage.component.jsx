@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
 // import Carousel from 'react-bootstrap/Carousel'
 import { useParams } from "react-router-dom";
 import "../css/RestaurantPage.css";
@@ -74,7 +75,7 @@ import "../css/RestaurantPage.css";
 //                     src={require(`../imgs/${img.link.split("/").pop()}`)}
 //                     alt={`Restaurant ${idx}`}
 //                   />
-              
+
 //             </Carousel.Item>
 //             ))}
 //           </Carousel>
@@ -117,8 +118,6 @@ import "../css/RestaurantPage.css";
 //   );
 // };
 
-
-
 // old code
 
 const RestaurantPage = () => {
@@ -131,24 +130,24 @@ const RestaurantPage = () => {
   const imageRefs = useRef([]);
 
   useEffect(() => {
-    console.log('Fetching restaurant data for ID:', id);
+    console.log("Fetching restaurant data for ID:", id);
 
     fetch(`http://localhost:5000/restaurants/${id}`)
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
-            console.log(response)
-          throw new Error('Restaurant not found');
+          console.log(response);
+          throw new Error("Restaurant not found");
         }
         return response.json();
       })
-      .then(data => {
-        console.log('Received restaurant data:', data);
+      .then((data) => {
+        console.log("Received restaurant data:", data);
         setRestaurant(data.restaurant);
         setLoading(false);
-        setImages(data.images)
+        setImages(data.images);
       })
-      .catch(error => {
-        console.error('Error fetching restaurant data:', error);
+      .catch((error) => {
+        console.error("Error fetching restaurant data:", error);
         setError(error.message);
         setLoading(false);
       });
@@ -159,7 +158,7 @@ const RestaurantPage = () => {
     if (images.length === 0) return;
 
     // Calculate the tallest image height
-    const imageHeights = imageRefs.current.map(ref => ref?.offsetHeight || 0);
+    const imageHeights = imageRefs.current.map((ref) => ref?.offsetHeight || 0);
     const tallestImageHeight = Math.max(...imageHeights);
     setMaxImageHeight(tallestImageHeight);
   }, [images]); // Dependency on 'images'
@@ -171,7 +170,9 @@ const RestaurantPage = () => {
   };
 
   const prevImage = () => {
-    setActiveImage((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+    setActiveImage(
+      (prevIndex) => (prevIndex - 1 + images.length) % images.length
+    );
   };
 
   if (loading) return <div>Loading...</div>;
@@ -187,39 +188,59 @@ const RestaurantPage = () => {
             {images.map((img, idx) => (
               <img
                 key={idx}
-                className={`carousel-image ${idx === activeImage ? 'active' : ''}`}
-                src={require(`../imgs/${img.link.split('/').pop()}`)}
+                className={`carousel-image ${
+                  idx === activeImage ? "active" : ""
+                }`}
+                src={require(`../imgs/${img.link.split("/").pop()}`)}
                 alt={`Restaurant ${idx}`}
               />
             ))}
           </div>
-          <button className="carousel-control prev" onClick={prevImage}>&lt;</button>
-          <button className="carousel-control next" onClick={nextImage}>&gt;</button>
+          <button className="carousel-control prev" onClick={prevImage}>
+            &lt;
+          </button>
+          <button className="carousel-control next" onClick={nextImage}>
+            &gt;
+          </button>
         </div>
 
         <div className="info-container">
-          <div className='info-top'>
+          <div className="info-top">
             <h1 id="name">{restaurant.name}</h1>
-            <h2 className="info">Average price per person: {restaurant.price}</h2>
+            <h2 className="info">
+              Average price per person: {restaurant.price}
+            </h2>
             <h3 className="info">About us: {restaurant.description}</h3>
             <h4 className="info">Category: {restaurant.category}</h4>
             <h4 className="info">Location: {restaurant.location}</h4>
-            <h4 className="info">Phone number:
-              <a className="text-decoration-none text-info" href={`tel:+${restaurant.phone}`}>
+            <h4 className="info">
+              Phone number:
+              <a
+                className="text-decoration-none text-info"
+                href={`tel:+${restaurant.phone}`}
+              >
                 {restaurant.phone}
               </a>
             </h4>
-            <h4 className="info">Email:
-              <a className="text-decoration-none text-info" href={`mailto:${restaurant.email}`}>
+            <h4 className="info">
+              Email:
+              <a
+                className="text-decoration-none text-info"
+                href={`mailto:${restaurant.email}`}
+              >
                 {restaurant.email}
               </a>
             </h4>
           </div>
-          <div className='booking-button'>
-              <button className='btn btn-outline-success '>Book a table</button>
+          <div className="booking-button">
+            <Link
+              to={`/booking/${restaurant._id}`}
+              className="btn btn-outline-success "
+            >
+              Book a Table
+            </Link>
           </div>
         </div>
-
       </div>
     </div>
   );

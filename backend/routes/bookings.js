@@ -39,14 +39,23 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
       restaurant[0].closeHour,
       interval
     );
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0); // Set to the beginning of the day
+
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1);
 
     availabilityPerSlot = [];
     // console.log(slots);
     for (let slot of slots) {
       console.log("Slot: " + slot);
+
       let bookings = await Booking.find({
         restaurantid: restaurantId,
-        date: date,
+        date: {
+          $gte: startOfDay,
+          $lt: endOfDay
+        },
         $or: [
           {
             startingTime: {
@@ -218,7 +227,7 @@ router.route("/create").post(async (req, res) => {
       startingTimeMinutes + Number(restaurant[0].Bookingduration);
 
     // Determine table capacity based on party size
-    let tableCapacity=0;
+    let tableCapacity = 0;
     if (partySize <= 2) {
       tableCapacity = 2;
     } else if (partySize <= 4) {
@@ -241,8 +250,12 @@ router.route("/create").post(async (req, res) => {
       duration: restaurant[0].Bookingduration,
     });
 
-    await newBooking.save();
-    return res.status(201).json({ message: "Booking created successfully" });
+    const booking = await newBooking.save();
+    const bookingID = booking._id.toString();
+    console.log({ message: "Booking created successfully", id: bookingID });
+    return res
+      .status(201)
+      .json({ message: "Booking created successfully", id: `${bookingID}` });
   } catch (error) {
     console.error("Error creating booking:", error);
     return res

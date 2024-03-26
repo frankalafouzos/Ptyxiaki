@@ -16,6 +16,7 @@ import EditPassword from './screens/EditPassword';
 import ProtectedRoute from './components/ProtectedRoute.component';
 import ConfirmBooking from './screens/ConfirmBooking';
 import MakeABooking from './screens/MakeABooking';
+import ThankYouForBooking from './screens/ThankYouForBooking';
 import './App.css';
 import './css/Header.css'
 
@@ -35,11 +36,13 @@ function App() {
             <Route path="/search" element={<SearchBar/>} />
             <Route path="/restaurants" element={<Restaurants/>} />
             <Route path="/restaurant/:id" element={<RestaurantPage/>} />
+            <Route path="/bookingThankYou/:bookingid" element={<ThankYouForBooking/>} />
             <Route path="/booking/:id" element={<ProtectedRoute element={<MakeABooking/>}/>} />
             <Route path="/profilePage" element={<ProtectedRoute element={<ProfilePage/>} />} />
             <Route path="/editProfile" element={<ProtectedRoute element={<EditProfile/>} />} />
             <Route path="/editPassword" element={<ProtectedRoute element={<EditPassword/>} />} />
             <Route path="/restaurant/:id/confirmBooking" element={<ProtectedRoute element={<ConfirmBooking/>} />} />
+
           </Routes>
           
         </main>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useLocation } from "react-router-dom";
 import { fetchUser } from "../scripts/fetchUser";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const formatTime = (time) => {
   // Assuming time is something like "1:00" or "9:30", convert it to "01:00" or "09:30"
@@ -88,15 +90,30 @@ const ConfirmBooking = () => {
         body: JSON.stringify(reservation),
       });
       if (response.ok) {
-        console.log("Reservation created successfully");
+        const responseData = await response.json();
+        console.log(`Reservation created successfully ${responseData.id}`);
+        toast.success("Reservation created successfully", {
+          position: "top-center",
+          autoClose: 2000,
+          onClose: () => window.location.replace(`http://localhost:3000/bookingThankYou/${responseData.id}`)
+        })
         // Handle success case here
       } else {
-        console.error("Failed to create reservation");
-        // Handle error case here
+        const responseData = await response.json();
+        console.error("Failed to create reservation"+response.status+response.message);
+        toast.error("Failed to create reservation", {
+          position: "top-center",
+          autoClose: 2000,
+          onClose: () => window.location.replace(`http://localhost:3000/restaurant/${reservation.restaurantId}`)
+          });
       }
     } catch (error) {
       console.error("Failed to create reservation:", error);
-      // Handle error case here
+      toast.error("Failed to create reservation", {
+        position: "top-center",
+        autoClose: 2000,
+        onClose: () => window.location.replace(`http://localhost:3000/restaurant/${reservation.restaurantId}`)
+        });
     }
   };
   
@@ -105,6 +122,7 @@ const ConfirmBooking = () => {
 
   return (
     <form className="form" onSubmit={handleSubmit}>
+      <h1 className="title" >Confirm Your Reservation</h1>
       <label htmlFor="name">Name</label>
       <input
         type="text"
@@ -113,6 +131,7 @@ const ConfirmBooking = () => {
         value={reservation.name}
         onChange={handleChange}
         placeholder="Name"
+        disabled
       />
       <label htmlFor="date">Date</label>
       <input
@@ -121,6 +140,7 @@ const ConfirmBooking = () => {
         name="date"
         value={reservation.date}
         onChange={handleChange}
+        disabled
       />
       <label htmlFor="time">Time</label>
       <input
@@ -129,6 +149,7 @@ const ConfirmBooking = () => {
         name="time"
         value={reservation.time}
         onChange={handleChange}
+        disabled
       />
       <label htmlFor="partySize">Party Size</label>
       <input
@@ -138,6 +159,7 @@ const ConfirmBooking = () => {
         value={reservation.partySize}
         onChange={handleChange}
         placeholder="Party Size"
+        disabled
       />
       <label htmlFor="phone">Contact Phone</label>
       <input
