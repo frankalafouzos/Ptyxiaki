@@ -2,6 +2,7 @@ const router = require("express").Router();
 let Booking = require("../models/booking.model");
 let RestaurantCapacity = require("../models/restaurantCapacity.model");
 let Restaurant = require("../models/restaurant.model");
+let User = require("../models/users.model");
 
 router.route("/").get((req, res) => {
   Booking.find()
@@ -263,5 +264,59 @@ router.route("/create").post(async (req, res) => {
       .json({ message: "An error occurred while creating the booking" });
   }
 });
+
+router.route("/userbookings").post(async (req, res) => {
+  const email = req.body.email;
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const formatTime = (minutesFromMidnight) => {
+      const hours = Math.floor(minutesFromMidnight / 60);
+      const minutes = minutesFromMidnight % 60;
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    };
+
+    const userid = user._id;
+
+    // Fetch all bookings made by the user
+    let bookings = await Booking.find({ userid: userid }).sort({ date: -1 });
+
+    // Fetch restaurant names in a single query
+    const restaurantIds = bookings.map(booking => booking.restaurantid);
+    const restaurants = await Restaurant.find({
+      '_id': { $in: restaurantIds }
+    }).select('name _id');
+
+    // Create a mapping of restaurant ID to restaurant name
+    const restaurantNameMap = restaurants.reduce((acc, restaurant) => {
+      acc[restaurant._id.toString()] = restaurant.name; // Ensure the key is a string
+      return acc;
+    }, {});
+
+    // Add restaurantName to each booking
+    bookings = bookings.map(booking => {
+      const bookingObject = booking.toObject(); // Convert Mongoose document to plain JavaScript object
+      bookingObject.restaurantName = restaurantNameMap[booking.restaurantid.toString()] || 'Restaurant name not found';
+      bookingObject.formattedStartingTime = formatTime(bookingObject.startingTime);
+      bookingObject.formattedEndingTime = formatTime(bookingObject.endingTime);
+      return bookingObject;
+    });
+
+    return res.json(bookings);
+  } catch (error) {
+    console.error("Error retrieving bookings:", error);
+    return res.status(500).json({ message: "An error occurred while fetching bookings" });
+  }
+});
+
+router.route("/deleteone/:id").delete((req, res) => {
+  Booking.findByIdAndDelete(req.params.id)
+    .then(() => res.json({ message: "Booking deleted successfully" }))
+    .catch((err) => res.status(400).json("Error: " + err));
+});
+
 
 module.exports = router;

@@ -15,7 +15,7 @@ const Profile = () => {
   }, [email]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="d-flex justify-content-center pt-5"><div className="loader"></div></div>
   }
 
   // // Check if user is loaded
