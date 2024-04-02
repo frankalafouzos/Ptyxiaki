@@ -39,7 +39,8 @@ const Login = () => {
           {
             auth : {
               token: data.token,
-              type: 'Bearer'
+              type: 'Bearer',
+              expires: 4 * 60 * 60 * 1000 // 4 hours in milliseconds
             },
             userState: {
               email: formData.email

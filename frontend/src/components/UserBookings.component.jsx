@@ -31,6 +31,66 @@ const UserBookings = ({ display }) => {
     fetchBookings();
   }, []);
 
+  function deleteBooking(bookingId) {
+    // Confirm before deleting
+    if (!window.confirm("Are you sure you want to delete this booking?")) {
+      return;
+    }
+
+    // Make the DELETE request
+    fetch(`http://localhost:5000/bookings/deleteone/${bookingId}`, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to delete booking");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data.message);
+        // Optionally, you can refresh the data on the page or redirect
+        alert(data.message);
+        window.location.reload(); // Reload the page to update the list
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Error deleting booking");
+      });
+  }
+
+  function cancelBooking(bookingId, bookingDate) {
+    // Confirm before deleting
+    const today = new Date();
+    if (!window.confirm("Are you sure you want to cancel this booking?")) {
+      return;
+    } else if (bookingDate - today < 24 * 60 * 60 * 1000) {
+      alert("Cannot cancel booking within 24 hours");
+      return;
+    }
+
+    // Make the Cancel request
+    fetch(`http://localhost:5000/bookings/deleteone/${bookingId}`, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to delete booking");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Booking cancelled successfully");
+        // Optionally, you can refresh the data on the page or redirect
+        alert("Booking cancelled successfully");
+        window.location.reload(); // Reload the page to update the list
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Error deleting booking");
+      });
+  }
+
   return (
     <div className="Container">
       <h2 className="title">Your Bookings</h2>
@@ -40,9 +100,11 @@ const UserBookings = ({ display }) => {
             <tr>
               <th></th>
               <th>Location</th>
-              <th>Duration</th>
+              <th>Duration (min)</th>
               <th>Date</th>
               <th>Time</th>
+              <th></th>
+              <th></th>
               <th></th>
             </tr>
           </thead>
@@ -52,7 +114,8 @@ const UserBookings = ({ display }) => {
               .map((booking) => {
                 const today = new Date();
                 const bookingDate = new Date(booking.date);
-                const isAfterToday = bookingDate > today;
+                bookingDate.setHours(Math.floor(booking.startingTime / 60), booking.startingTime % 60, 0, 0);
+                const isAfterToday = bookingDate >= today;
 
                 return (
                   <tr key={booking._id}>
@@ -72,7 +135,34 @@ const UserBookings = ({ display }) => {
                           Edit
                         </button>
                       )}
+                      {!isAfterToday && <span>Cannot edit</span>}
                     </td>
+
+                    {isAfterToday && (
+                      <>
+                        <td>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() => alert(`Today's Date: ${today}, Booking Date: ${bookingDate}, isAfterToday: ${isAfterToday}`)}
+                            id="cancelButton"
+                          >
+                            Cancel
+                          </button>
+                        </td>
+                      </>
+                    )}
+
+                    {!isAfterToday && (
+                      <td>
+                        <button
+                          className="btn btn-warning"
+                          onClick={() => alert(`Today's Date: ${today}, Booking Date: ${bookingDate}, isAfterToday: ${isAfterToday}`)}
+                          id="deleteButton"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
