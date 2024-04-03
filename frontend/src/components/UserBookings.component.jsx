@@ -143,7 +143,7 @@ const UserBookings = ({ display }) => {
                         <td>
                           <button
                             className="btn btn-danger"
-                            onClick={() => alert(`Today's Date: ${today}, Booking Date: ${bookingDate}, isAfterToday: ${isAfterToday}`)}
+                            onClick={() => cancelBooking(booking._id, bookingDate)}
                             id="cancelButton"
                           >
                             Cancel
@@ -156,7 +156,7 @@ const UserBookings = ({ display }) => {
                       <td>
                         <button
                           className="btn btn-warning"
-                          onClick={() => alert(`Today's Date: ${today}, Booking Date: ${bookingDate}, isAfterToday: ${isAfterToday}`)}
+                          onClick={() => deleteBooking(booking._id)}
                           id="deleteButton"
                         >
                           Delete
@@ -168,6 +168,7 @@ const UserBookings = ({ display }) => {
               })}
             {display ? (
               <tr>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
