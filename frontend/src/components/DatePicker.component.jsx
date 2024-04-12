@@ -18,10 +18,12 @@ function parseDate(input) {
   return new Date();
 }
 
-function DateInputComponent({ onDateChange }) {
+function DateInputComponent({ onDateChange, widthofInput }) {
   const [date, setDate] = useState(new Date());
   const [inputType, setInputType] = useState('text');
   const [inputValue, setInputValue] = useState(formatDate(new Date()));
+
+  
 
   const onFocus = () => {
     setInputType('date');
@@ -49,6 +51,7 @@ function DateInputComponent({ onDateChange }) {
       onFocus={onFocus}
       onBlur={onBlur}
       onChange={onChange}
+      style={widthofInput === undefined ? null : { width: widthofInput }}
     />
   );
 }

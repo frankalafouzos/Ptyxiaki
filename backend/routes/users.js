@@ -221,6 +221,26 @@ router.route("/delete").delete(async(req, res) => {
 });
 
 
+router.route("/getuserbyid").get(async (req, res) => {
+  try {
+    const { id } = req.query; 
+    console.log("ID: " + id);
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    console.log(`User fetched successfully ${user}`);
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+
 
 
 

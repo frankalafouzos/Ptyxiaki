@@ -318,5 +318,39 @@ router.route("/deleteone/:id").delete((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
+router.route("/getonebyid").get(async (req, res) => {
+  const {id} = req.query;
+  const booking = await Booking.findById(id)
+
+  if (!booking) {
+    return res.status(404).json({ message: "Booking not found" });
+  }
+
+  console.log(`Booking fetched successfully ${booking}`);
+  return res.json(booking);
+
+});
+
+router.route("/edit/:id").post((req, res) => {
+  Booking.findById(req.params.id)
+    .then((booking) => {
+      booking.userid = req.body.userid;
+      booking.restaurantid = req.body.restaurantid;
+      booking.date = req.body.date;
+      booking.startingTime = req.body.startingTime;
+      booking.endingTime = req.body.endingTime;
+      booking.partySize = req.body.partySize;
+      booking.tableCapacity = req.body.tableCapacity;
+      booking.phone = req.body.phone;
+      booking.duration = req.body.duration;
+
+      booking
+        .save()
+        .then(() => res.json({ message: "Booking updated successfully" }))
+        .catch((err) => res.status(400).json("Error: " + err));
+    })
+    .catch((err) => res.status(400).json("Error: " + err));
+});
+
 
 module.exports = router;
