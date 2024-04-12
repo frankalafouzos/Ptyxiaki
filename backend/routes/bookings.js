@@ -180,7 +180,7 @@ router.route("/availability/:restaurantId").get(async (req, res) => {
   const partyNumber = req.query.partyNumber; // Ensure partyNumber is an integer
 
   // Assuming the date string is in "YYYY-MM-DD" format
-  const dateString = req.query.date; // e.g., "2023-03-15"
+  const dateString = req.query.date; 
   const parts = dateString.split("-");
 
   // Note: parts[1] - 1 because months are 0-indexed in JavaScript Date objects
@@ -236,7 +236,7 @@ router.route("/create").post(async (req, res) => {
     } else if (partySize <= 6) {
       tableCapacity = 6;
     } else {
-      tableCapacity = 8; // Assuming the max party size does not exceed 8 for a single table
+      tableCapacity = 8; 
     }
 
     const newBooking = new Booking({
@@ -351,6 +351,8 @@ router.route("/edit/:id").post((req, res) => {
     })
     .catch((err) => res.status(400).json("Error: " + err));
 });
+
+
 
 
 module.exports = router;

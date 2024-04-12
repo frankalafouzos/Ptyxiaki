@@ -173,6 +173,7 @@ const UserBookings = ({ display }) => {
                 <td></td>
                 <td></td>
                 <td></td>
+                <td></td>
                 <td>
                   <button onClick={() => (window.location = "/userBookings")}>
                     View All
