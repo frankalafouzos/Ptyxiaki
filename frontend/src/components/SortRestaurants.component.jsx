@@ -14,14 +14,14 @@ const SortForm = ({ Sort, setSort }) => {
           onChange={(e) => setSort(e.target.value)}
         >
           <option value="Default">Default</option>
-          <option value="Category Asc">Category Asc</option>
-          <option value="Category Dsc">Category Dsc</option>
-          <option value="Location Asc">Location Asc</option>
-          <option value="Location Dsc">Location Dsc</option>
+          <option value="Category Dsc">Category Asc</option>
+          <option value="Category Asc">Category Dsc</option>
+          <option value="Location Dsc">Location Asc</option>
+          <option value="Location Asc">Location Dsc</option>
           <option value="Price Asc">Price Asc</option>
           <option value="Price Dsc">Price Dsc</option>
-          <option value="A-Z">A-Z</option>
-          <option value="Z-A">Z-A</option>
+          <option value="Name Asc">A-Z</option>
+          <option value="Name Dsc">Z-A</option>
         </Form.Control>
       </Form.Group>
     </Form>

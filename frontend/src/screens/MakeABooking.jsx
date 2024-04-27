@@ -61,7 +61,7 @@ const MakeABooking = () => {
         throw new Error("Network response was not ok");
       }
 
-      const data = await response.json();
+      const data = await response.json();   
       setAvailability(data); // Update the availability state with the fetched data
       setLoading(false);
     } catch (error) {
