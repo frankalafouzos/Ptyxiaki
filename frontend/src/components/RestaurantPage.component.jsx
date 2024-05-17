@@ -76,7 +76,7 @@ const RestaurantPage = () => {
                 className={`carousel-image ${
                   idx === activeImage ? "active" : ""
                 }`}
-                src={require(`../imgs/${img.link.split("/").pop()}`)}
+                src={img.link}
                 alt={`Restaurant ${idx}`}
               />
             ))}

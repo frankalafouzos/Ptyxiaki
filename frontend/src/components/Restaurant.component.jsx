@@ -19,7 +19,7 @@ const Restaurant = ({ restaurant, index, images }) => {
               <Carousel.Item key={idx} style={{ height: "25rem" }}>
                 <img
                   className="d-block w-100 rounded"
-                  src={require(`../imgs/${img.link.split("/").pop()}`)}
+                  src={img.link}
                   alt={`Slide ${idx}`}
                   style={{ objectFit: "cover", height: "25rem", width: "100%" }}
                 />
