@@ -14,7 +14,6 @@ const uploadImage = (file) => {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: Date.now().toString() + '-' + file.originalname,
     Body: file.buffer,
-    ACL: 'public-read',
     Metadata: { fieldName: file.fieldname }
   };
 
