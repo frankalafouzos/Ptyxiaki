@@ -1,15 +1,15 @@
-const AWS = require('aws-sdk');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 require('dotenv').config();
 
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  }
 });
 
-const s3 = new AWS.S3();
-
-const uploadImage = (file) => {
+const uploadImage = async (file) => {
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: Date.now().toString() + '-' + file.originalname,
@@ -17,7 +17,14 @@ const uploadImage = (file) => {
     Metadata: { fieldName: file.fieldname }
   };
 
-  return s3.upload(params).promise();
+  try {
+    const command = new PutObjectCommand(params);
+    const data = await s3.send(command);
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 module.exports = { uploadImage };

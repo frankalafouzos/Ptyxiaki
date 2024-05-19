@@ -2,25 +2,24 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 
-const UserSchema = new Schema({
+const OwnerSchema = new Schema({
     password: { type: String, required: true },
     firstname: { type: String, required: true },
     lastname: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    location: { type: String },
-    admin: { type: Boolean, default: false }
+    location: { type: String }
 });
 
 // Hash password before saving
-UserSchema.pre('save', async function(next) {
+OwnerSchema.pre('save', async function(next) {
     if (!this.isModified('password')) return next();
     this.password = await bcrypt.hash(this.password, 12);
     next();
 });
 
 // Method to check password validity
-UserSchema.methods.isValidPassword = async function(password) {
+OwnerSchema.methods.isValidPassword = async function(password) {
     return await bcrypt.compare(password, this.password);
 };
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('Owner', OwnerSchema);

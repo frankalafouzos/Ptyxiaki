@@ -24,12 +24,13 @@ const usersRouter = require('./routes/users');
 const restaurantsRouter = require('./routes/restaurant');
 const bookingsRouter = require('./routes/bookings');
 const imagesRouter = require('./routes/images');
-
+const ownersRouter = require('./routes/owners');
 
 app.use('/users', usersRouter);
 app.use('/restaurants', restaurantsRouter);
 app.use('/bookings', bookingsRouter);
 app.use('/images', imagesRouter);
+app.use('/owners', ownersRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`)

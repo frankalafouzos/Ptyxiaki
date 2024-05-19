@@ -4,6 +4,8 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './screens/Login';
 import SignUp from './screens/SignUp';
+import OwnerSignup from './screens/Owner/OwnerSignup';
+import OwnerSignIn from './screens/Owner/OwnerSignIn';
 import SearchBar from './components/SearchBar.component';
 import Home from './screens/Home';
 import Header from './components/Header.component';
@@ -35,6 +37,8 @@ function App() {
             <Route path="/login" element={<Login/>} />
             <Route path="/signout" element={<Login/>} />
             <Route path="/signup" element={<SignUp/>} />
+            <Route path="/owner-signup" element={<OwnerSignup/>} />
+            <Route path="/owner-signin" element={<OwnerSignIn/>} />
             <Route path="/search" element={<SearchBar/>} />
             <Route path="/restaurants" element={<Restaurants/>} />
             <Route path="/restaurant/:id" element={<RestaurantPage/>} />

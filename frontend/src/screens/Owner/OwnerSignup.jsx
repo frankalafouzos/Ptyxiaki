@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import '../css/Form.css';
+import '../../css/Form.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
-
-const SignUp = () => {
+const OwnerSignup = () => {
   const [formData, setFormData] = useState({
     firstname: '',
     lastname: '',
@@ -14,57 +12,45 @@ const SignUp = () => {
     location: '',
   });
 
-  
-  
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      
-      const response = await fetch('http://localhost:5000/users/signup', {
+      const response = await fetch('http://localhost:5000/owners/signup', { // Correct endpoint for owner signup
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          firstname: formData.firstname,
-          lastname: formData.lastname,
-          email: formData.email,
-          password: formData.password,
-          location: formData.location
-        })
+        body: JSON.stringify(formData),
       });
-  
+
       const data = await response.json();
-      
-      if (response.status === 400) {
+
+      if (!response.ok) { // Check for any non-2xx status codes
         throw new Error(data.message || 'Failed to sign up');
       }
-      console.log("Sign up successful")
+
       toast.success("Sign up successful", {
         position: "top-center",
         autoClose: 2000,
         onClose: () => window.location.replace('http://localhost:3000/login')
-      })
-      
-      
+      });
+
     } catch (error) {
       console.error('Signup error:', error);
       toast.error(error.message, {
         position: "top-center",
         autoClose: 2000,
-        onClose: () => window.location.replace('http://localhost:3000/signup')
-        });
+      });
     }
   };
 
-  function handleChange(e) {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  }
-
   return (
     <form onSubmit={handleSubmit} className="form">
-      <h1 className='title'>Sign up</h1>
+      <h1 className='title'>Register as an Owner</h1>
       <input
         name="firstname"
         value={formData.firstname}
@@ -102,12 +88,9 @@ const SignUp = () => {
         placeholder="Location"
       />
       <button type="submit">Sign Up</button>
-      <p className='pt-2'>Already registered? <a  href="/login">Log in</a></p>
-      <p>
-        Do you want to add your establishment? <a href="/owner-signup">Click here</a>
-      </p>
+      <p className='pt-2'>Already registered? <a href="/owner-signin">Log in</a></p>
     </form>
   );
 };
 
-export default SignUp;
+export default OwnerSignup;
