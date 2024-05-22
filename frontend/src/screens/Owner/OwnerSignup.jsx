@@ -19,7 +19,7 @@ const OwnerSignup = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/owners/signup', { // Correct endpoint for owner signup
+      const response = await fetch('http://localhost:5000/owners/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -29,14 +29,18 @@ const OwnerSignup = () => {
 
       const data = await response.json();
 
-      if (!response.ok) { // Check for any non-2xx status codes
+      if (!response.ok) {
         throw new Error(data.message || 'Failed to sign up');
       }
+
+      // Assuming the backend returns a token on signup
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', 'owner'); // Store the role in localStorage
 
       toast.success("Sign up successful", {
         position: "top-center",
         autoClose: 2000,
-        onClose: () => window.location.replace('http://localhost:3000/login')
+        onClose: () => window.location.replace('/owner-home') // Redirect to owner home page
       });
 
     } catch (error) {

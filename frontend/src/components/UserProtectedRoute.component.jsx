@@ -4,16 +4,16 @@ import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
-function ProtectedRoute({ element }) {
+function UserProtectedRoute({ element }) {
     const isAuthenticated = useIsAuthenticated();
     const location = useLocation();
     const [shouldRedirect, setShouldRedirect] = useState(false);
+    const role = localStorage.getItem('role');
 
     useEffect(() => {
-        if (!isAuthenticated() && !shouldRedirect) {
+        if (!isAuthenticated() || role !== 'user') {
             // Show the toast message
-            toast.error("You need to be authenticated to view this page!", {
+            toast.error("You need to be authenticated as a user to view this page!", {
                 position: "top-center",
                 autoClose: 1000
             });
@@ -26,9 +26,9 @@ function ProtectedRoute({ element }) {
             // Clear the timer if the component unmounts
             return () => clearTimeout(timer);
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, role]);
 
-    return isAuthenticated() ? element : (shouldRedirect && <Navigate to="/login" state={{ from: location }} replace />);
+    return isAuthenticated() && role === 'user' ? element : (shouldRedirect && <Navigate to="/login" state={{ from: location }} replace />);
 }
 
-export default ProtectedRoute;
+export default UserProtectedRoute;

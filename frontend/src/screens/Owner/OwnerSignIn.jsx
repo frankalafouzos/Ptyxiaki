@@ -14,15 +14,12 @@ const OwnerSignIn = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/owners/login', { // Correct endpoint for owner login
+      const response = await fetch('http://localhost:5000/owners/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
@@ -38,10 +35,13 @@ const OwnerSignIn = () => {
             email: formData.email
           }
         });
+
+        localStorage.setItem('role', 'owner'); // Store the role in localStorage
+
         toast.success("Sign in successful", {
           position: "top-center",
           autoClose: 2000,
-          onClose: () => window.location.replace('http://localhost:3000/')
+          onClose: () => window.location.replace('/owner-home') // Redirect to owner home page
         });
       } else {
         // Handle errors
