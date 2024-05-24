@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -24,16 +24,20 @@ import UserBookings from './components/UserBookings.component';
 import ThankYouForBooking from './screens/ThankYouForBooking';
 import EditBooking from './screens/EditBooking';
 import OwnerHome from './screens/Owner/OwnerHome';
+// import AddRestaurant from './screens/Owner/AddRestaurant';
+import OwnerDashboard from './screens/Owner/OwnerDashboard';
 import Logout from './components/Owner/Logout.component';
+import AuthContext, { AuthProvider } from './context/AuthContext';
 import './App.css';
 import './css/Header.css';
 
 function App() {
-  const role = localStorage.getItem('role');
-
+  const { auth } = useContext(AuthContext);
+  const role = localStorage.getItem('role') || 'user';
+  console.log('Role:', role);
   return (
     <Router>
-      {role === 'owner' ? <OwnerHeader /> : <Header />}
+      {auth.isAuthenticated && role === 'owner' ? <OwnerHeader /> : <Header />}
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -58,6 +62,8 @@ function App() {
 
           {/* Owner Protected Routes */}
           <Route path="/owner-home" element={<OwnerProtectedRoute element={<OwnerHome />} />} />
+          {/* <Route path="/owner-add-restaurant" element={<OwnerProtectedRoute element={<AddRestaurant />} />} /> */}
+          <Route path="/owner-dashboard" element={<OwnerProtectedRoute element={<OwnerDashboard />} />} />
         </Routes>
       </main>
       <Footer />
@@ -65,4 +71,8 @@ function App() {
   );
 }
 
-export default App;
+export default () => (
+  <AuthProvider>
+    <App />
+  </AuthProvider>
+);

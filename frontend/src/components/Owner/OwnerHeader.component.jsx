@@ -34,7 +34,9 @@ const OwnerHeader = () => {
                 <>
                   <Button onClick={() => {
                     signout();
-                    window.location.href = "/owner-signin"
+
+                    localStorage.setItem('role', 'user');
+                    window.location.href = "/"
                   }}>
                     Sign out
                   </Button>

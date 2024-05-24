@@ -7,7 +7,8 @@ const OwnerSchema = new Schema({
     firstname: { type: String, required: true },
     lastname: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    location: { type: String }
+    location: { type: String },
+    restaurantsIds: [{ type: Schema.Types.ObjectId, ref: 'Restaurant' }]
 });
 
 // Hash password before saving

@@ -353,6 +353,13 @@ router.route("/edit/:id").post((req, res) => {
 });
 
 
+router.get('getbookings/:restaurantid', (req, res) => {
+  Booking.find({ restaurantid: req.params.restaurantid })
+    .then(bookings => res.json(bookings))
+    .catch(err => res.status(400).json('Error: ' + err));
+});
+
+
 
 
 module.exports = router;
