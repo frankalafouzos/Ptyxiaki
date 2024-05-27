@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { Bar, Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Dashboard = ({ restaurantId }) => {
+const Dashboard = ({ restaurantId, year = new Date().getFullYear() }) => {
     const [restaurant, setRestaurant] = useState(null);
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,8 +13,9 @@ const Dashboard = ({ restaurantId }) => {
         totalBookings: 0,
         totalGuests: 0,
         averageGuestsPerBooking: 0,
-        busiestHour: 0,
+        busiestHour: null,
         bookingsPerDay: {},
+        bookingsPerHour: Array(24).fill(0), // Initialize bookings per hour
     });
 
     useEffect(() => {
@@ -41,18 +41,24 @@ const Dashboard = ({ restaurantId }) => {
                 const data = await response.json();
                 console.log('Received bookings data:', data);
                 setBookings(data);
-                calculateStats(data);
             } catch (error) {
                 console.error("Error fetching bookings data:", error);
                 setError(`Error fetching bookings data: ${error.message}`);
             }
         };
 
-        const calculateStats = (bookings) => {
+        const calculateStats = async (bookings) => {
+            const filteredBookings = bookings.filter(booking => {
+                const bookingYear = new Date(booking.date).getFullYear();
+                return bookingYear === year;
+            });
+
             const totalBookings = bookings.length;
-            const totalGuests = bookings.reduce((sum, booking) => sum + booking.partySize, 0);
-            const averageGuestsPerBooking = totalGuests / totalBookings;
-            const bookingsPerDay = bookings.reduce((acc, booking) => {
+            const totalBookingsThisYear = filteredBookings.length;
+            const totalGuests = bookings.reduce((sum, booking) => sum + (booking.partySize || 0), 0);
+            const totalGuestsThisYear = filteredBookings.reduce((sum, booking) => sum + (booking.partySize || 0), 0);
+            const averageGuestsPerBooking = Math.round(totalBookingsThisYear ? (totalGuestsThisYear / totalBookingsThisYear) : 0);
+            const bookingsPerDay = filteredBookings.reduce((acc, booking) => {
                 const date = new Date(booking.date).toLocaleDateString();
                 if (!acc[date]) acc[date] = 0;
                 acc[date]++;
@@ -61,15 +67,23 @@ const Dashboard = ({ restaurantId }) => {
             const hours = Array(24).fill(0);
             bookings.forEach(booking => {
                 const hour = Math.floor(booking.startingTime / 60);
-                hours[hour]++;
+                if (hour >= 0 && hour < 24) {
+                    hours[hour]++;
+                }
             });
-            const busiestHour = hours.indexOf(Math.max(...hours));
+
+            console.log('Bookings per hour:', hours);
+
+            const maxBookings = Math.max(...hours);
+            const busiestHour = maxBookings > 0 ? hours.indexOf(maxBookings) : null;
+
             setStats({
                 totalBookings,
                 totalGuests,
                 averageGuestsPerBooking,
                 busiestHour,
                 bookingsPerDay,
+                bookingsPerHour: hours, // Store bookings per hour in state
             });
         };
 
@@ -77,6 +91,7 @@ const Dashboard = ({ restaurantId }) => {
             setLoading(true);
             await fetchRestaurantData();
             await fetchBookingData();
+            await calculateStats(bookings);
             setLoading(false);
         };
 
@@ -88,7 +103,12 @@ const Dashboard = ({ restaurantId }) => {
     if (!restaurant) return <Alert variant="warning">No restaurant data</Alert>;
 
     const bookingsPerDayData = {
-        labels: Object.keys(stats.bookingsPerDay),
+        labels: Object.keys(stats.bookingsPerDay).sort((a, b) => {
+            // Convert 'DD/MM/YYYY' to 'YYYY/MM/DD' for correct sorting
+            const [aDay, aMonth, aYear] = a.split('/');
+            const [bDay, bMonth, bYear] = b.split('/');
+            return new Date(`${aYear}-${aMonth}-${aDay}`) - new Date(`${bYear}-${bMonth}-${bDay}`);
+        }),
         datasets: [{
             label: 'Bookings per Day',
             data: Object.values(stats.bookingsPerDay),
@@ -102,18 +122,21 @@ const Dashboard = ({ restaurantId }) => {
         labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
         datasets: [{
             label: 'Bookings per Hour',
-            data: Array.from({ length: 24 }, (_, i) => stats.bookingsPerDay[i] || 0),
+            data: stats.bookingsPerHour,
             backgroundColor: 'rgba(153, 102, 255, 0.2)',
             borderColor: 'rgba(153, 102, 255, 1)',
             borderWidth: 1
         }]
     };
 
+    console.log('Busiest Hour:', stats.busiestHour);
+    console.log('Busiest Hour Data:', busiestHourData);
+
     return (
-        <Container>
+        <Container style={{backgroundColor:'#F5F5DC'}} className='Container'>
             <h1 className="my-4">Dashboard for {restaurant.name}</h1>
             <Row>
-                <Col md={4}>
+                <Col md={6}>
                     <Card className="mb-4">
                         <Card.Body>
                             <Card.Title>Total Bookings</Card.Title>
@@ -121,7 +144,7 @@ const Dashboard = ({ restaurantId }) => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={4}>
+                <Col md={6}>
                     <Card className="mb-4">
                         <Card.Body>
                             <Card.Title>Total Guests</Card.Title>
@@ -129,19 +152,19 @@ const Dashboard = ({ restaurantId }) => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={4}>
+                <Col md={6}>
                     <Card className="mb-4">
                         <Card.Body>
                             <Card.Title>Average Guests per Booking</Card.Title>
-                            <Card.Text>{stats.averageGuestsPerBooking.toFixed(2)}</Card.Text>
+                            <Card.Text>{stats.averageGuestsPerBooking.toFixed(0)}</Card.Text>
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={4}>
+                <Col md={6}>
                     <Card className="mb-4">
                         <Card.Body>
                             <Card.Title>Busiest Hour</Card.Title>
-                            <Card.Text>{stats.busiestHour}:00</Card.Text>
+                            <Card.Text>{stats.busiestHour !== null ? `${stats.busiestHour}:00` : 'N/A'}</Card.Text>
                         </Card.Body>
                     </Card>
                 </Col>
