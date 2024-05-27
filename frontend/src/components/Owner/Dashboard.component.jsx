@@ -41,62 +41,71 @@ const Dashboard = ({ restaurantId, year = new Date().getFullYear() }) => {
                 const data = await response.json();
                 console.log('Received bookings data:', data);
                 setBookings(data);
+                
             } catch (error) {
                 console.error("Error fetching bookings data:", error);
                 setError(`Error fetching bookings data: ${error.message}`);
             }
         };
 
-        const calculateStats = async (bookings) => {
-            const filteredBookings = bookings.filter(booking => {
-                const bookingYear = new Date(booking.date).getFullYear();
-                return bookingYear === year;
-            });
-
-            const totalBookings = bookings.length;
-            const totalBookingsThisYear = filteredBookings.length;
-            const totalGuests = bookings.reduce((sum, booking) => sum + (booking.partySize || 0), 0);
-            const totalGuestsThisYear = filteredBookings.reduce((sum, booking) => sum + (booking.partySize || 0), 0);
-            const averageGuestsPerBooking = Math.round(totalBookingsThisYear ? (totalGuestsThisYear / totalBookingsThisYear) : 0);
-            const bookingsPerDay = filteredBookings.reduce((acc, booking) => {
-                const date = new Date(booking.date).toLocaleDateString();
-                if (!acc[date]) acc[date] = 0;
-                acc[date]++;
-                return acc;
-            }, {});
-            const hours = Array(24).fill(0);
-            bookings.forEach(booking => {
-                const hour = Math.floor(booking.startingTime / 60);
-                if (hour >= 0 && hour < 24) {
-                    hours[hour]++;
-                }
-            });
-
-            console.log('Bookings per hour:', hours);
-
-            const maxBookings = Math.max(...hours);
-            const busiestHour = maxBookings > 0 ? hours.indexOf(maxBookings) : null;
-
-            setStats({
-                totalBookings,
-                totalGuests,
-                averageGuestsPerBooking,
-                busiestHour,
-                bookingsPerDay,
-                bookingsPerHour: hours, // Store bookings per hour in state
-            });
-        };
+        
 
         const fetchData = async () => {
             setLoading(true);
             await fetchRestaurantData();
             await fetchBookingData();
-            await calculateStats(bookings);
+            console.log('Stats:', stats);
             setLoading(false);
         };
 
         fetchData();
     }, [restaurantId]);
+
+    const calculateStats = async (bookings) => {
+        const filteredBookings = bookings.filter(booking => {
+            const bookingYear = new Date(booking.date).getFullYear();
+            return bookingYear === year;
+        });
+
+        const totalBookings = bookings.length;
+        const totalBookingsThisYear = filteredBookings.length;
+        const totalGuests = await bookings.reduce((sum, booking) => sum + (booking.partySize || 0), 0);
+        const totalGuestsThisYear = await filteredBookings.reduce((sum, booking) => sum + (booking.partySize || 0), 0);
+        const averageGuestsPerBooking = await Math.round(totalBookingsThisYear ? (totalGuestsThisYear / totalBookingsThisYear) : 0);
+        const bookingsPerDay = await filteredBookings.reduce((acc, booking) => {
+            const date = new Date(booking.date).toLocaleDateString();
+            if (!acc[date]) acc[date] = 0;
+            acc[date]++;
+            return acc;
+        }, {});
+        const hours = await Array(24).fill(0);
+        await bookings.forEach(booking => {
+            const hour = Math.floor(booking.startingTime / 60);
+            if (hour >= 0 && hour < 24) {
+                hours[hour]++;
+            }
+        });
+
+        console.log('Bookings per hour:', hours);
+
+        const maxBookings = Math.max(...hours);
+        const busiestHour = maxBookings > 0 ? hours.indexOf(maxBookings) : null;
+
+        setStats({
+            totalBookings,
+            totalGuests,
+            averageGuestsPerBooking,
+            busiestHour,
+            bookingsPerDay,
+            bookingsPerHour: hours, // Store bookings per hour in state
+        });
+    };
+
+    useEffect(() => {
+        if (bookings.length > 0) {
+            calculateStats(bookings);
+        }
+    }, [bookings]);
 
     if (loading) return <Spinner animation="border" />;
     if (error) return <Alert variant="danger">{error}</Alert>;

@@ -161,4 +161,20 @@ router.get("/getownerbyid", async (req, res) => {
   }
 });
 
+// router.get('/owner/restaurants', async (req, res) => {
+//   try {
+//       const ownerID = req.params.id; // Or use token to identify the owner
+//       const owner = await Owner.findOne({ _id: ownerID });
+
+//       if (!owner) {
+//           return res.status(404).json({ message: 'Owner not found' });
+//       }
+
+//       const restaurantIds = owner.restaurantsIds // Assuming Restaurant has an ownerId field
+//       res.json({ restaurantIds });
+//   } catch (error) {
+//       res.status(500).json({ message: error.message });
+//   }
+// });
+
 module.exports = router;
