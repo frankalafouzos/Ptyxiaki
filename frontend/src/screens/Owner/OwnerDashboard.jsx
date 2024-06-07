@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Dashboard from '../../components/Owner/Dashboard.component';
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { Col, Row } from "react-bootstrap";
+import '../../css/Dashboard.css';
+import {Link} from 'react-router-dom';
 
 const OwnerDashboard = () => {
     const authUser = useAuthUser();
@@ -58,12 +61,22 @@ const OwnerDashboard = () => {
     if (error) return <div>Error: {error}</div>;
 
     return (
-        <div>
-            <h1>Restaurants Dashboard</h1>
+        <div className='dashboard-container'>
+            <h1 className='dashboard-title'>Restaurants Dashboard</h1>
             {restaurantIds.length > 0 ? (
-                restaurantIds.map(id => (
-                    <Dashboard key={id} restaurantId={id} />
-                ))
+                <Row className="row">
+                {restaurantIds.map(id => (
+                    <Col key={id} sm={12} md={6} lg={6} xl={6} xxl={6}>
+                    <Link 
+                        key={id} 
+                        to={`http://localhost:3000/restaurant-dashboard/${id}`} 
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                    >
+                        <Dashboard key={id} restaurantId={id} />
+                    </Link>
+                    </Col>
+                ))}
+                </Row>
             ) : (
                 <div>No restaurants found for this owner.</div>
             )}

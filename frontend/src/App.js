@@ -24,8 +24,11 @@ import UserBookings from './components/UserBookings.component';
 import ThankYouForBooking from './screens/ThankYouForBooking';
 import EditBooking from './screens/EditBooking';
 import OwnerHome from './screens/Owner/OwnerHome';
-// import AddRestaurant from './screens/Owner/AddRestaurant';
+import AddRestaurant from './screens/Owner/AddRestaurant';
+import EditRestaurant from './screens/Owner/EditRestaurant';
 import OwnerDashboard from './screens/Owner/OwnerDashboard';
+import OwnerMyRestaurants from './screens/Owner/OwnerMyRestaurants';
+import RestaurantDashboard from './screens/Owner/RestaurantDashboard';
 import Logout from './components/Owner/Logout.component';
 import AuthContext, { AuthProvider } from './context/AuthContext';
 import './App.css';
@@ -64,6 +67,10 @@ function App() {
           <Route path="/owner-home" element={<OwnerProtectedRoute element={<OwnerHome />} />} />
           {/* <Route path="/owner-add-restaurant" element={<OwnerProtectedRoute element={<AddRestaurant />} />} /> */}
           <Route path="/owner-dashboard" element={<OwnerProtectedRoute element={<OwnerDashboard />} />} />
+          <Route path="/restaurant-dashboard/:id" element={<OwnerProtectedRoute element={<RestaurantDashboard />} />} />
+          <Route path="/owner-restaurants" element={<OwnerProtectedRoute element={<OwnerMyRestaurants />} />} />
+          <Route path="/owner-add-restaurant" element={<OwnerProtectedRoute element={<AddRestaurant />} />} />
+<Route path="/edit-restaurant/:id" element={<OwnerProtectedRoute element={<EditRestaurant />} />} />
         </Routes>
       </main>
       <Footer />

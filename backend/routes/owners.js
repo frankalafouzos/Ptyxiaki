@@ -2,6 +2,7 @@ const router = require("express").Router();
 let Owner = require("../models/restaurantOwner.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { set } = require("mongoose");
 
 // Get all owners
 router.route("/").get((req, res) => {
@@ -176,5 +177,31 @@ router.get("/getownerbyid", async (req, res) => {
 //       res.status(500).json({ message: error.message });
 //   }
 // });
+
+router.post("/addRestaurant", async (req, res) => {
+  try {
+    let { id, restaurantId } = req.body;
+    console.log(id);
+    if (!id || !restaurantId) {
+      return res.status(400).json({ message: 'ownerID and restaurantId are required' });
+    }
+    id = id.toString();
+    const owner = await Owner.findOne({ _id: id });
+    if (!owner) {
+      return res.status(404).json({ message: 'Owner not found' });
+    }
+    const restaurantIds = owner.restaurantsIds;
+    restaurantIds.push(restaurantId)
+    owner.restaurantsIds = restaurantIds;
+    result = await owner.updateOne({ _id: id },{$set : {restaurantsIds: restaurantIds}});
+    console.log(result);
+    if(!result) {
+      return res.status(404).json({ message: 'Restaurant not added' });
+    }
+    res.json({ message: 'Restaurant added successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = router;
