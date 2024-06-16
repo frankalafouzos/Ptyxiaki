@@ -1,57 +1,62 @@
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose")
-const cookieParser = require("cookie-parser");
+const mongoose = require('mongoose');
+const Restaurant = require('./models/restaurant.model');
+const Image = require('./models/images.model');
+const RestaurantCapacity = require('./models/restaurantCapacity.model');
+const Owner = require('./models/restaurantOwner.model');
+const { deleteImage } = require('./functions/s3-utils');
+require('dotenv').config();
 
-require("dotenv").config();
-
-const app = express();
-const port = process.env.PORT || 5000;
-
-const uri = process.env.ATLAS_URI;
-mongoose.connect(uri, { useNewUrlParser: true});
-const connection = mongoose.connection;
-connection.once('open', () => {
-console.log("MongoDB database connection established successfully");
-}) 
-
-app.use(cookieParser());
-
-app.use(cors());
-app.use(express.json());
-
-const Schema = mongoose.Schema;
-
-const BookingSchema = new Schema({
-    userid: String,
-    restaurantid: String,
-    date: Date,
-    startingTime: Number, //in minutes of the day
-    endingTime: Number, //in minutes of the day
-    partySize: Number,
-    phone: String,
-    duration: Number, //in minutes
-    tableCapacity: Number
-});
-
-const Booking = mongoose.model('Booking', BookingSchema);
-
-const oldUserId = '65c2b146e88cd065d885b41a';
-const newUserId = '6654cbc794e67433036dcaa7';
-
-async function updateUserId() {
-    try {
-        const result = await Booking.updateMany(
-            { userid: oldUserId },
-            { $set: { userid: newUserId } }
-        );
-
-        console.log(`Modified ${result.nModified} bookings.`);
-    } catch (err) {
-        console.error(err);
-    } finally {
-        mongoose.connection.close();
-    }
+// Ensure that the MONGO_URI is loaded correctly
+if (!process.env.ATLAS_URI) {
+  console.error('Error: ATLAS_URI is not defined in the environment variables.');
+  process.exit(1);
 }
 
-updateUserId();
+// Connect to MongoDB
+mongoose.connect(process.env.ATLAS_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', async () => {
+  console.log('Connected to the database');
+
+  try {
+    // Step 1: Find all "Test" restaurants
+    const testRestaurants = await Restaurant.find({ name: /Test/i });
+
+    for (const restaurant of testRestaurants) {
+      const { _id, imageID } = restaurant;
+
+      // Step 2: Delete related images from S3 and the database
+      const images = await Image.find({ ImageID: imageID });
+      for (const image of images) {
+        await deleteImage(image.Key);
+        await Image.findByIdAndDelete(image._id);
+      }
+
+      // Step 3: Delete related capacities from the database
+      await RestaurantCapacity.findOneAndDelete({ restaurantid: _id });
+
+      // Step 4: Remove restaurant IDs from owner records
+      const owners = await Owner.find({ restaurantsIds: _id });
+      for (const owner of owners) {
+        owner.restaurantsIds = owner.restaurantsIds.filter(id => !id.equals(_id));
+        await owner.save();
+      }
+
+      // Step 5: Delete the "Test" restaurants from the database
+      await Restaurant.findByIdAndDelete(_id);
+
+      console.log(`Deleted Test restaurant: ${restaurant.name}`);
+    }
+
+    console.log('Cleanup complete');
+  } catch (error) {
+    console.error('Error during cleanup:', error);
+  } finally {
+    db.close();
+  }
+});

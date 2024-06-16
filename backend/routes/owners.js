@@ -162,43 +162,30 @@ router.get("/getownerbyid", async (req, res) => {
   }
 });
 
-// router.get('/owner/restaurants', async (req, res) => {
-//   try {
-//       const ownerID = req.params.id; // Or use token to identify the owner
-//       const owner = await Owner.findOne({ _id: ownerID });
-
-//       if (!owner) {
-//           return res.status(404).json({ message: 'Owner not found' });
-//       }
-
-//       const restaurantIds = owner.restaurantsIds // Assuming Restaurant has an ownerId field
-//       res.json({ restaurantIds });
-//   } catch (error) {
-//       res.status(500).json({ message: error.message });
-//   }
-// });
-
+// Add restaurant to owner's array of restaurant IDs
 router.post("/addRestaurant", async (req, res) => {
   try {
     let { id, restaurantId } = req.body;
-    console.log(id);
+    console.log('Owner ID:', id); // Logging the ID for debugging
+
     if (!id || !restaurantId) {
       return res.status(400).json({ message: 'ownerID and restaurantId are required' });
     }
+
     id = id.toString();
-    const owner = await Owner.findOne({ _id: id });
+    const owner = await Owner.findById(id);
+    restaurantId = restaurantId.toString();
     if (!owner) {
       return res.status(404).json({ message: 'Owner not found' });
     }
-    const restaurantIds = owner.restaurantsIds;
-    restaurantIds.push(restaurantId)
-    owner.restaurantsIds = restaurantIds;
-    result = await owner.updateOne({ _id: id },{$set : {restaurantsIds: restaurantIds}});
-    console.log(result);
-    if(!result) {
-      return res.status(404).json({ message: 'Restaurant not added' });
-    }
-    res.json({ message: 'Restaurant added successfully' });
+
+    // Add the restaurantId to the owner's restaurantsIds array
+    owner.restaurantsIds.push(restaurantId);
+
+    // Save the updated owner document
+    const updatedOwner = await owner.save();
+
+    res.json({ message: 'Restaurant added successfully', updatedOwner });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

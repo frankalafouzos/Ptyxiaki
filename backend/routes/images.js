@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const upload = require('../middlewares/upload-middleware');
 const { uploadImage } = require('../functions/s3-utils');
+const Image = require('../models/images.model'); 
 
 router.route('/upload').post(upload.single('image'), (req, res) => {
   uploadImage(req.file)

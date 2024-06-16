@@ -15,35 +15,27 @@
     margin-bottom: 5%;
   }
 
-  .form div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    
-    width: 80%;
-  }
-
-  .form div label {
+  .form  label {
     font-size: 1.2rem;
     margin-bottom: 10px;
   }
   
-  .form div input {
-    width: 100%;
+  .form  input {
+    width: 80%;
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #ddd;
     border-radius: 4px;
   }
-  .form div textarea {
-    width: 100%;
+  .form  textarea {
+    width: 80%;
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #ddd;
     border-radius: 4px;
   }
-  .form div select {
-    width: 100%;
+  .form  select {
+    width: 80%;
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #ddd;

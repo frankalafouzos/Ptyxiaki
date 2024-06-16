@@ -4,7 +4,7 @@ import 'chart.js/auto';
 import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Dashboard = ({ restaurantId, year = new Date().getFullYear() }) => {
+const Dashboard = ({ restaurantId, year = new Date().getFullYear(), from }) => {
     const [restaurant, setRestaurant] = useState(null);
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -47,8 +47,6 @@ const Dashboard = ({ restaurantId, year = new Date().getFullYear() }) => {
                 setError(`Error fetching bookings data: ${error.message}`);
             }
         };
-
-        
 
         const fetchData = async () => {
             setLoading(true);
@@ -107,7 +105,14 @@ const Dashboard = ({ restaurantId, year = new Date().getFullYear() }) => {
         }
     }, [bookings]);
 
-    if (loading) return <Spinner animation="border" />;
+    if (loading) {
+        return (
+          <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+            <Spinner animation="border" />
+          </div>
+        );
+      }
+      
     if (error) return <Alert variant="danger">{error}</Alert>;
     if (!restaurant) return <Alert variant="warning">No restaurant data</Alert>;
 
@@ -178,16 +183,19 @@ const Dashboard = ({ restaurantId, year = new Date().getFullYear() }) => {
                     </Card>
                 </Col>
             </Row>
-            <Row>
-                <Col md={6} className="mb-4">
-                    <h3>Bookings per Day</h3>
-                    <Bar data={bookingsPerDayData} />
-                </Col>
-                <Col md={6} className="mb-4">
-                    <h3>Bookings per Hour</h3>
-                    <Line data={busiestHourData} />
-                </Col>
-            </Row>
+
+            {from == 'restaurant-dashboard' && (
+                <Row>
+                    <Col md={6} className="mb-4">
+                        <h3>Bookings per Day</h3>
+                        <Bar data={bookingsPerDayData} />
+                    </Col>
+                    <Col md={6} className="mb-4">
+                        <h3>Bookings per Hour</h3>
+                        <Line data={busiestHourData} />
+                    </Col>
+                </Row>
+            )}
         </Container>
     );
 };

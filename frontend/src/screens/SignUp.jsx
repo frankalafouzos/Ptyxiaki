@@ -65,6 +65,7 @@ const SignUp = () => {
   return (
     <form onSubmit={handleSubmit} className="form">
       <h1 className='title'>Sign up</h1>
+      
       <input
         name="firstname"
         value={formData.firstname}

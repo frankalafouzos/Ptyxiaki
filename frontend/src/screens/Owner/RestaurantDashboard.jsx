@@ -6,7 +6,7 @@ const RestaurantDashboard = () => {
     const { id } = useParams();   
     return (
         <div>
-            <Dashboard restaurantId={id} />
+            <Dashboard restaurantId={id} from={"restaurant-dashboard"} />
         </div>
     );
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import RestaurantForm from '../../components/Owner/RestaurantForm.component';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../../css/RestaurantAdd-Edit.css';
 
 const AddRestaurant = () => {
   const handleSubmit = async (formData) => {
