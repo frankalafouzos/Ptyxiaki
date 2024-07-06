@@ -1,0 +1,57 @@
+.imageUploader {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.imageList {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  width: 100% !important;
+  margin: 0 !important; /* Ensure no extra margin around the row */
+  padding: 0 !important; /* Ensure no extra padding around the row */
+}
+
+.imageItem {
+  position: relative !important;
+  padding: 5px !important; /* Ensure some padding to prevent overlap */
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  background-color: #f8f8f8 !important;
+}
+
+.image {
+  width: 100% !important;
+  height: auto !important; /* Adjust as needed */
+  object-fit: cover !important;
+  border-radius: 4px !important;
+}
+
+.removeBtn {
+  position: absolute !important;
+  top: 5px !important;
+  right: 5px !important;
+  background: rgba(255, 0, 0, 0.7) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  width: 30px !important;
+  height: 30px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+  transition: background 0.3s ease !important;
+}
+
+.removeBtn:hover {
+  background: rgba(255, 0, 0, 1) !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5) !important;
+}

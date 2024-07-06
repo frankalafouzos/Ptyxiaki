@@ -6,10 +6,30 @@ const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/cl
 const Restaurant = require('../models/restaurant.model');
 const Image = require('../models/images.model');
 const RestaurantCapacity = require('../models/restaurantCapacity.model');
+const Owner = require('../models/restaurantOwner.model')
 const { Types: { ObjectId } } = require('mongoose');
 const { uploadImage, deleteImage } = require('../functions/s3-utils');
 
 const upload = multer({ storage: multer.memoryStorage() });
+
+const extractFileName = (url) => {
+  const parts = url.split('/');
+  return parts[parts.length - 1];
+};
+
+// router.post('/ChangeStatusOfAllRestaurants', async (req, res) => {
+//   try {
+//     const restaurants = await Restaurant.find({});
+//     for (restaurant of restaurants) {
+//       restaurant.status = "Approved";
+//       await restaurant.save()
+//     }
+//     res.status(200).send('All restaurant statuses updated to Approved');
+//   } catch (error) {
+//     res.status(500).send('An error occurred');
+//   }
+// });
+
 
 router.route('/').get(async (req, res) => {
   let { page, itemsPerPage, sortField, sortOrder, categoryFilter, locationFilter, minPrice, maxPrice } = req.query;
@@ -30,7 +50,7 @@ router.route('/').get(async (req, res) => {
   try {
     const restaurants = await Restaurant.find(filters).sort(sort).skip((page - 1) * itemsPerPage).limit(itemsPerPage);
     const totalItems = await Restaurant.countDocuments(filters);
-    const images = await Image.find(); 
+    const images = await Image.find();
 
     res.json({ restaurants, images, totalPages: Math.ceil(totalItems / itemsPerPage) });
   } catch (err) {
@@ -47,12 +67,9 @@ router.route('/Restaurants', async (req, res) => {
 router.route('/:id').get(async (req, res) => {
   const id = new ObjectId(req.params.id);
 
-  console.log("In"); // Ensure this line is executed
-
   const restaurant = await Restaurant.findById(id);
-  const images = await Image.find({ "ImageID": restaurant.imageID });
+  const images = await Image.find({ ImageID: restaurant.imageID });
   if (!restaurant) {
-    console.log("In");
     res.status(404).json({ message: 'Restaurant not found' });
   } else {
     res.json({ restaurant, images });
@@ -79,27 +96,12 @@ router.post('/add', async (req, res) => {
     status: 'pending approval', // added status field
     owner
   });
-
   try {
     await newRestaurant.save();
+    console.log("Done")
     res.json(newRestaurant);
   } catch (err) {
     res.status(400).json('Error: ' + err);
-  }
-});
-
-// Upload image
-router.post('/upload', upload.single('image'), async (req, res) => {
-  try {
-    const result = await uploadImage(req.file);
-    const newImage = new Image({
-      ImageID: req.body.imageID,
-      link: result.Location,
-    });
-    await newImage.save();
-    res.send({ imageUrl: result.Location });
-  } catch (error) {
-    res.status(500).send(error);
   }
 });
 
@@ -147,6 +149,52 @@ router.post('/restaurant-capacities/add', async (req, res) => {
   } catch (err) {
     res.status(400).json('Error: ' + err);
   }
+});
+
+// Delete only the restaurant by ID
+router.delete('/:id', (req, res) => {
+  Restaurant.findByIdAndDelete(req.params.id)
+    .then(() => res.json('Restaurant deleted.'))
+    .catch(err => res.status(404).json('Error: ' + err));
+});
+
+// Delete a restaurant capacity by restaurant ID
+router.delete('/restaurant-capacities/:id', (req, res) => {
+  RestaurantCapacity.findOneAndDelete({ restaurantId: req.params.id })
+    .then(() => res.json('Restaurant capacity deleted.'))
+    .catch(err => res.status(404).json('Error: ' + err));
+});
+
+
+// Delete all restaurants info by ID
+router.post('/deleteAll/:id', async (req, res) => {
+  const id = new ObjectId(req.params.id);
+  const ownerId = new ObjectId(req.body.ownerId)
+
+
+  const restaurant = await Restaurant.findById(id);
+  const images = await Image.find({ ImageID: restaurant.imageID });
+
+  for (image of images) {
+    let response = await deleteImage(extractFileName(image.link))
+    let response_2 = await Image.deleteOne({ _id: image._id })
+    console.log(response + "/nResponse from Mongo: " + response_2)
+    console.log("ImageID for the image jst deleted: "+image.ImageID)
+  }
+
+  await RestaurantCapacity.deleteOne({ restaurantid: id })
+
+
+  const result = await Owner.updateOne(
+    { _id: ownerId },
+    { $pull: { restaurantsIds: restaurant._id } }
+  );
+  console.log(result)
+
+
+  Restaurant.findByIdAndDelete(id)
+    .then(() => res.json('Restaurant deleted.'))
+    .catch(err => res.status(404).json('Error: ' + err));
 });
 
 module.exports = router;

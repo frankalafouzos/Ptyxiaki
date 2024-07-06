@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../css/Form.css";
+import styles from "../css/Form.module.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
@@ -98,8 +98,8 @@ const EditProfile = () => {
     return <div>Loading...</div>;
   } else {
     return (
-      <form onSubmit={handleSubmit} className="form">
-        <h1 className="title">Edit Profile</h1>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <h1 className={styles.title}>Edit Profile</h1>
         <input
           name="firstname"
           value={formData.firstname}

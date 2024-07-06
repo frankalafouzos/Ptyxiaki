@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../css/Form.css";
+import styles from "../css/Form.module.css";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -63,8 +63,8 @@ function EditPassword() {
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="form">
-        <h1 className="title">Edit Password</h1>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <h1 className={styles.title}>Edit Password</h1>
         <div>
           <label htmlFor="currentPassword">Current Password:</label>
           <input

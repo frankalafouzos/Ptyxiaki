@@ -32,6 +32,7 @@ app.use('/bookings', bookingsRouter);
 app.use('/images', imagesRouter);
 app.use('/owners', ownersRouter);
 
+
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`)
 })

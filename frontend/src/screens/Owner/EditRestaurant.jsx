@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const EditRestaurant = () => {
   const { id } = useParams();
   const [restaurantData, setRestaurantData] = useState(null);
+  const [images, setImages] = useState(null);
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -17,6 +18,7 @@ const EditRestaurant = () => {
         }
         const data = await response.json();
         setRestaurantData(data.restaurant);
+        setImages(data.images)
       } catch (error) {
         toast.error(error.message, {
           position: 'top-center',
@@ -29,7 +31,7 @@ const EditRestaurant = () => {
 
   const handleSubmit = async (formData) => {
     try {
-      const response = await fetch(`http://localhost:5000/restaurants/${id}/edit`, {
+      const response = await fetch(`http://localhost:5000/restaurants/edit/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +56,7 @@ const EditRestaurant = () => {
     }
   };
 
-  return restaurantData ? <RestaurantForm restaurantData={restaurantData} handleSubmit={handleSubmit} /> : <div>Loading...</div>;
+  return restaurantData ? <RestaurantForm restaurantData={restaurantData} handleSubmit={handleSubmit} images={images}/> : <div>Loading...</div>;
 };
 
 export default EditRestaurant;

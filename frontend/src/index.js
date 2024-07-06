@@ -1,6 +1,5 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import ReactDOM from 'react-dom';
 import './index.css';
 import AuthProvider from 'react-auth-kit';
 import createStore from 'react-auth-kit/createStore';
@@ -25,11 +24,10 @@ const store = createStore({
 });
 
 root.render(
-  <React.StrictMode>
+  <>
     <ToastContainer />
     <AuthProvider store={store}>
       <App />
     </AuthProvider>
-  </React.StrictMode>,
- 
+  </>,
 );

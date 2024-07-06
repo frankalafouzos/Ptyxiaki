@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../css/Form.css";
+import styles from "../css/Form.module.css";
 import Form from "react-bootstrap/Form";
 import DateInputComponent from "../components/DatePicker.component";
 import { Button } from "react-bootstrap";
@@ -85,8 +85,8 @@ const MakeABooking = () => {
 
   return (
     <div>
-      <form className="form" onSubmit={handleSubmit}>
-        <h1 className="title">Make a Booking</h1>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <h1 className={styles.title}>Make a Booking</h1>
         <DateInputComponent onDateChange={handleDateChange} />
         <input
           type="number"

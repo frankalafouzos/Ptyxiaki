@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../../css/Form.css';
+import styles from '../../css/Form.module.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -53,8 +53,8 @@ const OwnerSignup = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form">
-      <h1 className='title'>Register as an Owner</h1>
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <h1 className={styles.title}>Register as an Owner</h1>
       <input
         name="firstname"
         value={formData.firstname}
