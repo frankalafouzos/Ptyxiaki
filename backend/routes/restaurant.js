@@ -197,4 +197,15 @@ router.post('/deleteAll/:id', async (req, res) => {
     .catch(err => res.status(404).json('Error: ' + err));
 });
 
+//Get restaurant capacities by restaurant ID
+router.get('/restaurant-capacities/:id', async (req, res) => {
+  try {
+    const restaurantId = req.params.id;
+    const capacities = await RestaurantCapacity.findOne({ restaurantid: restaurantId });
+    res.json(capacities);
+  } catch (err) {
+    res.status(400).json('Error: ' + err);
+  }
+});
+
 module.exports = router;

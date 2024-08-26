@@ -22,12 +22,14 @@ app.use(express.json());
 
 const usersRouter = require('./routes/users');
 const restaurantsRouter = require('./routes/restaurant');
+const pendingRestaurantsRouter = require('./routes/pendingApprovalRestaurants');
 const bookingsRouter = require('./routes/bookings');
 const imagesRouter = require('./routes/images');
 const ownersRouter = require('./routes/owners');
 
 app.use('/users', usersRouter);
 app.use('/restaurants', restaurantsRouter);
+app.use('/pendingRestaurants', pendingRestaurantsRouter);
 app.use('/bookings', bookingsRouter);
 app.use('/images', imagesRouter);
 app.use('/owners', ownersRouter);

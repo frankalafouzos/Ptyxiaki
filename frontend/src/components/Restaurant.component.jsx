@@ -2,18 +2,20 @@ import { Card, Carousel, Modal, Button } from "react-bootstrap";
 import React, { useState, useEffect } from 'react';
 import { fetchOwner } from '../scripts/fetchUser'; 
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-
 import { Link } from "react-router-dom";
 import Logo from "../imgs/Logo.png";
 
 const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashboard }) => {
   const [showModal, setShowModal] = useState(false);
   const authUser = useAuthUser();
-  const email = authUser.email;
+  const email = authUser ? authUser.email : null;
   const [loading, setLoading] = useState(true);
   const [Owner, setOwner] = useState(null);
+
   useEffect(() => {
-    fetchOwner(email, setLoading, setOwner);
+    if (email) {
+      fetchOwner(email, setLoading, setOwner);
+    }
   }, [email]);
 
   const getImagesForRestaurant = (Id) => {
@@ -22,7 +24,7 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
 
   const handleDelete = async () => {
     try {
-      const response = await fetch("http://localhost:5000/restaurants/deleteAll/"+restaurant._id, {
+      const response = await fetch("http://localhost:5000/restaurants/deleteAll/" + restaurant._id, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

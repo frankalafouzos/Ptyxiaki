@@ -10,6 +10,7 @@ import SearchBar from './components/SearchBar.component';
 import Home from './screens/Home';
 import Header from './components/Header.component';
 import OwnerHeader from './components/Owner/OwnerHeader.component';
+import AdminHeader from './components/Admin/AdminHeader.component';
 import Footer from './components/Footer.component';
 import Restaurants from './screens/Restaurants';
 import RestaurantPage from './screens/Restaurant';
@@ -37,10 +38,15 @@ import './css/Header.css';
 function App() {
   const { auth } = useContext(AuthContext);
   const role = localStorage.getItem('role') || 'user';
-  console.log('Role:', role);
   return (
     <Router>
-      {auth.isAuthenticated && role === 'owner' ? <OwnerHeader /> : <Header />}
+      {auth.isAuthenticated && role === 'owner' ? (
+          <OwnerHeader />
+        ) : auth.isAuthenticated && role === 'admin' ? (
+          <AdminHeader />
+        ) : (
+          <Header />
+      )}
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -70,7 +76,7 @@ function App() {
           <Route path="/restaurant-dashboard/:id" element={<OwnerProtectedRoute element={<RestaurantDashboard />} />} />
           <Route path="/owner-restaurants" element={<OwnerProtectedRoute element={<OwnerMyRestaurants />} />} />
           <Route path="/owner-add-restaurant" element={<OwnerProtectedRoute element={<AddRestaurant />} />} />
-<Route path="/edit-restaurant/:id" element={<OwnerProtectedRoute element={<EditRestaurant />} />} />
+          <Route path="/edit-restaurant/:id" element={<OwnerProtectedRoute element={<EditRestaurant />} />} />
         </Routes>
       </main>
       <Footer />

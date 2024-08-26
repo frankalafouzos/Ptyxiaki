@@ -38,16 +38,24 @@ const Login = () => {
             email: formData.email
           }
         });
-
-        localStorage.setItem('role', 'user'); // Store the role in localStorage
-
-        toast.success("Sign in successful", {
-          position: "top-center",
-          autoClose: 2000,
-          onClose: () => window.location.replace('/')
-        });
+        console.log(data.admin)
+        // Check if the user is an admin
+        if (data.admin) {
+          localStorage.setItem('role', 'admin'); // Store the role in localStorage
+          toast.success("Sign in successful", {
+            position: "top-center",
+            autoClose: 2000,
+            onClose: () => window.location.replace('/admin-dashboard') // Redirect to admin page
+          });
+        } else {
+          localStorage.setItem('role', 'user'); // Store the role in localStorage
+          toast.success("Sign in successful", {
+            position: "top-center",
+            autoClose: 2000,
+            onClose: () => window.location.replace('/')
+          });
+        }
       } else {
-        // Handle errors
         throw new Error(data.message || 'Failed to Authenticate');
       }
     } catch (error) {

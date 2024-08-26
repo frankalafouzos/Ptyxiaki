@@ -5,34 +5,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import '../../css/RestaurantAdd-Edit.css';
 
 const AddRestaurant = () => {
-  const handleSubmit = async (formData) => {
-    try {
-      const response = await fetch('http://localhost:5000/restaurants/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
 
-      if (!response.ok) {
-        throw new Error('Failed to add restaurant');
-      }
-
-      toast.success('Restaurant added successfully', {
-        position: 'top-center',
-        autoClose: 2000,
-      });
-
-    } catch (error) {
-      toast.error(error.message, {
-        position: 'top-center',
-        autoClose: 2000,
-      });
-    }
-  };
-
-  return <RestaurantForm handleSubmit={handleSubmit} />;
+  return <RestaurantForm screenType="add" />;
 };
 
 export default AddRestaurant;

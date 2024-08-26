@@ -10,8 +10,6 @@ const RestaurantSchema = new Schema({
   phone: String,
   email: String,
   description: String,
-  tables: Number,
-  seatsPerTable: Number,
   Bookingduration: Number,
   openHour: Number, // in minutes of the day
   closeHour: Number, // in minutes of the day

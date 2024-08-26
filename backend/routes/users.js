@@ -41,39 +41,43 @@ router.route("/editpassword").post(async (req, res) => {
 //Log in
 router.post('/login', async (req, res) => {
   try {
-    const { email, password} = req.body;
-    // console.log(req.body)
+    const { email, password } = req.body;
+
     // Check if user exists
     const existingUser = await User.findOne({ email });
-    let jwtToken=""
-    if(existingUser){
-      const result = await existingUser.isValidPassword(password)
-      console.log(result)
-      
-      if (!result){
-        console.log("error")
-        throw Error("Not authenticated")
-      }  
-      console.log(existingUser._id, existingUser.email)
-      
-      let id = existingUser._id
+
+    if (existingUser) {
+      const result = await existingUser.isValidPassword(password);
+
+      if (!result) {
+        throw Error("Not authenticated");
+      }
+
+      const id = existingUser._id;
       const jwtToken = jwt.sign(
         {
-          id: id, 
+          id: id,
           email: existingUser.email,
           exp: Math.floor(Date.now() / 1000) + (60 * 60) // Sets the expiration time to 1 hour from now
-        },  
+        },
         process.env.JWT_SECRET
-      );  
-      res.status(200).json({ message: 'User logged in successfully.', token: jwtToken });
-    }else{
-      throw Error("Email does not correspond to a user!")
-    }  
-    
+      );
+
+      // Include the admin status in the response
+      res.status(200).json({ 
+        message: 'User logged in successfully.', 
+        token: jwtToken,
+        isAdmin: existingUser.admin // Include this in the response
+      });
+    } else {
+      throw Error("Email does not correspond to a user!");
+    }
+
   } catch (error) {
     res.status(400).json({ message: error.message });
-  }  
-});  
+  }
+});
+
 
 
 // Sign Up

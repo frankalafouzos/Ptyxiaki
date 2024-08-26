@@ -3,26 +3,42 @@ import { toast } from 'react-toastify';
 import { fetchOwner } from '../../scripts/fetchUser'; 
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import ImageUploader from './ImageUploader.component';
+import listOfCities from '../../listOfCities';
 
 
-const RestaurantForm = ({ restaurantData, handleSubmit, ownerId, Images }) => {
+const RestaurantForm = ({ restaurantData, capacities,  handleSubmit, ownerId, screenType }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    price: '',
-    category: '',
-    location: '',
-    phone: '',
-    email: '',
-    description: '',
-    tablesForTwo: '',
-    tablesForFour: '',
-    tablesForSix: '',
-    tablesForEight: '',
-    Bookingduration: '',
-    openHour: '',
-    closeHour: '',
+    // name: '',
+    // price: '',
+    // category: '',
+    // location: '',
+    // phone: '',
+    // email: '',
+    // description: '',
+    // tablesForTwo: '',
+    // tablesForFour: '',
+    // tablesForSix: '',
+    // tablesForEight: '',
+    // Bookingduration: '',
+    // openHour: '',
+    // closeHour: '',
+    name: 'Test Restaurant',
+    price: '10',
+    category: 'Greek',
+    location: 'Elliniko',
+    phone: '6944885589',
+    email: 'frankyaek@gmail.com',
+    description: 'Test teest',
+    tablesForTwo: '2',
+    tablesForFour: '4',
+    tablesForSix: '6',
+    tablesForEight: '8',
+    Bookingduration: '90',
+    openHour: '09:00',
+    closeHour: '22:00',
   });
 
+  const sortedCities = listOfCities.sort((a, b) => a.localeCompare(b));
   const [images, setImages] = useState([]);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [deletedImages, setDeletedImages] = useState([]);
@@ -41,9 +57,14 @@ const RestaurantForm = ({ restaurantData, handleSubmit, ownerId, Images }) => {
       if (restaurantData) {
         setFormData({
           ...restaurantData,
+        tablesForTwo: capacities.tablesForTwo,
+        tablesForFour: capacities.tablesForFour,
+        tablesForSix: capacities.tablesForSix,
+        tablesForEight: capacities.tablesForEight,
           openHour: minutesToTime(restaurantData.openHour),
           closeHour: minutesToTime(restaurantData.closeHour),
         });
+        console.log("Capacities: ", capacities);
         const imagesResponse = await fetch(`http://localhost:5000/images/getRestaurantImages/${restaurantData.imageID}`, {
           method: 'GET'
         });
@@ -55,6 +76,7 @@ const RestaurantForm = ({ restaurantData, handleSubmit, ownerId, Images }) => {
     
           // Assuming imagesData is an array of image objects
           setImages(imagesData); // Set the fetched images into state
+          console.log('Images:', images);
         } else {
           console.error('Failed to fetch images:', imagesResponse.statusText);
         }
@@ -68,26 +90,20 @@ const RestaurantForm = ({ restaurantData, handleSubmit, ownerId, Images }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setUploadedImages([...uploadedImages, ...files]);
-    console.log('Uploaded files:', files);
-  };
-
-  const handleImageDelete = (imageId) => {
-    console.log('Deleting image with ID:', imageId);
-    setDeletedImages([...deletedImages, imageId]);
-    setImages(images.map(image => {
-      if (image._id === imageId) {
-        return { ...image, isDeleted: true };
-      }
-      return image;
-    }));
-  };
-
-  const onSubmit = async (e) => {
+  
+  const onSubmitAdd = async (e) => {
     e.preventDefault();
+    if (restaurantData) {
+      const updatedRestaurantData = {
+        ...formData,
+        openHour: timeToMinutes(formData.openHour),
+        closeHour: timeToMinutes(formData.closeHour),
+        imageID,
+        _id: restaurantData._id,
+      };
+
+      
+    }
     console.log('Submitting restaurant data...');
     let restaurantId;
     ownerId = Owner._id;
@@ -140,49 +156,55 @@ const RestaurantForm = ({ restaurantData, handleSubmit, ownerId, Images }) => {
 
       console.log('Restaurant capacity added for restaurant ID:', restaurantId);
 
-      const uploadedImageUrls = [];
-      for (const image of uploadedImages) {
-        const imageFormData = new FormData();
-        imageFormData.append('image', image);
+      const uploadImages = async (uploadedImages, restaurantData) => {
+        if (!Array.isArray(uploadedImages) || uploadedImages.length === 0) {
+          console.log('No images to upload');
+          return;
+        }
       
-        console.log(`Calling => http://localhost:5000/images/upload/${restaurantData.imageID}`);
+        if (!restaurantData || !restaurantData.imageID) {
+          console.log('Invalid restaurant data');
+          return;
+        }
       
-        try {
-          const imageResponse = await fetch(`http://localhost:5000/images/upload/${restaurantData.imageID}`, {
-            method: 'POST',
-            body: imageFormData,
-          });
+        console.log('Starting image upload process');
+        const uploadedImageUrls = [];
+        let i = 1;  // Initialize order value here
       
-          if (!imageResponse.ok) {
-            throw new Error('Failed to upload image');
+        for (const image of uploadedImages) {
+          const imageFormData = new FormData();
+          imageFormData.append('image', image);
+      
+          // Assigning order if not present
+          const order = image.order || i;
+          console.log(`Calling => http://localhost:5000/images/upload/${restaurantData.imageID}?order=${order}`);
+      
+          try {
+            const imageResponse = await fetch(`http://localhost:5000/images/upload/${restaurantData.imageID}?order=${order}`, {
+              method: 'POST',
+              body: imageFormData,
+            });
+      
+            if (!imageResponse.ok) {
+              throw new Error('Failed to upload image');
+            }
+      
+            const imageData = await imageResponse.json();
+            uploadedImageUrls.push(imageData.imageUrl);
+            console.log('Image uploaded:', imageData.imageUrl);
+          } catch (error) {
+            console.error('Error uploading image:', error);
+            // Handle error as needed
           }
       
-          const imageData = await imageResponse.json();
-          uploadedImageUrls.push(imageData.imageUrl);
-          console.log('Image uploaded:', imageData.imageUrl);
-        } catch (error) {
-          console.error('Error uploading image:', error);
-          // Handle error as needed
+          i++;  // Increment the order for the next image
         }
-      }
+      };
       
 
+      await uploadImages(uploadedImages, restaurantData);
+
       console.log('Images uploaded for restaurant ID:', restaurantId);
-
-      const updateResponse = await fetch(`http://localhost:5000/restaurants/edit/${restaurantId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ imageID: newImageID, images: uploadedImageUrls }),
-      });
-
-      if (!updateResponse.ok) {
-        throw new Error('Failed to update restaurant with image links');
-      }
-
-      console.log('Restaurant updated with images for restaurant ID:', restaurantId);
-      console.log('Adding restaurant to owner with ID:', ownerId);
 
       const addRestaurantToOwnerResponse = await fetch('http://localhost:5000/owners/addRestaurant', {
         method: 'POST',
@@ -219,8 +241,116 @@ const RestaurantForm = ({ restaurantData, handleSubmit, ownerId, Images }) => {
     }
   };
 
+  const onSubmitEdit = async (e) => {
+    e.preventDefault();
+    if (restaurantData) {
+      const updatedRestaurantData = {
+        name: formData.name,
+        price: formData.price,
+        category: formData.category,
+        location: formData.location,
+        phone: formData.phone,
+        email: formData.email,
+        description: formData.description,
+        Bookingduration: formData.Bookingduration,
+        openHour: timeToMinutes(formData.openHour),
+        closeHour: timeToMinutes(formData.closeHour),
+        ApplicationCategory: 'Edit',
+        ExistingRestaurantId: restaurantData._id,
+        status: 'pending approval',
+        owner: Owner._id,
+      };
+
+      const response = await fetch('http://localhost:5000/pendingRestaurants/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedRestaurantData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit restaurant for approval');
+      }
+
+      const pendingApprovalData = await response.json();
+      const newImageID = pendingApprovalData.imageID;
+      setImageID(newImageID);
+      console.log('Restaurant data submitted for approval');
+
+      const capacityData = {
+        restaurantid: pendingApprovalData._id,
+        tablesForTwo: formData.tablesForTwo,
+        tablesForFour: formData.tablesForFour,
+        tablesForSix: formData.tablesForSix,
+        tablesForEight: formData.tablesForEight,
+      };
+
+      const capacityResponse = await fetch('http://localhost:5000/restaurants/restaurant-capacities/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(capacityData),
+      });
+
+      if (!capacityResponse.ok) {
+        throw new Error('Failed to add restaurant capacity');
+      }
+
+      console.log('Restaurant capacity added for pending restaurant ID:', pendingApprovalData._id);
+
+      const uploadImages = async (uploadedImages, pendingApprovalData) => {
+        if (!Array.isArray(uploadedImages) || uploadedImages.length === 0) {
+          console.log('No images to upload');
+          return;
+        }
+
+        if (!pendingApprovalData || !pendingApprovalData.imageID) {
+          console.log('Invalid pending approval data');
+          return;
+        }
+
+        console.log('Starting image upload process for pending approval');
+        let i = 1;
+        const uploadedImageUrls = [];
+        for (const image of uploadedImages) {
+          const imageFormData = new FormData();
+          imageFormData.append('image', image);
+          imageFormData.append('order', i);
+          i++;
+          console.log(`Calling => http://localhost:5000/images/upload/${pendingApprovalData.imageID}?order=`+i);
+
+          try {
+            const imageResponse = await fetch(`http://localhost:5000/images/upload/${pendingApprovalData.imageID}?order=${i}`, {
+              method: 'POST',
+              body: imageFormData,
+            });
+
+            if (!imageResponse.ok) {
+              throw new Error('Failed to upload image');
+            }
+
+            const imageData = await imageResponse.json();
+            uploadedImageUrls.push(imageData.imageUrl);
+            console.log('Image uploaded:', imageData.imageUrl);
+          } catch (error) {
+            console.error('Error uploading image:', error);
+            // Handle error as needed
+          }
+        }
+      };
+
+      await uploadImages(uploadedImages, pendingApprovalData);
+
+      console.log('Images uploaded for pending approval restaurant ID:', pendingApprovalData._id);
+
+      toast.success('Restaurant edit submitted for approval');
+    }
+  };
+
   return (
-    <form onSubmit={onSubmit} className="form">
+    <form  onSubmit={screenType === 'add' ? onSubmitAdd : onSubmitEdit} className="form">
       <h1 className="title">{restaurantData ? 'Edit Restaurant' : 'Add Restaurant'}</h1>
       <h3>Please add the information of your restaurant below:</h3>
       <div>
@@ -253,6 +383,7 @@ const RestaurantForm = ({ restaurantData, handleSubmit, ownerId, Images }) => {
           value={formData.category}
           onChange={handleChange}
           className="form-control"
+          style={{ height: '40px' }}
           required
         >
           <option value="">No category selected</option>
@@ -268,16 +399,23 @@ const RestaurantForm = ({ restaurantData, handleSubmit, ownerId, Images }) => {
       </div>
 
       <div>
-        <label>Location:</label>
-        <input
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-          placeholder="Location"
-          className="form-control"
-          required
-        />
-      </div>
+      <label htmlFor="location">Location:</label>
+      <select
+        name="location"
+        value={formData.location}
+        onChange={handleChange}
+        className="form-control"
+        style={{ height: '40px' }}
+        required
+      >
+        <option value="" disabled>Select a city</option>
+        {sortedCities.map((city, index) => (
+          <option key={index} value={city}>
+            {city}
+          </option>
+        ))}
+      </select>
+    </div>
       <div>
         <label>Phone:</label>
         <input
@@ -324,99 +462,99 @@ const RestaurantForm = ({ restaurantData, handleSubmit, ownerId, Images }) => {
             min="0"
             required
           />
-          </div>
-          <div className="table-capacity-input">
-            <label>Tables for 4:</label>
-            <input
-              name="tablesForFour"
-              value={formData.tablesForFour}
-              onChange={handleChange}
-              placeholder="Tables for 4"
-              className="form-control"
-              type="number"
-              min="0"
-              required
-            />
-          </div>
-          <div className="table-capacity-input">
-            <label>Tables for 6:</label>
-            <input
-              name="tablesForSix"
-              value={formData.tablesForSix}
-              onChange={handleChange}
-              placeholder="Tables for 6"
-              className="form-control"
-              type="number"
-              min="0"
-              required
-            />
-          </div>
-          <div className="table-capacity-input">
-            <label>Tables for 8:</label>
-            <input
-              name="tablesForEight"
-              value={formData.tablesForEight}
-              onChange={handleChange}
-              placeholder="Tables for 8"
-              className="form-control"
-              type="number"
-              min="0"
-              required
-            />
-          </div>
         </div>
-  
-        <div>
-          <label>Booking Duration (minutes):</label>
+        <div className="table-capacity-input">
+          <label>Tables for 4:</label>
           <input
-            name="Bookingduration"
-            value={formData.Bookingduration}
+            name="tablesForFour"
+            value={formData.tablesForFour}
             onChange={handleChange}
-            placeholder="Booking Duration (minutes)"
+            placeholder="Tables for 4"
             className="form-control"
+            type="number"
+            min="0"
             required
           />
         </div>
-        <div>
-          <label>Open Hour (HH:MM):</label>
+        <div className="table-capacity-input">
+          <label>Tables for 6:</label>
           <input
-            name="openHour"
-            value={formData.openHour}
+            name="tablesForSix"
+            value={formData.tablesForSix}
             onChange={handleChange}
-            placeholder="Open Hour"
-            type="time"
+            placeholder="Tables for 6"
             className="form-control"
+            type="number"
+            min="0"
             required
           />
         </div>
-        <div>
-          <label>Close Hour (HH:MM):</label>
+        <div className="table-capacity-input">
+          <label>Tables for 8:</label>
           <input
-            name="closeHour"
-            value={formData.closeHour}
+            name="tablesForEight"
+            value={formData.tablesForEight}
             onChange={handleChange}
-            placeholder="Close Hour"
-            type="time"
+            placeholder="Tables for 8"
             className="form-control"
+            type="number"
+            min="0"
             required
           />
         </div>
-        <ImageUploader initialImages={images}/>
-        <button type="submit">{restaurantData ? 'Save Changes' : 'Add Restaurant'}</button>
-      </form>
-    );
-  };
-  
-  // Utility functions for converting time formats
-  const minutesToTime = (minutes) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-  };
-  
-  const timeToMinutes = (time) => {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
-  
-  export default RestaurantForm;
+      </div>
+
+      <div>
+        <label>Booking Duration (minutes):</label>
+        <input
+          name="Bookingduration"
+          value={formData.Bookingduration}
+          onChange={handleChange}
+          placeholder="Booking Duration (minutes)"
+          className="form-control"
+          required
+        />
+      </div>
+      <div>
+        <label>Open Hour (HH:MM):</label>
+        <input
+          name="openHour"
+          value={formData.openHour}
+          onChange={handleChange}
+          placeholder="Open Hour"
+          type="time"
+          className="form-control"
+          required
+        />
+      </div>
+      <div>
+        <label>Close Hour (HH:MM):</label>
+        <input
+          name="closeHour"
+          value={formData.closeHour}
+          onChange={handleChange}
+          placeholder="Close Hour"
+          type="time"
+          className="form-control"
+          required
+        />
+      </div>
+      <ImageUploader setImages={setUploadedImages} initialImages={images} />
+      <button type="submit">{restaurantData ? 'Save Changes' : 'Add Restaurant'}</button>
+    </form>
+  );
+};
+
+// Utility functions for converting time formats
+const minutesToTime = (minutes) => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+};
+
+const timeToMinutes = (time) => {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+export default RestaurantForm;

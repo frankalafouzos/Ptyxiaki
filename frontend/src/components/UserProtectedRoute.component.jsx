@@ -28,7 +28,7 @@ function UserProtectedRoute({ element }) {
         }
     }, [isAuthenticated, role]);
 
-    return isAuthenticated() && role === 'user' ? element : (shouldRedirect && <Navigate to="/login" state={{ from: location }} replace />);
+    return isAuthenticated() && role === 'user' ? element : shouldRedirect ? <Navigate to="/login" state={{ from: location }} replace /> : null;
 }
 
 export default UserProtectedRoute;

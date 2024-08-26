@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const EditRestaurant = () => {
   const { id } = useParams();
   const [restaurantData, setRestaurantData] = useState(null);
+  const [capacities, setCapacities] = useState(null);
   const [images, setImages] = useState(null);
 
   useEffect(() => {
@@ -17,7 +18,13 @@ const EditRestaurant = () => {
           throw new Error('Failed to fetch restaurant');
         }
         const data = await response.json();
+        const capacitiesResponse = await fetch(`http://localhost:5000/restaurants/restaurant-capacities/${id}`);
+        if (!capacitiesResponse.ok) {
+          throw new Error('Failed to fetch restaurant capacities');
+        }
+        const capacitiyData = await capacitiesResponse.json();
         setRestaurantData(data.restaurant);
+        setCapacities(capacitiyData);
         setImages(data.images)
       } catch (error) {
         toast.error(error.message, {
@@ -56,7 +63,7 @@ const EditRestaurant = () => {
     }
   };
 
-  return restaurantData ? <RestaurantForm restaurantData={restaurantData} handleSubmit={handleSubmit} images={images}/> : <div>Loading...</div>;
+  return restaurantData ? <RestaurantForm restaurantData={restaurantData} capacities={capacities} handleSubmit={handleSubmit} images={images}/> : <div>Loading...</div>;
 };
 
 export default EditRestaurant;
