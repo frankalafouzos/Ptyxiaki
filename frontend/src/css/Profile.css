@@ -1,0 +1,27 @@
+  .hover-button{
+    font-size: 80% !important;
+  }
+  
+  .hover-button:hover::after{
+    content: "Turning your account to user account will remove your admin privileges. This action is not reversible by you but only by another admin.";
+
+    position: absolute;
+    
+    background-color: black;
+    
+    color: white;
+    
+    padding: 5px;
+    
+    border-radius: 4px;
+    
+    font-size: 10px;
+    
+    margin-top: 7%;
+    
+    left: 50%;
+    
+    transform: translateX(20%);
+  }
+
+  

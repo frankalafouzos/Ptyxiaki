@@ -1,3 +1,5 @@
+
+
 export const fetchUser = async (email, setLoading, setUser) => {
   if (process.env.NODE_ENV === 'development') {
     console.log("Fetching user data for email:", email);
@@ -58,10 +60,12 @@ export const fetchOwner = async (email, setLoading, setOwner) => {
       console.log("Received owner data:", data);
     }
 
-    setOwner(data);
+    await setOwner(data);
   } catch (error) {
     console.error(error);
   } finally {
     setLoading(false);
   }
 };
+
+

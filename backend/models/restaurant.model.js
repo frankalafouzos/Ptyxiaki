@@ -14,7 +14,8 @@ const RestaurantSchema = new Schema({
   openHour: Number, // in minutes of the day
   closeHour: Number, // in minutes of the day
   status: { type: String, default: 'pending approval' }, // added status field
-  owner: { type: Schema.Types.ObjectId, ref: 'Owner' }
+  owner: { type: Schema.Types.ObjectId, ref: 'Owner' },
+  hide: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('Restaurant', RestaurantSchema);

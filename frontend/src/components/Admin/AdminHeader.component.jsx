@@ -19,16 +19,16 @@ const OwnerHeader = () => {
     <header>
       <Navbar variant="white" expand="xl" collapseOnSelect>
         <Container content="fluid">
-          <Navbar.Brand href="/owner-home">
+          <Navbar.Brand href="/admin-home">
             <img id="logo" src={logo} alt="" />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
-              <Nav.Link href="/owner-dashboard">Dashboard</Nav.Link>
-              <Nav.Link href="/owner-profile">Profile</Nav.Link>
-              <Nav.Link href="/owner-restaurants">My Restaurants</Nav.Link> {/* Example owner-specific link */}
-              <Nav.Link href="/owner-add-restaurant">Add Establishment</Nav.Link> {/* Add Restaurant Link */}
+              <Nav.Link href="/admin-restaurants">Restaurants</Nav.Link>
+              <Nav.Link href="/admin-profile">Profile</Nav.Link>
+              <Nav.Link href="/admin-users">Users</Nav.Link> {/* Example owner-specific link */}
+              <Nav.Link href="/admin-administrator">Add Administrator</Nav.Link> {/* Add Restaurant Link */}
               {isAuthenticated() ? (
                 // Elements to render when owner is authenticated
                 <>
@@ -44,10 +44,10 @@ const OwnerHeader = () => {
               ) : (
                 // Elements to render when owner is not authenticated
                 <>
-                  <Nav.Link href="/owner-signup">
+                  <Nav.Link href="/signup">
                     <FaUserPen /> Sign Up
                   </Nav.Link>
-                  <Nav.Link href="/owner-signin">
+                  <Nav.Link href="/login">
                     <FaUser /> Sign In
                   </Nav.Link>
                 </>

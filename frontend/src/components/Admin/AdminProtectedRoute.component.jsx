@@ -11,28 +11,29 @@ function OwnerProtectedRoute({ element }) {
     const displayRef = useRef(false); // Use ref to track toast display status
 
     useEffect(() => {
-        if (!isAuthenticated() || localStorage.getItem('role') !== 'owner') {
+        if (!isAuthenticated() || localStorage.getItem('role') !== 'admin') {
             if (!displayRef.current) {
                 displayRef.current = true;
                 // Show the toast message
-                toast.error("You need to be authenticated as an owner to view this page!", {
+                toast.error("You need to be authenticated as an admin to view this page!", {
                     position: "top-center",
                     autoClose: 1000
                 });
+                
 
                 // Set a timeout to redirect after showing the message
                 setTimeout(() => {
-                    navigate('/owner-signin', { state: { from: location }, replace: true });
+                    navigate('/login', { state: { from: location }, replace: true });
                 }, 2000); // Delay of 2000 milliseconds (2 seconds)
             }
 
-            if( localStorage.getItem('role') === 'owner' ){
+            if( localStorage.getItem('role') === 'admin' ){
                 localStorage.getItem('role','user'); 
             }
         }
     }, [isAuthenticated, location, navigate]);
 
-    if (!isAuthenticated() || localStorage.getItem('role') !== 'owner') {
+    if (!isAuthenticated() || localStorage.getItem('role') !== 'admin') {
         return null;
     }
 

@@ -38,14 +38,14 @@ const Login = () => {
             email: formData.email
           }
         });
-        console.log(data.admin)
+        console.log(data.isAdmin)
         // Check if the user is an admin
-        if (data.admin) {
+        if (data.isAdmin) {
           localStorage.setItem('role', 'admin'); // Store the role in localStorage
           toast.success("Sign in successful", {
             position: "top-center",
             autoClose: 2000,
-            onClose: () => window.location.replace('/admin-dashboard') // Redirect to admin page
+            onClose: () => window.location.replace('/admin-home') // Redirect to admin page
           });
         } else {
           localStorage.setItem('role', 'user'); // Store the role in localStorage

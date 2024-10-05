@@ -5,10 +5,8 @@ import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { Link } from "react-router-dom";
 import Logo from "../imgs/Logo.png";
 
-const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashboard, fromAdminDashboard }) => {
+const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashboard }) => {
   const [showModal, setShowModal] = useState(false);
-  const [showAdminModal, setShowAdminModal] = useState(false);
-  const [showAdminHideModal, setShowAdminHideModal] = useState(false);
   const authUser = useAuthUser();
   const email = authUser ? authUser.email : null;
   const [loading, setLoading] = useState(true);
@@ -52,67 +50,8 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
     setShowModal(false); // Close the modal
   };
 
-
-  const handleAdminDelete = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/owners/delete-restaurant/" + restaurant._id, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (response.ok) {
-        console.log('Delete successful');
-        window.location.reload();
-        // Handle successful deletion (e.g., refresh data, show a message)
-      } else {
-        console.log('Delete failed');
-        // Handle deletion failure
-      }
-    } catch (error) {
-      console.error('An error occurred:', error);
-      // Handle error
-    }
-
-    setShowModal(false); // Close the modal
-  };
-
-
-  const handleAdminHide = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/admins/hide-restaurant/" + restaurant._id, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (response.ok) {
-        console.log('Delete successful');
-        window.location.reload();
-        // Handle successful deletion (e.g., refresh data, show a message)
-      } else {
-        console.log('Delete failed');
-        // Handle deletion failure
-      }
-    } catch (error) {
-      console.error('An error occurred:', error);
-      // Handle error
-    }
-
-    setShowModal(false); // Close the modal
-  };
-
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
-
-
-  const handleShowAdminModal = () => setShowAdminModal(true);
-  const handleCloseAdminModal = () => setShowAdminModal(false);
-
-  const handleShowAdminHideModal = () => setShowAdminHideModal(true);
-  const handleCloseAdminHideModal = () => setShowAdminHideModal(false);
 
   const restaurantImages = getImagesForRestaurant(restaurant.imageID);
 
@@ -164,7 +103,7 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
               Go to Restaurant's Page
             </Link>
           </div>
-          {!fromOwnerDashboard || !fromAdminDashboard && (
+          {!fromOwnerDashboard && (
             <Link to={`/booking/${restaurant._id}`} className="btn btn-success">
               Book a Table
             </Link>
@@ -178,17 +117,6 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
                 Edit
               </Link>
             </div>
-          )}
-          {fromAdminDashboard && (
-            <div className="w-50 h-100 d-flex justify-content-around">
-              <button onClick={handleShowAdminHideModal} className="h-100 btn btn-warning">
-              Hide
-            </button>
-            <button onClick={handleShowAdminModal} className="h-100 btn btn-danger">
-              Delete
-            </button>
-            
-          </div>
           )}
         </div>
       </Card.Body>
@@ -204,36 +132,6 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
             Cancel
           </Button>
           <Button variant="danger" onClick={handleDelete}>
-            Yes, Delete
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showAdminModal} onHide={handleCloseAdminModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this item?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseAdminModal}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleAdminDelete}>
-            Yes, Delete
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showAdminHideModal} onHide={handleCloseAdminHideModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Request</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to hide this restaurant?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseAdminHideModal}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleAdminHide}>
             Yes, Delete
           </Button>
         </Modal.Footer>
