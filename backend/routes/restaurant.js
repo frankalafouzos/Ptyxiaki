@@ -43,6 +43,7 @@ router.route('/').get(async (req, res) => {
   if (locationFilter) filters.location = locationFilter;
   if (minPrice) filters.price = { $gte: parseFloat(minPrice) };
   if (maxPrice) filters.price = { ...filters.price, $lte: parseFloat(maxPrice) };
+  filters.status = "Approved";
 
   let sort = {};
   if (sortField) sort[sortField] = sortOrder;
@@ -164,6 +165,21 @@ router.delete('/restaurant-capacities/:id', (req, res) => {
     .then(() => res.json('Restaurant capacity deleted.'))
     .catch(err => res.status(404).json('Error: ' + err));
 });
+
+//Delete status temporarily by changing the status to "Deleted"
+router.delete('/delete/:id', async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findById(req.params.id);
+    if (!restaurant) {
+      return res.status(404).json({ error: 'Restaurant not found' });
+    }
+    restaurant.status = "Deleted";
+    await restaurant.save();
+    res.json("Deleted");
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+})
 
 
 // Delete all restaurants info by ID

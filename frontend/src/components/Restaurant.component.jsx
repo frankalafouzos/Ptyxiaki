@@ -5,7 +5,7 @@ import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { Link } from "react-router-dom";
 import Logo from "../imgs/Logo.png";
 
-const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashboard, fromAdminDashboard }) => {
+const Restaurant = ({ restaurant, index, images}) => {
   const [showModal, setShowModal] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [showAdminHideModal, setShowAdminHideModal] = useState(false);
@@ -13,7 +13,7 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
   const email = authUser ? authUser.email : null;
   const [loading, setLoading] = useState(true);
   const [Owner, setOwner] = useState(null);
-
+  let role = localStorage.getItem('role')
   useEffect(() => {
     if (email) {
       fetchOwner(email, setLoading, setOwner);
@@ -26,7 +26,7 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
 
   const handleDelete = async () => {
     try {
-      const response = await fetch("http://localhost:5000/restaurants/deleteAll/" + restaurant._id, {
+      const response = await fetch("http://localhost:5000/restaurants/delete/" + restaurant._id, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
 
   const handleAdminDelete = async () => {
     try {
-      const response = await fetch("http://localhost:5000/owners/delete-restaurant/" + restaurant._id, {
+      const response = await fetch("http://localhost:5000/owners/delete/" + restaurant._id, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
       });
 
       if (response.ok) {
-        console.log('Delete successful');
+        console.log('Restaurant hidden!');
         window.location.reload();
         // Handle successful deletion (e.g., refresh data, show a message)
       } else {
@@ -101,7 +101,7 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
       // Handle error
     }
 
-    setShowModal(false); // Close the modal
+    setShowAdminHideModal(false); // Close the modal
   };
 
   const handleShowModal = () => setShowModal(true);
@@ -118,7 +118,7 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
 
   return (
     <Card className="Restaurant rounded">
-      <Link to={`/restaurant/${restaurant._id}${fromOwnerDashboard ? '?fromOwnerDashboard=true' : ''}`}>
+      <Link to={`/restaurant/${restaurant._id}`}>
         <Carousel fade variant="top" style={{ height: "25rem" }}>
           {restaurantImages.length > 0 ? (
             restaurantImages.map((img, idx) => (
@@ -145,7 +145,7 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
       </Link>
 
       <Card.Body>
-        <Link className="Link" to={`/restaurant/${restaurant._id}${fromOwnerDashboard ? '?fromOwnerDashboard=true' : ''}`}>
+        <Link className="Link" to={`/restaurant/${restaurant._id}`}>
           <Card.Title as="h3" className="restaurant-title">
             <strong>{restaurant.name}</strong>
           </Card.Title>
@@ -158,18 +158,18 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
         <div className="Buttons-container">
           <div className="h-25">
             <Link
-              to={`/restaurant/${restaurant._id}${fromOwnerDashboard ? '?fromOwnerDashboard=true' : ''}`}
+              to={`/restaurant/${restaurant._id}`}
               className="h-25 btn btn-primary"
             >
               Go to Restaurant's Page
             </Link>
           </div>
-          {!fromOwnerDashboard || !fromAdminDashboard && (
+          {role==="user" && (
             <Link to={`/booking/${restaurant._id}`} className="btn btn-success">
               Book a Table
             </Link>
           )}
-          {showEditButton && (
+          {role==="owner" && (
             <div className="w-50 h-100 d-flex justify-content-around">
               <button onClick={handleShowModal} className="h-100 btn btn-danger">
                 Delete
@@ -179,7 +179,7 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
               </Link>
             </div>
           )}
-          {fromAdminDashboard && (
+          {role==="admin" && (
             <div className="w-50 h-100 d-flex justify-content-around">
               <button onClick={handleShowAdminHideModal} className="h-100 btn btn-warning">
               Hide
@@ -233,8 +233,8 @@ const Restaurant = ({ restaurant, index, images, showEditButton, fromOwnerDashbo
           <Button variant="secondary" onClick={handleCloseAdminHideModal}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={handleAdminHide}>
-            Yes, Delete
+          <Button variant="warning" onClick={handleAdminHide}>
+            Yes, Hide
           </Button>
         </Modal.Footer>
       </Modal>

@@ -6,6 +6,8 @@ const bcrypt = require("bcrypt");
 const { nanoid } = require("nanoid");
 const jwt = require("jsonwebtoken");
 
+// /admins
+
 router.route("/changeRole").post(async(req, res) => {
     try {
       const email = req.body.email;
@@ -99,21 +101,47 @@ router.route("/editprofile").post(async (req, res) => {
   }
 });
 
-router.route("/delete-restaurant/:id").post(async (req, res) => {
+router.route("/hide-restaurant/:id").post(async (req, res) => {
   const RestaurantID = req.params.id
   try {
     const restaurant = await Restaurant.findOne({ id: RestaurantID });
     if (!restaurant) {
       return res.status(404).json({ error: 'Restaurant not found' });
     }
-    await restaurant.deleteOne();
-    console.log("Restaurant deleted!")
-    let user = await User.findOne({ restaurantsIds: restaurantId }).exec();
-    user.restaurantsIds.pull(restaurantId);
-    await user.save();
-
+    restaurant.status = "Hidden";
+    await restaurant.save();
+    res.json("Restaurant hidden!");
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+});
+
+
+router.route('/restaurants').get(async (req, res) => {
+  let { page, itemsPerPage, sortField, sortOrder, categoryFilter, locationFilter, minPrice, maxPrice } = req.query;
+
+  page = parseInt(page) || 1;
+  itemsPerPage = parseInt(itemsPerPage) || 12;
+  sortOrder = sortOrder === 'asc' ? 1 : -1;
+
+  let filters = {};
+  if (categoryFilter) filters.category = categoryFilter;
+  if (locationFilter) filters.location = locationFilter;
+  if (minPrice) filters.price = { $gte: parseFloat(minPrice) };
+  if (maxPrice) filters.price = { ...filters.price, $lte: parseFloat(maxPrice) };
+  filters.status = "Approved";
+
+  let sort = {};
+  if (sortField) sort[sortField] = sortOrder;
+
+  try {
+    const restaurants = await Restaurant.find(filters).sort(sort).skip((page - 1) * itemsPerPage).limit(itemsPerPage);
+    const totalItems = await Restaurant.countDocuments(filters);
+    const images = await Image.find();
+
+    res.json({ restaurants, images, totalPages: Math.ceil(totalItems / itemsPerPage) });
+  } catch (err) {
+    res.status(400).json('Error: ' + err);
   }
 });
 

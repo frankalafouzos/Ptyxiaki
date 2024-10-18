@@ -89,6 +89,7 @@ const Restaurants = () => {
                 restaurant={restaurant}
                 index={index}
                 images={images}
+                fromUsersDashboard={true}
               />
             </Col>
           ))}

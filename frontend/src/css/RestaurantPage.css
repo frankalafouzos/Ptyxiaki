@@ -94,3 +94,47 @@
     width: 13rem;
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.custom-modal .modal-dialog {
+    max-width: 500px;
+    border-radius: 12px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.15);
+  }
+  
+  .custom-modal-header {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+  }
+  
+  .custom-modal-header .modal-title {
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .custom-modal-body {
+    font-size: 1rem;
+    color: #555;
+    padding: 1.5rem;
+  }
+  
+  .custom-modal-footer {
+    background-color: #f1f1f1;
+    padding: 1.5rem;
+  }
+  
