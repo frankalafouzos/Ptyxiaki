@@ -61,15 +61,37 @@ import AdminEditPassword from './screens/Admin/AdminEditPassword';
 
 
 function App() {
+  const now = new Date();
   const { auth } = useContext(AuthContext);
-  const role = localStorage.getItem('role') || 'user';
+  let role = localStorage.getItem('role');
+  console.log(role)
+
+  // localStorage.removeItem('role');
+  
+  if (!role || role === 'owner' || role === 'admin' || role === 'user') {
+    const item = { role: role || "user", expiry: 0 };
+    role = localStorage.setItem("role", JSON.stringify(item));
+  }
+  if (typeof role === 'string') {
+    role = JSON.parse(role);
+  }
+  if(typeof role === 'object' && role !== null){
+    if (now.getTime() > role.expiry) {
+      const item = { role: role || "user", expiry: 0 };
+      role = localStorage.setItem("role", JSON.stringify(item));
+      role= {role: 'user', expiry: 0}
+    }
+  }
+  
   return (
     <Router>
-      {auth.isAuthenticated && role === 'owner' ? (
+      {auth.isAuthenticated && role.role === 'owner' ? (
           <OwnerHeader />
-        ) : auth.isAuthenticated && role === 'admin' ? (
+        ) : auth.isAuthenticated && role.role === 'admin' ? (
           <AdminHeader />
-        ) : (
+        ) : auth.isAuthenticated && role.role === 'user' ?(
+          <Header />
+      ):(
           <Header />
       )}
       <main>
@@ -95,24 +117,24 @@ function App() {
           <Route path="/editBooking/:id" element={<UserProtectedRoute element={<EditBooking />} />} />
 
           {/* Owner Protected Routes */}
-          <Route path="/owner-home" element={<OwnerProtectedRoute element={<OwnerHome />} />} />
-          <Route path="/owner-dashboard" element={<OwnerProtectedRoute element={<OwnerDashboard />} />} />
-          <Route path="/restaurant-dashboard/:id" element={<OwnerProtectedRoute element={<RestaurantDashboard />} />} />
-          <Route path="/owner-restaurants" element={<OwnerProtectedRoute element={<OwnerMyRestaurants />} />} />
-          <Route path="/owner-add-restaurant" element={<OwnerProtectedRoute element={<AddRestaurant />} />} />
-          <Route path="/edit-restaurant/:id" element={<OwnerProtectedRoute element={<EditRestaurant />} />} />
+          <Route path="/owner/home" element={<OwnerProtectedRoute element={<OwnerHome />} />} />
+          <Route path="/owner/dashboard" element={<OwnerProtectedRoute element={<OwnerDashboard />} />} />
+          <Route path="/owner/restaurant-dashboard/:id" element={<OwnerProtectedRoute element={<RestaurantDashboard />} />} />
+          <Route path="/owner/restaurants" element={<OwnerProtectedRoute element={<OwnerMyRestaurants />} />} />
+          <Route path="/owner/add-restaurant" element={<OwnerProtectedRoute element={<AddRestaurant />} />} />
+          <Route path="/owner/edit-restaurant/:id" element={<OwnerProtectedRoute element={<EditRestaurant />} />} />
           <Route path="/owner-profile" element={<OwnerProtectedRoute element={<OwnerProfile />} />} />
-          <Route path="/ownerEditPassword" element={<OwnerProtectedRoute element={<OwnerEditPassword />} />} />
-          <Route path="/ownerEditProfile" element={<OwnerProtectedRoute element={<OwnerEditProfile />} />} />
+          <Route path="/owner/EditPassword" element={<OwnerProtectedRoute element={<OwnerEditPassword />} />} />
+          <Route path="/owner/EditProfile" element={<OwnerProtectedRoute element={<OwnerEditProfile />} />} />
 
           {/* Admin Pages */}
-          <Route path="/admin-home" element={<AdminProtectedRoute element={<AdminHome />} />} />
-          <Route path="/admin-administrator" element={<AdminProtectedRoute element={<AdminAdministrator />} />} />
-          <Route path="/admin-profile" element={<AdminProtectedRoute element={<AdminProfile />} />} />
-          <Route path="/adminEditPassword" element={<AdminProtectedRoute element={<AdminEditPassword />} />} />
-          <Route path="/adminEditProfile" element={<AdminProtectedRoute element={<AdminEditProfile />} />} />
-          <Route path="/admin-users" element={<AdminProtectedRoute element={<AdminUsers />} />} />
-          <Route path="/admin-restaurants" element={<AdminProtectedRoute element={<AdminRestaurants />} />} />
+          <Route path="/admin" element={<AdminProtectedRoute element={<AdminHome />} />} />
+          <Route path="/admin/add-administrator" element={<AdminProtectedRoute element={<AdminAdministrator />} />} />
+          <Route path="/admin/profile" element={<AdminProtectedRoute element={<AdminProfile />} />} />
+          <Route path="/admin/EditPassword" element={<AdminProtectedRoute element={<AdminEditPassword />} />} />
+          <Route path="/admin/EditProfile" element={<AdminProtectedRoute element={<AdminEditProfile />} />} />
+          <Route path="/admin/users" element={<AdminProtectedRoute element={<AdminUsers />} />} />
+          <Route path="/admin/restaurants" element={<AdminProtectedRoute element={<AdminRestaurants />} />} />
 
 
 

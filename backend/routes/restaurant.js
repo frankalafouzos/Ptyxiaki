@@ -17,6 +17,8 @@ const extractFileName = (url) => {
   return parts[parts.length - 1];
 };
 
+
+//Not needed right now
 // router.post('/ChangeStatusOfAllRestaurants', async (req, res) => {
 //   try {
 //     const restaurants = await Restaurant.find({});
@@ -30,6 +32,39 @@ const extractFileName = (url) => {
 //   }
 // });
 
+
+// Get all unique locations
+router.get('/locations', async (req, res) => {
+  try {
+    const locations = await Restaurant.distinct('location');
+    res.json(locations);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching locations' });
+  }
+});
+
+// Get all unique categories
+router.get('/categories', async (req, res) => {
+  try {
+    const categories = await Restaurant.distinct('category');
+    res.json(categories);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching categories' });
+  }
+});
+
+// Get all unique status
+router.get('/status', async (req, res) => {
+  try {
+    const status = await Restaurant.distinct('status');
+    res.json(status);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching status' });
+  }
+});
 
 router.route('/').get(async (req, res) => {
   let { page, itemsPerPage, sortField, sortOrder, categoryFilter, locationFilter, minPrice, maxPrice } = req.query;
@@ -59,11 +94,11 @@ router.route('/').get(async (req, res) => {
   }
 });
 
-router.route('/Restaurants', async (req, res) => {
-  const restaurants = await Restaurant.find({});
-  const images = await Image.find()
-  res.render('Restaurants', { restaurants, images, cities })
-});
+// router.route('/Restaurants', async (req, res) => {
+//   const restaurants = await Restaurant.find({});
+//   const images = await Image.find()
+//   res.render('Restaurants', { restaurants, images, cities })
+// });
 
 router.route('/:id').get(async (req, res) => {
   const id = new ObjectId(req.params.id);

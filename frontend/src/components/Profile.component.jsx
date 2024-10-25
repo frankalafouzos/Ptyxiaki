@@ -11,7 +11,7 @@ const Profile = () => {
   const [user, setUser] = useState(null); // Initialize user as null
   const authUser = useAuthUser();
   const email = authUser.email;
-  const role = localStorage.getItem('role');
+  const role = JSON.parse(localStorage.getItem('role')).role;
   const [isUser, setIsUser] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);

@@ -36,7 +36,15 @@ const OwnerSignIn = () => {
           }
         });
 
-        localStorage.setItem('role', 'owner'); // Store the role in localStorage
+        const now = new Date();
+        console.log('Inside owner')
+
+        const item = {
+          role: 'owner',
+          expiry: now.getTime() + 4 * 60 * 60 * 1000 , // current time + ttl
+        };
+
+        localStorage.setItem('role', JSON.stringify(item)); // Store the role in localStorage
 
         toast.success("Sign in successful", {
           position: "top-center",

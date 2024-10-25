@@ -6,8 +6,11 @@ const CustomModal = ({
   show, 
   handleClose, 
   handleDelete, 
+  title="Confirm Action User", // Default modal title
+  body="Are you sure you want to perform this action?", // Default modal body
   cancelLabel = "Cancel", // Default cancel button label
-  confirmLabel = "Confirm" // Default confirm button label
+  confirmLabel = "Confirm", // Default confirm button label
+  isWarning = false // Default to false for normal confirmations
 }) => {
   const [closing, setClosing] = useState(false); // State to manage close animation
   const [isVisible, setIsVisible] = useState(show); // State to manage modal visibility
@@ -36,19 +39,19 @@ const CustomModal = ({
     <div className={`custom-modal-overlay ${closing ? 'custom-modal-overlay-close' : ''}`}>
       <div className={`custom-modal ${closing ? 'custom-modal-close-transition' : ''}`}>
         <div className="custom-modal-header">
-          <h5 className="custom-modal-title">Confirm Action</h5> 
+          <h5 className="custom-modal-title">{title}</h5>  {/* Dynamic Modal Title */}
           <button className="custom-modal-close" onClick={handleModalClose}>
             &times;
           </button>
         </div>
         <div className="custom-modal-body">
-          Are you sure you want to perform this action?
+          {body} {/* Dynamic Modal Body */}
         </div>
         <div className="custom-modal-footer">
           <Button variant="secondary" onClick={handleModalClose}>
             {cancelLabel} {/* Dynamic Cancel Button Label */}
           </Button>
-          <Button variant="danger" onClick={handleDelete}>
+          <Button variant={isWarning ? 'warning' : 'danger'} onClick={handleDelete}>
             {confirmLabel} {/* Dynamic Confirm Button Label */}
           </Button>
         </div>

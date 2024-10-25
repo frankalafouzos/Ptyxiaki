@@ -126,6 +126,21 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
 }
 
+.custom-modal-footer .btn-warning {
+    background-color: #faad14;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2.5rem;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.custom-modal-footer .btn-warning:hover {
+    background-color: #fba700; /* Darker red on hover */
+    transform: translateY(-3px) scale(1.05); /* Lift button and slight enlargement */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
+}
+
 /* Slide-up Animation */
 @keyframes slideUp {
     from {

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchOwner } from '../scripts/fetchUser'; 
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { Link } from "react-router-dom";
+import CustomModal from "./CustomModal";
 import Logo from "../imgs/Logo.png";
 
 const Restaurant = ({ restaurant, index, images}) => {
@@ -13,9 +14,9 @@ const Restaurant = ({ restaurant, index, images}) => {
   const email = authUser ? authUser.email : null;
   const [loading, setLoading] = useState(true);
   const [Owner, setOwner] = useState(null);
-  let role = localStorage.getItem('role')
+  let role = JSON.parse(localStorage.getItem('role')).role;
   useEffect(() => {
-    if (email) {
+    if (email && role === "owner") {
       fetchOwner(email, setLoading, setOwner);
     }
   }, [email]);
@@ -194,50 +195,68 @@ const Restaurant = ({ restaurant, index, images}) => {
       </Card.Body>
       <>
 
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this item?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            Yes, Delete
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <CustomModal
+        show={showModal}
+        handleClose={handleCloseModal}
+        handleDelete={handleDelete}
+        title="Confirm Delete"
+        body="Are you sure you want to delete this Restaurant?"
+        cancelLabel="No, Go Back"
+        confirmLabel="Yes, Delete"
+      />
 
-      <Modal show={showAdminModal} onHide={handleCloseAdminModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this item?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseAdminModal}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleAdminDelete}>
-            Yes, Delete
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <CustomModal
+        show={showAdminModal}
+        handleClose={handleCloseAdminModal}
+        handleDelete={handleAdminDelete}
+        title="Confirm Delete"
+        body="Are you sure you want to delete this Restaurant?"
+        cancelLabel="No, Go Back"
+        confirmLabel="Yes, Delete"
+      />
 
-      <Modal show={showAdminHideModal} onHide={handleCloseAdminHideModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Request</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to hide this restaurant?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseAdminHideModal}>
-            Cancel
-          </Button>
-          <Button variant="warning" onClick={handleAdminHide}>
-            Yes, Hide
-          </Button>
-        </Modal.Footer>
-      </Modal>
+
+
+
+
+      <CustomModal
+        show={showAdminHideModal}
+        handleClose={handleCloseAdminHideModal}
+        handleDelete={handleAdminHide}
+        title="Confirm Request"
+        body="Are you sure you want to hide this restaurant?"
+        cancelLabel="No, Go Back"
+        confirmLabel="Yes, Hide"
+        isWarning={true}
+      />
+
+
+
+
+
+
+
+      {/* <CustomModal
+        show={showAdminModal}
+        handleClose={handleCloseAdminModal}
+        handleDelete={handleAdminDelete}
+        title="Remove User"
+        body="Are you sure you want to delete this restaurant from the system?"
+        cancelLabel="No, Go Back"
+        confirmLabel="Delete Restaurant"
+      />
+
+
+      <CustomModal
+        show={showAdminHideModal}
+        handleClose={handleCloseAdminHideModal}
+        handleDelete={handleAdminHide}
+        title="Confirm Request"
+        body="Are you sure you want to hide this restaurant?"
+        cancelLabel="No, Go Back"
+        confirmLabel="Yes, Hide"
+        isWarning={true}
+      /> */}
     </>
     </Card>
   );

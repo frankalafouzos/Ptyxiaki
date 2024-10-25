@@ -29,6 +29,28 @@ router.get('/popular', async (req, res) => {
     }
 });
 
+
+router.post('/admin', async (req, res) => {
+    const { query } = req.body; // This will hold the search term entered by the user
+    const regex = new RegExp(query, 'i'); // Create a case-insensitive regular expression
+
+    try {
+        const restaurants = await Restaurant.find({
+            $or: [
+                { name: { $regex: regex } }, // Search by restaurant name
+                { category: { $regex: regex } }, // Search by category
+                { location: { $regex: regex } }, // Search by location
+            ]
+        });
+
+        // Optionally limit results or paginate them
+        res.status(200).json({ success: true, restaurants });
+    } catch (error) {
+        console.error("Error during search:", error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
 module.exports = router;
 
 

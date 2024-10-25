@@ -13,7 +13,7 @@ const RestaurantPage = () => {
   const [error, setError] = useState(null);
   const { id } = useParams();
   const location = useLocation();
-  let role = localStorage.getItem("role");
+  let role = JSON.parse(localStorage.getItem("role"));
   const [maxImageHeight, setMaxImageHeight] = useState(0);
   const imageRefs = useRef([]);
   const [showAdminModal, setShowAdminModal] = useState(false);
@@ -42,6 +42,30 @@ const RestaurantPage = () => {
         setLoading(false);
       });
   }, [id]);
+
+  useEffect(() => {
+    // Send the request to increment visitCounter
+    if (role.role === "user") {
+      const incrementVisitCounter = async () => {
+        try {
+          const response = await fetch(`http://localhost:5000/restaurants/${restaurant._id}/incrementVisitCounter`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          if (!response.ok) {
+            console.error('Error incrementing visit counter');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      };
+
+      // Call the function to increment the visit counter when the restaurant is rendered
+      incrementVisitCounter();
+    }
+  }, [restaurant._id]);
 
   useEffect(() => {
     if (images.length === 0) return;
@@ -130,6 +154,7 @@ const RestaurantPage = () => {
     <>
       <div className="restaurant-container">
         <div className="content-layout">
+
           <div className="carousel-container">
             <div className="image-wrapper">
               {images.map((img, idx) => (
@@ -141,25 +166,28 @@ const RestaurantPage = () => {
                   alt={`Restaurant ${idx}`}
                 />
               ))}
+              <div className="button-wrapper">
+                <button className="carousel-control prev" onClick={prevImage}>
+                  &lt;
+                </button>
+                <button className="carousel-control next" onClick={nextImage}>
+                  &gt;
+                </button>
+              </div>
             </div>
-            <button className="carousel-control prev" onClick={prevImage}>
-              &lt;
-            </button>
-            <button className="carousel-control next" onClick={nextImage}>
-              &gt;
-            </button>
+
           </div>
 
           <div className="info-container">
             <div className="info-top">
-              <h1 id="name">{restaurant.name}</h1>
-              <h2 className="info">
+              <h2>{restaurant.name}</h2>
+              <h5 className="info">
                 Average price per person: {restaurant.price}
-              </h2>
-              <h3 className="info">About us: {restaurant.description}</h3>
-              <h4 className="info">Category: {restaurant.category}</h4>
-              <h4 className="info">Location: {restaurant.location}</h4>
-              <h4 className="info">
+              </h5><br />
+              <h6 className="info">About us: {restaurant.description}</h6><br />
+              <h7 className="info">Category: {restaurant.category}</h7><br />
+              <h7 className="info">Location: {restaurant.location}</h7><br />
+              <h7 className="info">
                 Phone number:
                 <a
                   className="text-decoration-none text-info"
@@ -167,8 +195,8 @@ const RestaurantPage = () => {
                 >
                   {restaurant.phone}
                 </a>
-              </h4>
-              <h4 className="info">
+              </h7><br />
+              <h7 className="info">
                 Email:
                 <a
                   className="text-decoration-none text-info"
@@ -176,10 +204,10 @@ const RestaurantPage = () => {
                 >
                   {restaurant.email}
                 </a>
-              </h4>
+              </h7><br /><br /><br />
             </div>
             <div className="booking-button">
-              {role === "user" && (
+              {role.role === "user" && (
                 <Link
                   to={`/booking/${restaurant._id}`}
                   className="btn btn-outline-success "
@@ -187,7 +215,7 @@ const RestaurantPage = () => {
                   Book a Table
                 </Link>
               )}
-              {role === "owner" && (
+              {role.role === "owner" && (
                 <Link
                   to={`/edit-restaurant/${restaurant._id}`}
                   className="btn btn-outline-warning "
@@ -195,8 +223,8 @@ const RestaurantPage = () => {
                   Edit
                 </Link>
               )}
-              {role === "admin" && (
-                <div className="" style={{ display: "flex", flexDirection: "column" }}>
+              {role.role === "admin" && (
+                <div className="" style={{ display: "flex", flexDirection: "column", overflow: "hidden", height: "auto" }}>
                   <button
                     onClick={handleShowAdminHideModal}
                     className="btn btn-outline-warning mt-4"
@@ -218,17 +246,29 @@ const RestaurantPage = () => {
 
 
       <CustomModal
-  show={showAdminModal}
-  handleClose={handleCloseAdminModal}
-  handleDelete={handleAdminDelete}
-  title="Remove User"
-  body="Are you sure you want to remove this user from the system?"
-  cancelLabel="No, Go Back"
-  confirmLabel="Remove User"
-/>
+        show={showAdminModal}
+        handleClose={handleCloseAdminModal}
+        handleDelete={handleAdminDelete}
+        title="Remove User"
+        body="Are you sure you want to delete this restaurant from the system?"
+        cancelLabel="No, Go Back"
+        confirmLabel="Delete Restaurant"
+      />
 
 
-      <Modal show={showAdminHideModal} onHide={handleCloseAdminHideModal}>
+      <CustomModal
+        show={showAdminHideModal}
+        handleClose={handleCloseAdminHideModal}
+        handleDelete={handleAdminHide}
+        title="Confirm Request"
+        body="Are you sure you want to hide this restaurant?"
+        cancelLabel="No, Go Back"
+        confirmLabel="Yes, Hide"
+        isWarning={true}
+      />
+
+
+      {/* <Modal show={showAdminHideModal} onHide={handleCloseAdminHideModal}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Request</Modal.Title>
         </Modal.Header>
@@ -241,7 +281,7 @@ const RestaurantPage = () => {
             Yes, Hide
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Modal> */}
     </>
 
   );

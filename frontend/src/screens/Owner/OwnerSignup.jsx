@@ -35,7 +35,15 @@ const OwnerSignup = () => {
 
       // Assuming the backend returns a token on signup
       localStorage.setItem('token', data.token);
-      localStorage.setItem('role', 'owner'); // Store the role in localStorage
+      const now = new Date();
+        console.log('Inside owner')
+
+        const item = {
+          role: 'owner',
+          expiry: now.getTime() + 14400000 , // current time + ttl
+        };
+
+        localStorage.setItem('role', JSON.stringify(item)); // Store the role in localStorage
 
       toast.success("Sign up successful", {
         position: "top-center",

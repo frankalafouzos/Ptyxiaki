@@ -1,7 +1,7 @@
 .Container {
     background-color: #fff;
     padding: 2% 0%;
-    width: 50%;
+    width: 60%;
     margin: 50px auto;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -9,6 +9,41 @@
     flex-direction: column;
     align-items: center;
   }
+
+  /* Media query for smaller screens */
+@media (max-width: 768px) {
+  .Container {
+      width: 90%; /* Change the width to 90% for smaller screens */
+  }
+}
+
+  .table-container {
+    max-width: 100%; /* Ensure the table doesn't overflow the container */
+    overflow-x: auto; 
+  }
+
+  table {
+    width: 100%; /* Make the table take up the full width of the container */
+    table-layout:auto; /* Adjusts table cells automatically */
+}
+
+
+  .view-all {
+    background-color: #007bff;
+    font-size: small;
+    color: white;
+    padding: 0.5rem 2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 1rem;
+    width: auto;
+    white-space: nowrap;
+    display: block; /* Ensure the button behaves as a block element */
+    margin-left: auto; /* Align the button to the right */
+  }
+
+  
   
   .Container button:hover {
     background-color: #0056b3;

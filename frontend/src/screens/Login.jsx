@@ -41,14 +41,28 @@ const Login = () => {
         console.log(data.isAdmin)
         // Check if the user is an admin
         if (data.isAdmin) {
-          localStorage.setItem('role', 'admin'); // Store the role in localStorage
+          const now = new Date();
+          console.log('Inside admin')
+          // `ttl` is the time to live in milliseconds
+          const item = {
+              role: 'admin',
+              expiry: now.getTime() + 14400000 , // current time + ttl
+          };
+          localStorage.setItem('role', JSON.stringify(item)); // Store the role in localStorage
           toast.success("Sign in successful", {
             position: "top-center",
             autoClose: 2000,
-            onClose: () => window.location.replace('/admin-home') // Redirect to admin page
+            onClose: () => window.location.replace('/admin') // Redirect to admin page
           });
         } else {
-          localStorage.setItem('role', 'user'); // Store the role in localStorage
+          const now = new Date();
+          console.log('Inside user')
+          // `ttl` is the time to live in milliseconds
+          const item = {
+              role: 'user',
+              expiry: now.getTime() + 14400000, // current time + ttl
+          };
+          localStorage.setItem('role', JSON.stringify(item)); // Store the role in localStorage
           toast.success("Sign in successful", {
             position: "top-center",
             autoClose: 2000,

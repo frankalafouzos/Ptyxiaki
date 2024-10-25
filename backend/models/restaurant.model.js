@@ -29,6 +29,6 @@ const RestaurantSchema = new Schema({
     type: Number,
     default: 0
   }
-});
+}, { timestamps: { createdAt: 'createdAt' } });
 
 module.exports = mongoose.model('Restaurant', RestaurantSchema);

@@ -19,23 +19,23 @@ const OwnerHeader = () => {
     <header>
       <Navbar variant="white" expand="xl" collapseOnSelect>
         <Container content="fluid">
-          <Navbar.Brand href="/admin-home">
+          <Navbar.Brand href="/admin">
             <img id="logo" src={logo} alt="" />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
-              <Nav.Link href="/admin-restaurants">Restaurants</Nav.Link>
-              <Nav.Link href="/admin-profile">Profile</Nav.Link>
-              <Nav.Link href="/admin-users">Users</Nav.Link> {/* Example owner-specific link */}
-              <Nav.Link href="/admin-administrator">Add Administrator</Nav.Link> {/* Add Restaurant Link */}
+              <Nav.Link href="/admin/restaurants">Restaurants</Nav.Link>
+              <Nav.Link href="/admin/profile">Profile</Nav.Link>
+              <Nav.Link href="/admin/users">Users</Nav.Link> 
+              <Nav.Link href="/admin/add-administrator">Add Administrator</Nav.Link>
               {isAuthenticated() ? (
                 // Elements to render when owner is authenticated
                 <>
                   <Button onClick={() => {
                     signout();
 
-                    localStorage.setItem('role', 'user');
+                    localStorage.setItem('role', '');
                     window.location.href = "/"
                   }}>
                     Sign out

@@ -95,94 +95,99 @@ const UserBookings = ({ display }) => {
     <div className="Container">
       <h2 className="title">Your Bookings</h2>
       {bookings.length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>Location</th>
-              <th>Duration (min)</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th></th>
-              <th></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings
-              .slice(0, display && display !== "" ? display : bookings.length)
-              .map((booking) => {
-                const today = new Date();
-                const bookingDate = new Date(booking.date);
-                bookingDate.setHours(Math.floor(booking.startingTime / 60), booking.startingTime % 60, 0, 0);
-                const isAfterToday = bookingDate >= today;
+        <div className="table-container">
+          <table className="table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Location</th>
+                <th>Duration (min)</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings
+                .slice(0, display && display !== "" ? display : bookings.length)
+                .map((booking) => {
+                  const today = new Date();
+                  const bookingDate = new Date(booking.date);
+                  bookingDate.setHours(Math.floor(booking.startingTime / 60), booking.startingTime % 60, 0, 0);
+                  const isAfterToday = bookingDate >= today;
 
-                return (
-                  <tr key={booking._id}>
-                    <td></td>
-                    <td>{booking.restaurantName}</td>
-                    <td>{booking.duration}</td>
-                    <td>{bookingDate.toLocaleDateString("en-GB")}</td>
-                    <td>{booking.formattedStartingTime}</td>
-                    <td>
+                  return (
+                    <tr key={booking._id}>
+                      <td></td>
+                      <td>{booking.restaurantName}</td>
+                      <td>{booking.duration}</td>
+                      <td>{bookingDate.toLocaleDateString("en-GB")}</td>
+                      <td>{booking.formattedStartingTime}</td>
+                      <td>
+                        {isAfterToday && (
+                          <button
+                            onClick={() =>
+                              (window.location = `/editbooking/${booking._id}`)
+                            }
+                            id="editButton"
+                          >
+                            Edit
+                          </button>
+                        )}
+                        {!isAfterToday && <span>Cannot edit</span>}
+                      </td>
+
                       {isAfterToday && (
-                        <button
-                          onClick={() =>
-                            (window.location = `/editbooking/${booking._id}`)
-                          }
-                          id="editButton"
-                        >
-                          Edit
-                        </button>
+                        <>
+                          <td>
+                            <button
+                              className="btn btn-danger"
+                              onClick={() => cancelBooking(booking._id, bookingDate)}
+                              id="cancelButton"
+                            >
+                              Cancel
+                            </button>
+                          </td>
+                        </>
                       )}
-                      {!isAfterToday && <span>Cannot edit</span>}
-                    </td>
 
-                    {isAfterToday && (
-                      <>
+                      {!isAfterToday && (
                         <td>
                           <button
-                            className="btn btn-danger"
-                            onClick={() => cancelBooking(booking._id, bookingDate)}
-                            id="cancelButton"
+                            className="btn btn-warning"
+                            onClick={() => deleteBooking(booking._id)}
+                            id="deleteButton"
                           >
-                            Cancel
+                            Delete
                           </button>
                         </td>
-                      </>
-                    )}
-
-                    {!isAfterToday && (
-                      <td>
-                        <button
-                          className="btn btn-warning"
-                          onClick={() => deleteBooking(booking._id)}
-                          id="deleteButton"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-            {display ? (
-              <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>
-                  <button onClick={() => (window.location = "/userBookings")}>
-                    View All
-                  </button>
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
+                      )}
+                      <td></td>
+                    </tr>
+                  );
+                })}
+              {display ? (
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    <button className="view-all" onClick={() => (window.location = "/userBookings")}>
+                      <div>View All</div>
+                    </button>
+                  </td>
+                  
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <p>No bookings found. {email}</p>
       )}

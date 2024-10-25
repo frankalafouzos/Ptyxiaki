@@ -9,9 +9,12 @@ function OwnerProtectedRoute({ element }) {
     const location = useLocation();
     const navigate = useNavigate();
     const displayRef = useRef(false); // Use ref to track toast display status
-
+    let role = localStorage.getItem('role')
+    
+    role= JSON.parse(role)
+    console.log(role.role)
     useEffect(() => {
-        if (!isAuthenticated() || localStorage.getItem('role') !== 'admin') {
+        if (!isAuthenticated() || role.role !== 'admin') {
             if (!displayRef.current) {
                 displayRef.current = true;
                 // Show the toast message
@@ -33,7 +36,7 @@ function OwnerProtectedRoute({ element }) {
         }
     }, [isAuthenticated, location, navigate]);
 
-    if (!isAuthenticated() || localStorage.getItem('role') !== 'admin') {
+    if (!isAuthenticated() || role.role !== 'admin') {
         return null;
     }
 

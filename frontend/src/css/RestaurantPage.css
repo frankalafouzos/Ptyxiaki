@@ -1,140 +1,210 @@
-/* RestaurantPage.css */
+/* Main container */
 .restaurant-container {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 3rem auto;
-    max-width: 80%;
-    height: 50rem;
+    max-width: 90%;
     padding: 1.25rem;
     text-align: center;
     background-color: #f9f9f9;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    /* min-height: 100vh;  */
 }
 
-/* ... existing h1, .info, and link styles ... */
-
+/* Content layout */
 .content-layout {
     display: flex;
+    /* flex: 1; */
     gap: 1.25rem;
-    align-items: start;
-    height: 100%; /* Ensure the layout fills the parent container */
+    align-items:center; /* Stretch to fill the container */
+    justify-content: space-between;
+    height: 100%; /* Full height */
 }
 
+/* Carousel container */
 .carousel-container {
-    flex: 1; /* Take up half of the content layout space */
-    position: relative;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%; /* Match the height of the content layout */
+    align-items: center; /* Vertically center the content */
+    justify-content: center; /* Horizontally center the content */
+    width: 70%;
+    position: relative;
+    height:max-content;
+    padding: 1rem;
+    background-color: #f0f0f0;
+    /* box-sizing: border-box; */
 }
 
+/* Image wrapper */
 .image-wrapper {
-    width: 100%;
-    height: 100%; /* Fill the height of the carousel container */
-    position: relative;
-    background-color: #f0f0f0; /* Light grey background */
     display: flex;
-    align-items: center;
+    align-items: center; /* Vertically center the image */
     justify-content: center;
+    
+    height:max-content;
+    /* width: 100%;
+    height: 100%;  */
 }
 
+/* Carousel image */
 .carousel-image {
-    max-width: 100%;
-    max-height: 100%;
-    display: none; /* Hide all images initially */
-    object-fit: contain; /* Keep the image's aspect ratio */
+    width: 60%;
+    height: 60%;
+    object-fit: cover; /* Cover container without distorting */
+    display: none; /* Hidden by default */
 }
 
 .carousel-image.active {
-    display: block; /* Show only active image */
+    display: block; /* Show the active image */
 }
 
-.info-container {
-    flex: 1;
+
+/* Carousel buttons */
+.button-wrapper {
+    position: absolute;
+    top: 50%;
+    width: 100%;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: left;
-    padding: 10px;
+    justify-content: space-between;
+    transform: translateY(-50%);
+    padding: 0 15px;
 }
 
 .carousel-control {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.3);
     color: white;
     border: none;
     cursor: pointer;
     padding: 10px;
-    border-radius: 5px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.prev {
-    left: 10px;
+.carousel-control:hover {
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
-.next {
-    right: 10px;
+/* Info container */
+.info-container {
+    flex: 1;
+    max-width: 50%; /* Takes up to 50% of the width */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Spread content */
+    text-align: left;
+    padding: 10px;
 }
 
-
-
-.booking-button{
-    
-    margin-bottom: 0;
-    align-self: flex-end; /* Align to the right of the flex container */
-    padding-bottom: 3.5rem;
-    
+/* Booking button */
+.booking-button {
+    margin-top: auto; /* Align button at the bottom */
+    align-self: flex-start; /* Align button to the left */
+    padding-top: 1.5rem;
+    width: 100%;
+    display: flex;
+    justify-content: end;
 }
-.booking-button .btn{
-    margin-right: 0;
+
+.booking-button .btn {
     height: 3.5rem;
     width: 13rem;
-    
+}
+
+/* Stacked layout for smaller screens */
+@media (max-width: 768px) {
+    .content-layout {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .carousel-container,
+    .info-container {
+        max-width: 100%;
+    }
+
+    .carousel-container {
+        height: auto;
+        margin-bottom: 20px;
+    }
+
+    .image-wrapper {
+        height: auto;
+    }
+
+    .carousel-image {
+        max-width: 90%;
+        min-height: 200px;
+    }
+
+    .info-container {
+        margin-top: 20px;
+        padding: 20px;
+    }
+
+    .carousel-control {
+        width: 35px;
+        height: 35px;
+    }
+
+    .booking-button {
+        align-self: center;
+        padding-bottom: 1rem;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .carousel-container {
+        height: auto;
+        margin-bottom: 20px;
+    }
+
+    .carousel-image {
+        max-width: 90%;
+        min-height: 150px;
+    }
+
+    .info-container h1,
+    .info-container h2,
+    .info-container h3,
+    .info-container h4 {
+        font-size: 1rem; /* Reduce font size */
+    }
 }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+/* Modal styles */
 .custom-modal .modal-dialog {
     max-width: 500px;
     border-radius: 12px;
     box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.15);
-  }
-  
-  .custom-modal-header {
+}
+
+.custom-modal-header {
     background-color: #f8f9fa;
     padding: 1.5rem;
-  }
-  
-  .custom-modal-header .modal-title {
+}
+
+.custom-modal-header .modal-title {
     font-weight: 600;
     font-size: 1.5rem;
     color: #333;
-  }
-  
-  .custom-modal-body {
+}
+
+.custom-modal-body {
     font-size: 1rem;
     color: #555;
     padding: 1.5rem;
-  }
-  
-  .custom-modal-footer {
+}
+
+.custom-modal-footer {
     background-color: #f1f1f1;
     padding: 1.5rem;
-  }
-  
+}
