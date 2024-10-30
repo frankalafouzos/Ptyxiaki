@@ -123,7 +123,7 @@ function App() {
           <Route path="/owner/restaurants" element={<OwnerProtectedRoute element={<OwnerMyRestaurants />} />} />
           <Route path="/owner/add-restaurant" element={<OwnerProtectedRoute element={<AddRestaurant />} />} />
           <Route path="/owner/edit-restaurant/:id" element={<OwnerProtectedRoute element={<EditRestaurant />} />} />
-          <Route path="/owner-profile" element={<OwnerProtectedRoute element={<OwnerProfile />} />} />
+          <Route path="/owner/profile" element={<OwnerProtectedRoute element={<OwnerProfile />} />} />
           <Route path="/owner/EditPassword" element={<OwnerProtectedRoute element={<OwnerEditPassword />} />} />
           <Route path="/owner/EditProfile" element={<OwnerProtectedRoute element={<OwnerEditProfile />} />} />
 

@@ -110,9 +110,29 @@ router.route("/hide-restaurant/:id").post(async (req, res) => {
     if (!restaurant) {
       return res.status(404).json({ error: 'Restaurant not found' });
     }
-    restaurant.status = "Hidden";
+    if (restaurant.status === "Hidden") {
+      restaurant.status = "Approved";
+    } else {
+      restaurant.status = "Hidden";
+    }
     await restaurant.save();
     res.json("Restaurant hidden!");
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.route("/approve-restaurant/:id").post(async (req, res) => {
+  const RestaurantID = new ObjectId(req.params.id);
+  try {
+    const restaurant = await Restaurant.findById(RestaurantID);
+    if (!restaurant) {
+      return res.status(404).json({ error: 'Restaurant not found' });
+    }
+    restaurant.status = "Approved";
+
+    await restaurant.save();
+    res.json("Restaurant approved!");
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -151,78 +171,6 @@ const getCurrentTimeInMinutes = () => {
   const date = new Date();
   return date.getHours() * 60 + date.getMinutes();
 };
-
-
-router.route("/get-filtered-restaurants").post(async (req, res) => {
-  const {
-    name,
-    category,
-    location,
-    minPrice,
-    maxPrice,
-    status,
-    owner,
-    minVisits,
-    openNow
-  } = req.query;
-
-  let filter = {};
-
-  // Add filters based on user input
-  if (name) {
-    filter.name = { $regex: name, $options: 'i' }; // Case-insensitive search using regex
-  }
-
-  if (category) {
-    filter.category = category;
-  }
-
-  if (location) {
-    filter.location = { $regex: location, $options: 'i' };
-  }
-
-  if (minPrice || maxPrice) {
-    filter.price = {};
-    if (minPrice) filter.price.$gte = Number(minPrice);
-    if (maxPrice) filter.price.$lte = Number(maxPrice);
-  }
-
-  if (status) {
-    filter.status = status;
-  }
-
-  if (owner) {
-    filter.owner = owner;
-  }
-
-  if (minVisits) {
-    filter.visitCounter = { $gte: Number(minVisits) };
-  }
-
-  // Optional: Check if the restaurant is currently open based on openHour and closeHour
-  if (openNow) {
-    const currentTime = getCurrentTimeInMinutes();
-    filter.openHour = { $lte: currentTime };
-    filter.closeHour = { $gte: currentTime };
-  }
-
-  try {
-    const restaurants = await Restaurant.find(filter);
-    res.status(200).json(restaurants);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching restaurants', error });
-  }
-});
-
-
-
-
-
-
-
-
-
-//Admin routes for restaurants
 
 // Handle POST request for filtering restaurants
 router.post('/filter', async (req, res) => {
@@ -283,6 +231,105 @@ router.post('/filter', async (req, res) => {
     res.status(500).json({ message: 'Error fetching restaurants' });
   }
 });
+
+
+// Get all users for admin
+// router.route('/allUsers').get(async (req, res) => {
+//   try {
+//     const users = await User.find();
+//     const owners = await Owner.find();
+
+//     // Combine users and owners, with 'role' indicating 'User' or 'Owner'
+//     const combinedData = [
+//       ...users.map(user => ({ ...user.toObject(), role: user.admin ? 'Admin' : 'User' })),
+//       ...owners.map(owner => ({ ...owner.toObject(), role: 'Owner' }))
+//     ];
+
+//     console.log('Final combinedData:', combinedData); // Debugging output
+
+//     res.status(200).json(combinedData); // Send the combined array
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
+
+
+// Get all users with filters and sorting
+router.route('/allUsers').get(async (req, res) => {
+  try {
+    const { role, searchQuery, sortField, sortOrder } = req.query;
+
+    // Fetch users and owners
+    const users = await User.find();
+    const owners = await Owner.find();
+
+    // Combine users and owners
+    let combinedData = [
+      ...users.map(user => ({ ...user.toObject(), role: user.admin ? 'Admin' : 'User' })),
+      ...owners.map(owner => ({ ...owner.toObject(), role: 'Owner' }))
+    ];
+
+    // Filter based on role if specified
+    if (role) {
+      combinedData = combinedData.filter(user => user.role === role);
+    }
+
+    // Search filter: checks if any of the search criteria match
+    if (searchQuery) {
+      const lowercasedQuery = searchQuery.toLowerCase();
+      combinedData = combinedData.filter(user =>
+        `${user.firstname} ${user.lastname}`.toLowerCase().includes(lowercasedQuery) ||
+        user.email.toLowerCase().includes(lowercasedQuery)
+      );
+    }
+
+    // Sort the data if a sort field is specified
+    if (sortField) {
+      combinedData.sort((a, b) => {
+        const fieldA = a[sortField];
+        const fieldB = b[sortField];
+
+        if (fieldA < fieldB) return sortOrder === 'asc' ? -1 : 1;
+        if (fieldA > fieldB) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    res.status(200).json(combinedData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+// Delete a user by ID
+router.delete('/user/:id', async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to delete user', error: error.message });
+  }
+});
+
+// Toggle admin status of a user by ID
+router.patch('/user/:id/toggleAdmin', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.admin = !user.admin;
+    await user.save();
+
+    res.status(200).json({ message: `User ${user.admin ? 'promoted to' : 'demoted from'} admin`, user });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to toggle admin status', error: error.message });
+  }
+});
+
+
+
 
 
 

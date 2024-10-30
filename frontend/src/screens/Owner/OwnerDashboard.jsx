@@ -69,7 +69,7 @@ const OwnerDashboard = () => {
                     <Col key={id} sm={12} md={6} lg={6} xl={6} xxl={6}>
                     <Link 
                         key={id} 
-                        to={`http://localhost:3000/restaurant-dashboard/${id}`} 
+                        to={`http://localhost:3000/owner/restaurant-dashboard/${id}`} 
                         style={{ textDecoration: 'none', color: 'inherit' }}
                     >
                         <Dashboard key={id} restaurantId={id} />

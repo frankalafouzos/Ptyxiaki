@@ -9,6 +9,7 @@ import { FaFilter, FaCircleXmark, FaFilterCircleXmark, FaX } from "react-icons/f
 
 const AdminRestaurants = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
   const [restaurants, setRestaurants] = useState([]);
   const [images, setImages] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState(localStorage.getItem("categoryFilter") || "");
@@ -36,6 +37,7 @@ const AdminRestaurants = () => {
 
   // Handle resetting filters
   const resetFilters = () => {
+    setSort("Default");
     setSearchQuery('');  // Clear search input
     setCategoryFilter('');
     setLocationFilter('');
@@ -61,7 +63,7 @@ const AdminRestaurants = () => {
       categoryFilter ||
       locationFilter ||
       visitCounterMin ||
-      visitCounterMax
+      visitCounterMax || sort !== "Default"
     );
   };
 
@@ -103,6 +105,7 @@ const AdminRestaurants = () => {
         setRestaurants(data.restaurants);
         setImages(data.images);
         setTotalPages(data.totalPages);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching restaurants:", error);
       }
@@ -122,6 +125,10 @@ const AdminRestaurants = () => {
     visitCounterMin,
     visitCounterMax,
   ]);
+
+  if (loading) {
+    return <div className="d-flex justify-content-center pt-5"><div className="loader"></div></div>
+  }
 
   return (
     <div className="main-container">
@@ -196,7 +203,7 @@ const AdminRestaurants = () => {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
       />
-      {(restaurants.length === 0) ? (
+      {(restaurants.length === 0 && loading===false) ? (
         <div className="error"><h2>No restaurants found</h2></div>
   ) :(
       <div className="restaurants-container">

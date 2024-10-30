@@ -10,10 +10,19 @@ const CustomModal = ({
   body="Are you sure you want to perform this action?", // Default modal body
   cancelLabel = "Cancel", // Default cancel button label
   confirmLabel = "Confirm", // Default confirm button label
-  isWarning = false // Default to false for normal confirmations
+  isWarning = false, // Default to false for normal confirmations
+  isApprove = false // Default to false for normal confirmations
 }) => {
   const [closing, setClosing] = useState(false); // State to manage close animation
   const [isVisible, setIsVisible] = useState(show); // State to manage modal visibility
+  let color = "warning";
+    if (isApprove) {
+      color="success";
+    }else if(isWarning){
+      color="warning";
+    }else{
+      color="danger";
+    }
 
   // Handle modal close
   const handleModalClose = () => {
@@ -23,6 +32,12 @@ const CustomModal = ({
       handleClose(); // Call the parent close function
     }, 500); // Match the duration of the close animation
   };
+
+  useEffect(() => {
+    
+
+  }, [isApprove, isWarning]);
+
 
   // Effect to reset closing state when modal is opened
   useEffect(() => {
@@ -51,7 +66,7 @@ const CustomModal = ({
           <Button variant="secondary" onClick={handleModalClose}>
             {cancelLabel} {/* Dynamic Cancel Button Label */}
           </Button>
-          <Button variant={isWarning ? 'warning' : 'danger'} onClick={handleDelete}>
+          <Button variant={color} onClick={handleDelete}>
             {confirmLabel} {/* Dynamic Confirm Button Label */}
           </Button>
         </div>
