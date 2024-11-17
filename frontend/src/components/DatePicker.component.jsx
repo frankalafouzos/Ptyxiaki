@@ -23,8 +23,6 @@ function DateInputComponent({ onDateChange, widthofInput }) {
   const [inputType, setInputType] = useState('text');
   const [inputValue, setInputValue] = useState(formatDate(new Date()));
 
-  
-
   const onFocus = () => {
     setInputType('date');
     setInputValue(date.toISOString().split('T')[0]);
@@ -40,19 +38,30 @@ function DateInputComponent({ onDateChange, widthofInput }) {
     setDate(newDate);
     const formattedDate = inputType === 'date' ? e.target.value : formatDate(newDate);
     setInputValue(formattedDate);
-    onDateChange(formattedDate); // Call the callback with the new date
+    onDateChange(formattedDate);
   };
 
   return (
-    <input
-      type={inputType}
-      placeholder="DD/MM/YYYY"
-      value={inputValue}
-      onFocus={onFocus}
-      onBlur={onBlur}
-      onChange={onChange}
-      style={widthofInput === undefined ? null : { width: widthofInput }}
-    />
+    <>
+      <label htmlFor="date" style={{ fontWeight: '600', color: '#34495e' }}>Date of Reservation:</label>
+      <input
+        type={inputType}
+        id="date"
+        placeholder="DD/MM/YYYY"
+        value={inputValue}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        onChange={onChange}
+        style={{
+          width: widthofInput || '100%',
+          padding: '0.5rem',
+          border: '1px solid #ced4da',
+          borderRadius: '5px',
+          fontSize: '1rem',
+          color: '#495057',
+        }}
+      />
+    </>
   );
 }
 

@@ -30,6 +30,7 @@ import MakeABooking from './screens/MakeABooking';
 import UserBookings from './components/UserBookings.component';
 import ThankYouForBooking from './screens/ThankYouForBooking';
 import EditBooking from './screens/EditBooking';
+import RateBooking from './screens/RateBooking';
 
 // Owner
 import OwnerHome from './screens/Owner/OwnerHome';
@@ -50,7 +51,7 @@ import OwnerEditPassword from './screens/Owner/OwnerEditPassword';
 // Admin
 import AdminHome from './screens/Admin/AdminHome';
 import AdminProtectedRoute from './components/Admin/AdminProtectedRoute.component';
-import AdminAdministrator from './screens/Admin/AdminAdministrator';
+import AdminAdministrator from './screens/Admin/AdminAddAdministrator';
 import AdminProfile from './screens/Admin/AdminProfile';
 import AdminUsers from './screens/Admin/AdminUsers';
 import AdminRestaurants from './screens/Admin/AdminRestaurants';
@@ -115,6 +116,7 @@ function App() {
           <Route path="/userBookings" element={<UserProtectedRoute element={<UserBookings />} />} />
           <Route path="/restaurant/:id/confirmBooking" element={<UserProtectedRoute element={<ConfirmBooking />} />} />
           <Route path="/editBooking/:id" element={<UserProtectedRoute element={<EditBooking />} />} />
+          <Route path="/ratebooking/:bookingId" element={<UserProtectedRoute element={<RateBooking />} />} />
 
           {/* Owner Protected Routes */}
           <Route path="/owner/home" element={<OwnerProtectedRoute element={<OwnerHome />} />} />

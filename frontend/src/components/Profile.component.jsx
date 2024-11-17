@@ -117,10 +117,10 @@ const Profile = () => {
                   : isAdmin ? (
                     <>
                       <div className="d-flex justify-content-between">
-                        <Button variant="primary" href="/adminEditProfile">
+                        <Button variant="primary" href="/admin/EditProfile">
                           Edit Profile
                         </Button>
-                        <Button variant="primary" href="/adminEditPassword">
+                        <Button variant="primary" href="/admin/EditPassword">
                           Edit Password
                         </Button>
                         <Button variant="danger" onClick={handleShowModal} className="hover-button">

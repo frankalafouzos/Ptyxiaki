@@ -28,6 +28,7 @@ const imagesRouter = require('./routes/images');
 const ownersRouter = require('./routes/owners');
 const adminsRouter = require('./routes/admin');
 const searchRouter = require('./routes/search');
+const locationsRouter = require('./routes/locations');
 
 app.use('/users', usersRouter);
 app.use('/restaurants', restaurantsRouter);
@@ -37,6 +38,7 @@ app.use('/images', imagesRouter);
 app.use('/owners', ownersRouter);
 app.use('/admins', adminsRouter);
 app.use('/search', searchRouter);
+app.use('/locations', locationsRouter);
 
 
 app.listen(port, () => {

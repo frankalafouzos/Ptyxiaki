@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { Form, Button, Container } from 'react-bootstrap';
 import { useLocation } from "react-router-dom";
 import { fetchUser } from "../scripts/fetchUser";
 import { toast } from 'react-toastify';
@@ -120,60 +121,87 @@ const ConfirmBooking = () => {
 
   if (loading) return <div>Loading user data...</div>;
 
+
+
   return (
-    <form className="form" onSubmit={handleSubmit}>
-      <h1 className="title" >Confirm Your Reservation</h1>
-      <label htmlFor="name">Name</label>
-      <input
-        type="text"
-        id="name"
-        name="name"
-        value={reservation.name}
-        onChange={handleChange}
-        placeholder="Name"
-        disabled
-      />
-      <label htmlFor="date">Date</label>
-      <input
-        type="date"
-        id="date"
-        name="date"
-        value={reservation.date}
-        onChange={handleChange}
-        disabled
-      />
-      <label htmlFor="time">Time</label>
-      <input
-        type="time"
-        id="time"
-        name="time"
-        value={reservation.time}
-        onChange={handleChange}
-        disabled
-      />
-      <label htmlFor="partySize">Party Size</label>
-      <input
-        type="number"
-        id="partySize"
-        name="partySize"
-        value={reservation.partySize}
-        onChange={handleChange}
-        placeholder="Party Size"
-        disabled
-      />
-      <label htmlFor="phone">Contact Phone</label>
-      <input
-        type="phone"
-        id="phone"
-        name="phone"
-        value={reservation.phone}
-        onChange={handleChange}
-        placeholder="Contact Phone"
-        required
-      />
-      <button type="submit">Confirm Your Reservation</button>
-    </form>
+      <Container className="p-4 mt-4 shadow-sm bg-white rounded" style={{ maxWidth: '600px' }}>
+          <h1 className="text-center mb-4" style={{ fontSize: '1.75rem', color: '#333' }}>Confirm Your Reservation</h1>
+          <Form onSubmit={handleSubmit} className="w-100">
+              <Form.Group className="mb-3">
+                  <Form.Label htmlFor="name" style={{ fontWeight: 'bold' }}>Name</Form.Label>
+                  <Form.Control
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={reservation.name}
+                      onChange={handleChange}
+                      placeholder="Name"
+                      disabled
+                      className="form-control-lg"
+                  />
+              </Form.Group>
+  
+              <Form.Group className="mb-3">
+                  <Form.Label htmlFor="date" style={{ fontWeight: 'bold' }}>Date</Form.Label>
+                  <Form.Control
+                      type="date"
+                      id="date"
+                      name="date"
+                      value={reservation.date}
+                      onChange={handleChange}
+                      disabled
+                      className="form-control-lg"
+                  />
+              </Form.Group>
+  
+              <Form.Group className="mb-3">
+                  <Form.Label htmlFor="time" style={{ fontWeight: 'bold' }}>Time</Form.Label>
+                  <Form.Control
+                      type="time"
+                      id="time"
+                      name="time"
+                      value={reservation.time}
+                      onChange={handleChange}
+                      disabled
+                      className="form-control-lg"
+                  />
+              </Form.Group>
+  
+              <Form.Group className="mb-3">
+                  <Form.Label htmlFor="partySize" style={{ fontWeight: 'bold' }}>Party Size</Form.Label>
+                  <Form.Control
+                      type="number"
+                      id="partySize"
+                      name="partySize"
+                      value={reservation.partySize}
+                      onChange={handleChange}
+                      placeholder="Party Size"
+                      disabled
+                      className="form-control-lg"
+                  />
+              </Form.Group>
+  
+              <Form.Group className="mb-3">
+                  <Form.Label htmlFor="phone" style={{ fontWeight: 'bold' }}>Contact Phone</Form.Label>
+                  <Form.Control
+                      type="phone"
+                      id="phone"
+                      name="phone"
+                      value={reservation.phone}
+                      onChange={handleChange}
+                      placeholder="Contact Phone"
+                      required
+                      className="form-control-lg"
+                  />
+              </Form.Group>
+  
+              <Button type="submit" variant="primary" className="w-100 btn-lg mt-3">
+                  Confirm Your Reservation
+              </Button>
+          </Form>
+      </Container>
   );
+  
 };
 
 export default ConfirmBooking;

@@ -329,7 +329,39 @@ router.patch('/user/:id/toggleAdmin', async (req, res) => {
 });
 
 
+// Route to add a new admin
+router.post('/addAdmin', async (req, res) => {
+  const { firstname, lastname, email, location, password } = req.body;
+  console.log("Body: " + JSON.stringify(req.body))
+  // Check if all required fields are provided
+  if (!firstname || !lastname || !email || !password || !location) {
+      return res.status(400).json({ message: 'All fields are required' });
+  }
 
+  try {
+      // Check if a user with the provided email already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+          return res.status(400).json({ message: 'Email is already in use' });
+      }
+
+      // Create a new user with the admin flag set to true
+      const newUser = new User({
+          firstname,
+          lastname,
+          email,
+          password, // This will be hashed automatically by the pre-save hook
+          location,
+          admin: true
+      });
+
+      await newUser.save();
+      res.status(201).json({ message: 'Admin user created successfully', user: newUser });
+  } catch (error) {
+      console.error('Error creating admin:', error);
+      res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 

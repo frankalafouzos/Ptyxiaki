@@ -1,18 +1,28 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { Container, Button } from 'react-bootstrap';
+import "../css/ThankYouForBooking.css";
 
 const ThankYouForBooking = () => {
     const { bookingid } = useParams();
 
     return (
-        <div style={{ textAlign: 'center', marginTop: '100px' }}>
-            <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: '#333' }}>
-                Thank You for Your Booking!
-            </h1>
-            <p style={{ fontSize: '18px', color: '#666' }}>
-                Your booking ID is: {bookingid}
-            </p>
-        </div>
+        <Container className="thank-you-container">
+            <div className="thank-you-content">
+                <h1>Thank You for Your Booking!</h1>
+                <p className="subheading">We’re excited to have you dine with us!</p>
+                <p className="booking-id">
+                    Your Booking ID: <span>{bookingid}</span>
+                </p>
+                <Button 
+                    variant="primary" 
+                    href="/restaurants"
+                    className="view-restaurants-button"
+                >
+                    View Restaurants
+                </Button>
+            </div>
+        </Container>
     );
 };
 

@@ -48,7 +48,7 @@ const OwnerSignup = () => {
       toast.success("Sign up successful", {
         position: "top-center",
         autoClose: 2000,
-        onClose: () => window.location.replace('/owner-home') // Redirect to owner home page
+        onClose: () => window.location.replace('/owner/home') // Redirect to owner home page
       });
 
     } catch (error) {

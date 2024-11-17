@@ -49,7 +49,7 @@ const OwnerSignIn = () => {
         toast.success("Sign in successful", {
           position: "top-center",
           autoClose: 2000,
-          onClose: () => window.location.replace('/owner-home') // Redirect to owner home page
+          onClose: () => window.location.replace('/owner/home') // Redirect to owner home page
         });
       } else {
         // Handle errors

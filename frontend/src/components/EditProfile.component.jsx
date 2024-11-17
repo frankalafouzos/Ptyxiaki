@@ -16,24 +16,26 @@ const EditProfile = () => {
   const [user, setUser] = useState(null); // Initialize user as null
   const authUser = useAuthUser();
   const email = authUser.email;
-  const role = localStorage.getItem('role');
+  const role = JSON.parse(localStorage.getItem('role')).role;
   const [isUser, setIsUser] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   console.log("Role: ", role);
+  console.log("Admin: ", user);
+  console.log("Email: ", email);
 
   useEffect(() => {
     const fetchData = async () => {
       if (role === "user") {
-        await fetchUser(email, setLoading, setUser);
+         fetchUser(email, setLoading, setUser);
         setIsUser(true);
         console.log("User role found");
       } else if (role === "owner") {
-        await fetchOwner(email, setLoading, setUser);
+         fetchOwner(email, setLoading, setUser);
         setIsOwner(true);
         console.log(isOwner ? "Owner role found" : "Owner role not found");
       } else if (role === "admin") {
-        await fetchUser(email, setLoading, setUser);
+         fetchUser(email, setLoading, setUser);
         setIsAdmin(true);
         console.log("Admin role found");
       } else {

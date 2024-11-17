@@ -1,5 +1,6 @@
 const router = require("express").Router();
 let Booking = require("../models/booking.model");
+let BookingRating = require("../models/bookingRating.model");
 let RestaurantCapacity = require("../models/restaurantCapacity.model");
 let Restaurant = require("../models/restaurant.model");
 let User = require("../models/users.model");
@@ -359,6 +360,54 @@ router.get('/getbookings/:restaurantid', (req, res) => {
     .catch(err => res.status(400).json('Error: ' + err));
 });
 
+
+router.get("/:bookingId", async (req, res) => {
+  try {
+    // Fetch the booking by ID
+    const booking = await Booking.findById(req.params.bookingId);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    // Fetch the restaurant associated with the booking
+    const restaurant = await Restaurant.findById(booking.restaurantid);
+    if (!restaurant) return res.status(404).json({ message: "Restaurant not found" });
+
+    // Combine the booking and restaurant data in the response
+    res.status(200).json({
+      booking,
+      restaurant,
+    });
+  } catch (error) {
+    console.error("Error fetching booking or restaurant:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+router.post('/rate/:bookingId', async (req, res) => {
+  const { rating, feedback } = req.body;
+  const bookingId = req.params.bookingId;
+
+  try {
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    const newRating = new BookingRating({
+      bookingId: booking._id,
+      restaurantId: booking.restaurantId,
+      userId: booking.userId,
+      rating,
+      feedback,
+    });
+
+    await newRating.save();
+    res.status(201).json({ message: 'Rating saved successfully', rating: newRating });
+  } catch (error) {
+    console.error('Error saving rating:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 

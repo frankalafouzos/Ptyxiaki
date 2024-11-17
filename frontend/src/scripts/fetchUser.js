@@ -25,7 +25,7 @@ export const fetchUser = async (email, setLoading, setUser) => {
     if (process.env.NODE_ENV === 'development') {
       console.log("Received user data:", data);
     }
-
+    console.log("Received user data:", data);
     setUser(data);
   } catch (error) {
     console.error(error);

@@ -19,7 +19,7 @@ const OwnerHeader = () => {
     <header>
       <Navbar variant="white" expand="xl" collapseOnSelect>
         <Container content="fluid">
-          <Navbar.Brand href="/owner-home">
+          <Navbar.Brand href="/owner/home">
             <img id="logo" src={logo} alt="" />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />

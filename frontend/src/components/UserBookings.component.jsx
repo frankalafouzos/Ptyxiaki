@@ -32,12 +32,10 @@ const UserBookings = ({ display }) => {
   }, []);
 
   function deleteBooking(bookingId) {
-    // Confirm before deleting
     if (!window.confirm("Are you sure you want to delete this booking?")) {
       return;
     }
 
-    // Make the DELETE request
     fetch(`http://localhost:5000/bookings/deleteone/${bookingId}`, {
       method: "DELETE",
     })
@@ -49,9 +47,8 @@ const UserBookings = ({ display }) => {
       })
       .then((data) => {
         console.log(data.message);
-        // Optionally, you can refresh the data on the page or redirect
         alert(data.message);
-        window.location.reload(); // Reload the page to update the list
+        window.location.reload();
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -60,7 +57,6 @@ const UserBookings = ({ display }) => {
   }
 
   function cancelBooking(bookingId, bookingDate) {
-    // Confirm before deleting
     const today = new Date();
     if (!window.confirm("Are you sure you want to cancel this booking?")) {
       return;
@@ -69,7 +65,6 @@ const UserBookings = ({ display }) => {
       return;
     }
 
-    // Make the Cancel request
     fetch(`http://localhost:5000/bookings/deleteone/${bookingId}`, {
       method: "DELETE",
     })
@@ -81,9 +76,8 @@ const UserBookings = ({ display }) => {
       })
       .then((data) => {
         console.log("Booking cancelled successfully");
-        // Optionally, you can refresh the data on the page or redirect
         alert("Booking cancelled successfully");
-        window.location.reload(); // Reload the page to update the list
+        window.location.reload();
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -107,6 +101,7 @@ const UserBookings = ({ display }) => {
                 <th></th>
                 <th></th>
                 <th></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -115,7 +110,12 @@ const UserBookings = ({ display }) => {
                 .map((booking) => {
                   const today = new Date();
                   const bookingDate = new Date(booking.date);
-                  bookingDate.setHours(Math.floor(booking.startingTime / 60), booking.startingTime % 60, 0, 0);
+                  bookingDate.setHours(
+                    Math.floor(booking.startingTime / 60),
+                    booking.startingTime % 60,
+                    0,
+                    0
+                  );
                   const isAfterToday = bookingDate >= today;
 
                   return (
@@ -140,17 +140,15 @@ const UserBookings = ({ display }) => {
                       </td>
 
                       {isAfterToday && (
-                        <>
-                          <td>
-                            <button
-                              className="btn btn-danger"
-                              onClick={() => cancelBooking(booking._id, bookingDate)}
-                              id="cancelButton"
-                            >
-                              Cancel
-                            </button>
-                          </td>
-                        </>
+                        <td>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() => cancelBooking(booking._id, bookingDate)}
+                            id="cancelButton"
+                          >
+                            Cancel
+                          </button>
+                        </td>
                       )}
 
                       {!isAfterToday && (
@@ -164,7 +162,20 @@ const UserBookings = ({ display }) => {
                           </button>
                         </td>
                       )}
-                      <td></td>
+
+                      <td>
+                        {!isAfterToday && (
+                          <button
+                            className="btn btn-primary"
+                            onClick={() =>
+                              (window.location = `/ratebooking/${booking._id}`)
+                            }
+                            id="rateButton"
+                          >
+                            Rate
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
@@ -178,11 +189,13 @@ const UserBookings = ({ display }) => {
                   <td></td>
                   <td></td>
                   <td>
-                    <button className="view-all" onClick={() => (window.location = "/userBookings")}>
+                    <button
+                      className="view-all"
+                      onClick={() => (window.location = "/userBookings")}
+                    >
                       <div>View All</div>
                     </button>
                   </td>
-                  
                 </tr>
               ) : null}
             </tbody>

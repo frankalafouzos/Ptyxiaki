@@ -42,6 +42,28 @@ const RestaurantPage = () => {
         setLoading(false);
       });
   }, [id]);
+  
+  useEffect(() => {
+    
+    if (role.role !== "admin") {
+      console.log("Increementing visit counter for restaurant ID:", id);
+      fetch(`http://localhost:5000/restaurants/increnmentVisitCounter/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            console.log(response);
+            throw new Error("Error incrementing visit counter");
+          }
+        })
+        .catch((error) => {
+          console.error("Error incrementing visit counter:", error);
+        });
+    }
+  }, []);
 
   useEffect(() => {
     // Send the request to increment visitCounter
@@ -217,7 +239,7 @@ const RestaurantPage = () => {
               )}
               {role.role === "owner" && (
                 <Link
-                  to={`/edit-restaurant/${restaurant._id}`}
+                  to={`/owner/edit-restaurant/${restaurant._id}`}
                   className="btn btn-outline-warning "
                 >
                   Edit

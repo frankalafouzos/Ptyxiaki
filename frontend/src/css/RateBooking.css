@@ -1,0 +1,31 @@
+.rate-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+  }
+  
+  .rate-card {
+    max-width: 500px;
+    margin: 0 auto;
+    border: none;
+    border-radius: 10px;
+  }
+  
+  .booking-details p {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .rating-component {
+    margin: 1rem 0;
+  }
+  
+  .star {
+    transition: color 0.2s;
+  }
+  
+  .feedback textarea {
+    resize: none;
+  }
+  

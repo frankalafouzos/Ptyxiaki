@@ -7,6 +7,7 @@ const Restaurant = require('../models/restaurant.model');
 const Image = require('../models/images.model');
 const RestaurantCapacity = require('../models/restaurantCapacity.model');
 const Owner = require('../models/restaurantOwner.model')
+const BookingRating = require("../models/bookingRating.model");
 const { Types: { ObjectId } } = require('mongoose');
 const { uploadImage, deleteImage } = require('../functions/s3-utils');
 
@@ -258,5 +259,34 @@ router.get('/restaurant-capacities/:id', async (req, res) => {
     res.status(400).json('Error: ' + err);
   }
 });
+
+router.post('/increnmentVisitCounter/:id', async (req, res) => {
+  try {
+    console.log("ID: ", req.params.id);
+    const restaurant = await Restaurant.findById(req.params.id);
+    console.log("Restaurant: ", restaurant);
+    
+    restaurant.visitCounter += 1;
+    await restaurant.save();
+    res.status(200).json({ message: "Visit counter incremented for restaurant with id: "+ req.params.id });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.get('/restaurants/:restaurantId/ratings', async (req, res) => {
+  const { restaurantId } = req.params;
+
+  try {
+    const ratings = await BookingRating.find({ restaurantId }).populate('userId', 'firstname lastname');
+    const averageRating = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length || 0;
+
+    res.status(200).json({ ratings, averageRating });
+  } catch (error) {
+    console.error('Error fetching ratings:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 module.exports = router;

@@ -223,7 +223,7 @@ const Restaurant = ({ restaurant, index, images }) => {
               <button onClick={handleShowModal} className="h-100 btn btn-danger">
                 Delete
               </button>
-              <Link to={`/edit-restaurant/${restaurant._id}`} className="h-100 btn btn-warning">
+              <Link to={`/owner/edit-restaurant/${restaurant._id}`} className="h-100 btn btn-warning">
                 Edit
               </Link>
             </div>

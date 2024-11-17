@@ -1,65 +1,64 @@
-.availability-container {
+/* Container and General Styles */
+.booking-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 2rem auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.booking-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
   text-align: center;
+}
+
+/* DateInputComponent Integration */
+.booking-form label {
+  font-weight: 600;
+  color: #34495e;
+}
+
+/* Availability Section */
+.availability-container {
+  margin-top: 2rem;
+  width: 100%;
+  text-align: center;
+}
+
+.availability-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
 }
 
 .time-slots {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.5rem;
   justify-content: center;
-  gap: 10px;
-  padding: 0;
 }
 
-.time-slot {
-  flex: 0 1 calc(33.333% - 20px);
-  list-style-type: none;
+.time-slot-col {
+  padding: 0.25rem;
 }
 
-.time-slot button {
+.time-slot-btn {
   width: 100%;
-  background-color: #4caf50;
-  border: none;
-  color: white;
-  padding: 10px;
-  text-align: center;
-  font-size: 16px;
-  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1rem;
   border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.time-slot button:hover {
-  background-color: #45a049;
+.time-slot-btn:hover {
+  background-color: #27ae60;
+  color: #fff;
 }
-
-/* .loading-indicator {
-  text-align: center;
-  Additional styling here
-} */
-
-
-.loader {
-    border: 5px solid #f3f3f3; /* Light grey background */
-    border-top: 5px solid #3498db; /* Blue color */
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 2s linear infinite;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-
-  .note {
-    color: #6c757d; /* Gray text color for the note */
-    font-size: 0.9rem; /* Smaller font size for subtlety */
-    margin-top: 8px; /* Margin to create space between the input and the note */
-    margin-bottom: 20px; /* Additional space before the submit button */
-    width: 50%; /* Width of the note */
-  }
