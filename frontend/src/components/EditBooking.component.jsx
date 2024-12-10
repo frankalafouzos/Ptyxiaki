@@ -76,11 +76,10 @@ const EditBooking = () => {
         <form className="form" onSubmit={handleSubmit}>
           <h1 className="title">Edit Booking</h1>
           <div style={{ display:"flex", flexDirection: "column", width:"50%", justifyContent:"center"}}>
-            <label htmlFor="partySize">Party Size</label>
+            <label htmlFor="partySize"><strong>Party Size</strong></label>
             <input style={{  width:"100%"}} placeholder='Party Size' type="number" name="partySize" id="partySize" value={bookingData.partySize} />
           </div>
           <div style={{ display:"flex", flexDirection: "column", width:"50%", justifyContent:"center"}}>
-            <label htmlFor="partySize">Party Size</label>
             <DateInputComponent onDateChange={handleDateChange} widthofInput="100%" />
           </div>
           <button type="submit">Check availability</button>

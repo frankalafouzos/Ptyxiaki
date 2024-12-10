@@ -45,6 +45,7 @@ import OwnerHeader from './components/Owner/OwnerHeader.component';
 import OwnerProfile from './screens/Owner/OwnerProfile';
 import OwnerEditProfile from './screens/Owner/OwnerEditProfile';
 import OwnerEditPassword from './screens/Owner/OwnerEditPassword';
+import OwnerRestaurantCalendar from './screens/Owner/OwnerRestaurantCalendar';
 
 
 
@@ -128,6 +129,8 @@ function App() {
           <Route path="/owner/profile" element={<OwnerProtectedRoute element={<OwnerProfile />} />} />
           <Route path="/owner/EditPassword" element={<OwnerProtectedRoute element={<OwnerEditPassword />} />} />
           <Route path="/owner/EditProfile" element={<OwnerProtectedRoute element={<OwnerEditProfile />} />} />
+          <Route path="/owner/restaurant/:restaurantId/calendar" element={<OwnerProtectedRoute element={<OwnerRestaurantCalendar />} />} />
+
 
           {/* Admin Pages */}
           <Route path="/admin" element={<AdminProtectedRoute element={<AdminHome />} />} />

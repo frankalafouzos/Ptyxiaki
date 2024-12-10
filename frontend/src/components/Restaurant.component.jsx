@@ -36,7 +36,7 @@ const Restaurant = ({ restaurant, index, images }) => {
         headers: {
           'Content-Type': 'application/json',
         }
-        
+
       });
 
       if (response.ok) {
@@ -226,60 +226,68 @@ const Restaurant = ({ restaurant, index, images }) => {
               <Link to={`/owner/edit-restaurant/${restaurant._id}`} className="h-100 btn btn-warning">
                 Edit
               </Link>
+              {/* View Calendar Button */}
+              <Link
+                to={`/owner/restaurant/${restaurant._id}/calendar`}
+                className="h-100 btn btn-info"
+              >
+                View Calendar
+              </Link>
             </div>
           )}
+
           {role === "admin" && (
-  <div className="w-50 h-100 d-flex justify-content-around">
-    {restaurant.status === "Pending Approval" ? (
-      <>
-        {/* Approve button when status is Pending Approval */}
-        <button
-          onClick={handleShowAdminApproveModal}
-          className="h-100 btn btn-success"
-        >
-          Approve
-        </button>
-        {/* Delete button for Pending Approval */}
-        <button
-          onClick={handleShowModal}
-          className="h-100 btn btn-danger"
-        >
-          Delete
-        </button>
-      </>
-    ) : (
-      <>
-        {/* Toggle Hide/Show button when not Pending Approval */}
-        <button
-          onClick={handleShowAdminHideModal}
-          className="h-100 btn btn-warning"
-        >
-          {restaurant.status !== "Hidden" ? "Hide" : "Show"}
-        </button>
+            <div className="w-50 h-100 d-flex justify-content-around">
+              {restaurant.status === "Pending Approval" ? (
+                <>
+                  {/* Approve button when status is Pending Approval */}
+                  <button
+                    onClick={handleShowAdminApproveModal}
+                    className="h-100 btn btn-success"
+                  >
+                    Approve
+                  </button>
+                  {/* Delete button for Pending Approval */}
+                  <button
+                    onClick={handleShowModal}
+                    className="h-100 btn btn-danger"
+                  >
+                    Delete
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Toggle Hide/Show button when not Pending Approval */}
+                  <button
+                    onClick={handleShowAdminHideModal}
+                    className="h-100 btn btn-warning"
+                  >
+                    {restaurant.status !== "Hidden" ? "Hide" : "Show"}
+                  </button>
 
-        {/* Delete button if status is not already Deleted */}
-        {restaurant.status !== "Deleted" && (
-          <button
-            onClick={handleShowModal}
-            className="h-100 btn btn-danger"
-          >
-            Delete
-          </button>
-        )}
+                  {/* Delete button if status is not already Deleted */}
+                  {restaurant.status !== "Deleted" && (
+                    <button
+                      onClick={handleShowModal}
+                      className="h-100 btn btn-danger"
+                    >
+                      Delete
+                    </button>
+                  )}
 
-        {/* Permanent Remove button if status is Deleted */}
-        {restaurant.status === "Deleted" && (
-          <button
-            onClick={handleShowAdminModal}
-            className="h-100 btn btn-danger"
-          >
-            Remove
-          </button>
-        )}
-      </>
-    )}
-  </div>
-)}
+                  {/* Permanent Remove button if status is Deleted */}
+                  {restaurant.status === "Deleted" && (
+                    <button
+                      onClick={handleShowAdminModal}
+                      className="h-100 btn btn-danger"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
 
         </div>

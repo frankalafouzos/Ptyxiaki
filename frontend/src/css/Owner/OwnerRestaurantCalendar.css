@@ -1,0 +1,16 @@
+.calendar-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .fc-event {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  
+  .modal-body p {
+    font-size: 1rem;
+    margin: 10px 0;
+  }
+  

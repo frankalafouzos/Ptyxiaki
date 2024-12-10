@@ -8,6 +8,8 @@ const Image = require('../models/images.model');
 const RestaurantCapacity = require('../models/restaurantCapacity.model');
 const Owner = require('../models/restaurantOwner.model')
 const BookingRating = require("../models/bookingRating.model");
+const Booking = require("../models/booking.model");
+const ClosedDate = require('../models/ClosedDates.model');
 const { Types: { ObjectId } } = require('mongoose');
 const { uploadImage, deleteImage } = require('../functions/s3-utils');
 
@@ -287,6 +289,118 @@ router.get('/restaurants/:restaurantId/ratings', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Route to fetch restaurant capacity and bookings
+router.get('/:restaurantId/capacity', async (req, res) => {
+  try {
+    const { restaurantId } = req.params;
+
+    // Fetch restaurant capacity
+    const capacity = await RestaurantCapacity.findOne({ restaurantid: restaurantId });
+    if (!capacity) {
+      return res.status(404).json({ message: 'Capacity data not found' });
+    }
+    const totalCapacity = capacity.totalCapacity();
+
+    // Fetch bookings for the restaurant
+    const bookings = await Booking.find({ restaurantid: restaurantId });
+
+    // Calculate capacity usage per day
+    const capacityData = bookings.reduce((acc, booking) => {
+      const date = booking.date.toISOString().split('T')[0];
+      if (!acc[date]) {
+        acc[date] = { bookedSeats: 0, totalCapacity };
+      }
+      acc[date].bookedSeats += booking.partySize;
+      return acc;
+    }, {});
+
+    const result = Object.entries(capacityData).map(([date, data]) => ({
+      date,
+      bookedSeats: data.bookedSeats,
+      totalCapacity: data.totalCapacity,
+      capacityPercentage: Math.round((data.bookedSeats / data.totalCapacity) * 100),
+    }));
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Route to fetch bookings for a specific day
+router.get('/:restaurantId/bookings/:date', async (req, res) => {
+  try {
+    const { restaurantId, date } = req.params;
+
+    // Get bookings for the given restaurant and date
+    const bookings = await Booking.find({
+      restaurantid: restaurantId,
+      date: new Date(date),
+    });
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get closed dates for a restaurant
+router.get('/:restaurantId/closedDates', async (req, res) => {
+  try {
+    const closedDates = await ClosedDate.find({ restaurantId: req.params.restaurantId });
+    res.json(closedDates.map((entry) => entry.date.toISOString().split('T')[0]));
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch closed dates.' });
+  }
+});
+
+// Add a closed date
+router.post('/:restaurantId/close', async (req, res) => {
+  const { date } = req.body;
+
+  try {
+    // Check if there are bookings on the given date
+    const existingBookings = await Booking.find({
+      restaurantid: req.params.restaurantId,
+      date: new Date(date),
+    });
+
+    if (existingBookings.length > 0) {
+      return res.status(400).json({ message: 'Cannot close the restaurant on this day. Existing bookings found.' });
+    }
+
+    // Add closed date
+    const closedDate = new ClosedDate({
+      restaurantId: req.params.restaurantId,
+      date: new Date(date),
+    });
+
+    await closedDate.save();
+    res.status(200).json({ message: 'Date successfully closed.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to close the date.' });
+  }
+});
+
+// Remove a closed date
+router.delete('/:restaurantId/closedDates', async (req, res) => {
+  const { date } = req.body;
+
+  try {
+    await ClosedDate.deleteOne({
+      restaurantId: req.params.restaurantId,
+      date: new Date(date),
+    });
+    res.status(200).json({ message: 'Closed date successfully removed.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to remove closed date.' });
+  }
+});
+
+
 
 
 module.exports = router;
