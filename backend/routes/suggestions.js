@@ -24,64 +24,94 @@ const openai = new OpenAI({
 
 
 router.post('/', async (req, res) => {
-    const restaurants = await Restaurant.find();
-    // const summarizedRestaurants = restaurants.map(r => ({
-    //     id: r._id,
-    //     category: r.category,
-    //     location: r.location,
-    //     price: r.price,
-    //     visitCounter: r.visitCounter,
-    // }));
-    const summarizedRestaurants = restaurants
-    .map(r => [r._id, r.price]) // Only keep Restaurant ID and Price
-    .sort((a, b) => b[1] - a[1]) // Sort by price if needed
-    .slice(0, 50); // Top 50 restaurants
-
-
-
-
-    // return res.json({ restaurants });
-    const userBookings = await Booking.find({ userid: req.body.userId });
-
-    // Aggregate bookings by restaurant ID
-    const aggregatedBookings = await userBookings.reduce((acc, booking) => {
-        acc[booking.restaurantid] = (acc[booking.restaurantid] || 0) + 1;
-        return acc;
-    }, {});
-    const aggregatedBookingArray = Object.entries(aggregatedBookings).slice(0, 50); // Top 50 booked restaurants
-
-    // return res.json({ aggregatedBookings });
-
     try {
+        // Fetch user bookings
+        const userBookings = await Booking.find({ userid: req.body.userId }).lean();
+
+        // Aggregate bookings and fetch restaurant details
+        const bookingWithRestaurants = await Promise.all(
+            userBookings.map(async (booking) => {
+                const restaurant = await Restaurant.findById(booking.restaurantid).lean();
+                return {
+                    booking,
+                    restaurant,
+                };
+            })
+        );
+
+        // Filter out any bookings where restaurant data is not found
+        const validBookings = bookingWithRestaurants.filter(entry => entry.restaurant);
+
+        // Summarize restaurants for OpenAI
+        const summarizedRestaurants = validBookings.map(entry => [
+            entry.restaurant._id.toString(),
+            entry.restaurant.price,
+        ]);
+
+        // Limit restaurants to the first 100
+        const limitedSummarizedRestaurants = summarizedRestaurants
+            .sort((a, b) => b[1] - a[1]) // Sort by price
+            .slice(0, 100);
+
+        // Aggregate bookings for OpenAI input
+        const aggregatedBookings = validBookings.reduce((acc, entry) => {
+            const { restaurantid } = entry.booking;
+            acc[restaurantid] = (acc[restaurantid] || 0) + 1;
+            return acc;
+        }, {});
+
+        const aggregatedBookingArray = Object.entries(aggregatedBookings).slice(0, 50);
+
+        // Call OpenAI API
         const response = await openai.chat.completions.create({
             model: "gpt-4",
             messages: [
-                { role: "system", content: "You are a helpful assistant that recommends restaurants based on user bookings." },
+                { role: "system", content: "You are a helpful assistant that recommends new restaurants based on user bookings. Firstly I need the answer as fast as possible! Important Note: I need only the restaurant ids in a json! Keep in mind I pass to you the first 150 restaurants. Find the patterns between the restaurants the user has already made a booking based on all of the info you get and bring back your suggestions." },
                 {
                     role: "user",
-                    content: `Here is a list of restaurants:\n${JSON.stringify(summarizedRestaurants, null, 2)}\n\n` +
-                        `Here is the user's booking history:\n${JSON.stringify(aggregatedBookingArray, null, 2)}\n\n` +
-                        `Provide restaurant IDs only that match the preferences.`,
+                    content: `Restaurants are represented as [Restaurant ID, Price].\n` +
+                             `Bookings are represented as [Restaurant ID, Booking Count].\n` +
+                             `Restaurants:\n${JSON.stringify(limitedSummarizedRestaurants)}\n` +
+                             `Bookings:\n${JSON.stringify(aggregatedBookingArray)}\n` +
+                             `Provide only the restaurant IDs as a JSON array. Example: ["id1", "id2", "id3"]`,
                 },
-            ]
+            ],
         });
 
-        // Parse the AI response to extract restaurant IDs
-        const suggestedIds = response.choices[0].message.content
-            .match(/\d+/g) // Extract numeric IDs from the response
-            .map(Number); // Convert to an array of integers
+        // Parse GPT response
+        const gptResponse = response.choices[0].message.content;
+        console.log("GPT-4 Response Content:", gptResponse);
 
-        // Filter restaurant list to include only matching IDs
-        const filteredRestaurants = restaurantList.filter(restaurant => suggestedIds.includes(restaurant.id));
+        let suggestedIds;
+        const match = gptResponse.match(/\[.*?\]/s); // Match the first JSON-like array
+        if (match) {
+            suggestedIds = JSON.parse(match[0]);
+        } else {
+            throw new Error("No JSON array found in GPT response");
+        }
 
-        // Respond with the filtered restaurant IDs
-        res.json({ restaurantIds: filteredRestaurants.map(r => r.id) });
+        console.log("Extracted Suggested IDs:", suggestedIds);
+
+        // Fetch suggested restaurants details
+        const suggestedRestaurants = await Promise.all(
+            suggestedIds.map(async id => {
+                const restaurant = await Restaurant.findById(id).lean();
+                const images = await Image.find({ ImageID: restaurant?.imageID }).lean();
+                return { restaurant, images };
+            })
+        );
+
+        const validSuggestedRestaurants = suggestedRestaurants.filter(r => r.restaurant);
+
+        // Respond with the enriched bookings and suggestions
+        res.json({
+            suggestions: validSuggestedRestaurants,
+        });
     } catch (error) {
         console.error("Error:", error.response ? error.response.data : error.message);
         res.status(500).json({ error: "Failed to fetch restaurant recommendations" });
     }
-
-
 });
+
 
 module.exports = router;

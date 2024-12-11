@@ -103,6 +103,32 @@ router.route('/').get(async (req, res) => {
 //   res.render('Restaurants', { restaurants, images, cities })
 // });
 
+router.get('/top-restaurants', async (req, res) => {
+  try {
+    // Fetch top 10 restaurants sorted by visitCounter
+    const topRestaurants = await Restaurant.find({ status: 'Approved' })
+      .sort({ visitCounter: -1 })
+      .limit(10)
+      .lean(); // Use lean() for better performance
+
+    // Fetch images for each restaurant
+    const topRestaurantsWithImages = await Promise.all(
+      topRestaurants.map(async (restaurant) => {
+        const images = await Image.find({ ImageID: restaurant.imageID }).lean();
+        return {
+          restaurant,
+          images,
+        };
+      })
+    );
+
+    res.json(topRestaurantsWithImages);
+  } catch (error) {
+    console.error('Error fetching top restaurants:', error);
+    res.status(500).json({ message: 'Error fetching top restaurants' });
+  }
+});
+
 router.route('/:id').get(async (req, res) => {
   const id = new ObjectId(req.params.id);
 

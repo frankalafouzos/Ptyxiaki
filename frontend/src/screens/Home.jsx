@@ -2,6 +2,7 @@ import React from "react";
 
 import "../css/Home.css";
 import SearchBar from "../components/SearchBar.component";
+import SuggestedRestaurants from "../components/SuggestedRestaurants.component";
 
 // In your Home component, comment out the styles to test:
 const Home = () => {
@@ -14,6 +15,7 @@ const Home = () => {
           Explore the features of our amazing app.
         </p>
       </div>
+      <SuggestedRestaurants/>
     </div>
   );
 };
