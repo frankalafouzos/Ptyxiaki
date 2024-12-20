@@ -3,9 +3,12 @@ import { fetchUser } from "../scripts/fetchUser";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import Restaurant from "./Restaurant.component";
 
 const SuggestedRestaurants = () => {
     const [loading, setLoading] = useState(true);
+    const [loadingTopRestaurants, setLoadingTopRestaurants] = useState(true);
+    const [loadingSuggestions, setLoadingSuggestions] = useState(true);
     const [user, setUser] = useState(null); // Initialize user as null
     const [suggestedRestaurants, setSuggestedRestaurants] = useState([]); // State for suggestions
     const [topRestaurants, setTopRestaurants] = useState([]); // State for top restaurants
@@ -19,58 +22,58 @@ const SuggestedRestaurants = () => {
             fetchUser(email, setLoading, setUser);
             setIsUser(true);
             console.log("User role found");
-        } else {
-            console.log("Role not found or email is null");
-            fetch("http://localhost:5000/restaurants/top-restaurants", {
-                method: "GET",
-            }) // Fetch top restaurants if user is not logged in
+        }
+        console.log("Role not found or email is null");
+        fetch("http://localhost:5000/restaurants/top-restaurants", {
+            method: "GET",
+        }) // Fetch top restaurants if user is not logged in
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch top restaurants");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log("Received top restaurants:", data);
+                setTopRestaurants(data || []);
+                setLoadingTopRestaurants(false);
+            })
+            .catch((error) => {
+                console.error(error);
+                setLoadingTopRestaurants(false);
+            });
+        // }
+    }, [email, role]);
+
+    useEffect(() => {
+        if (isUser && user) {
+            // Fetch suggestions
+            fetch("http://localhost:5000/suggestions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    userId: user._id, // Ensure user._id exists
+                }),
+            })
                 .then((response) => {
                     if (!response.ok) {
-                        throw new Error("Failed to fetch top restaurants");
+                        throw new Error("Failed to fetch restaurant recommendations");
                     }
                     return response.json();
                 })
                 .then((data) => {
-                    console.log("Received top restaurants:", data);
-                    setTopRestaurants(data.restaurants || []);
-                    setLoading(false);
+                    console.log("Received suggested restaurants:", data);
+                    setSuggestedRestaurants(data.suggestions || []); // Use the `suggestions` array from the API
+                    setLoadingSuggestions(false);
                 })
                 .catch((error) => {
                     console.error(error);
-                    setLoading(false);
+                    setLoadingSuggestions(false);
                 });
         }
-    }, [email, role]);
-
-    // useEffect(() => {
-    //     if (isUser && user) {
-    //         // Fetch suggestions
-    //         fetch("http://localhost:5000/suggestions", {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //             },
-    //             body: JSON.stringify({
-    //                 userId: user._id, // Ensure user._id exists
-    //             }),
-    //         })
-    //             .then((response) => {
-    //                 if (!response.ok) {
-    //                     throw new Error("Failed to fetch restaurant recommendations");
-    //                 }
-    //                 return response.json();
-    //             })
-    //             .then((data) => {
-    //                 console.log("Received suggested restaurants:", data);
-    //                 setSuggestedRestaurants(data.suggestions || []); // Use the `suggestions` array from the API
-    //                 setLoading(false);
-    //             })
-    //             .catch((error) => {
-    //                 console.error(error);
-    //                 setLoading(false);
-    //             });
-    //     }
-    // }, [isUser, user]);
+    }, [isUser, user]);
 
     const responsive = {
         desktop: {
@@ -89,79 +92,56 @@ const SuggestedRestaurants = () => {
 
     const renderSuggestedCarousel = (restaurants) => (
         <Carousel responsive={responsive} infinite autoPlay autoPlaySpeed={3000}>
-            {restaurants.map((entry, index) => {
-                const { restaurant, images } = entry; // Destructure `restaurant` and `images`
-                const imageUrl = images?.[0]?.link || "/placeholder.jpg"; // Default image if none available
-                return (
-                    <div key={index} className="card">
-                        <img
-                            src={imageUrl}
-                            alt={restaurant.name}
-                            className="card-img-top"
-                        />
-                        <div className="card-body">
-                            <h5 className="card-title">{restaurant.name}</h5>
-                            <p className="card-text">{restaurant.description}</p>
-                            <p className="card-text">Location: {restaurant.location}</p>
-                            <p className="card-text">Price: {restaurant.price}</p>
-                        </div>
-                    </div>
-                );
-            })}
-        </Carousel>
-    );
-    const renderTopCarousel = (restaurants) => (
-        <Carousel responsive={responsive} infinite autoPlay autoPlaySpeed={3000}>
-            {restaurants.map((entry, index) => {
-                const restaurant = entry.restaurant || entry; // Handle nested `restaurant` or flat structure
-                const images = entry.images || [];
-                const imageUrl = images?.[0]?.link || "/placeholder.jpg"; // Default image if none available
-                return (
-                    <div key={index} className="card">
-                        <img
-                            src={imageUrl}
-                            alt={restaurant.name}
-                            className="card-img-top"
-                            style={{ maxHeight: "200px", objectFit: "cover" }}
-                        />
-                        <div className="card-body">
-                            <h5 className="card-title">{restaurant.name}</h5>
-                            <p className="card-text">{restaurant.description}</p>
-                            <p className="card-text">Location: {restaurant.location}</p>
-                            <p className="card-text">Category: {restaurant.category}</p>
-                            <p className="card-text">Price: {restaurant.price}</p>
-                        </div>
-                    </div>
-                );
-            })}
-        </Carousel>
-    );
-    
+            {restaurants.map((restaurantInfo, index) => {
+                const { restaurant, images } = restaurantInfo;
+                console.log("Restaurant:", restaurant);
+                console.log("Images:", images);
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+                // Ensure you return the component here
+                return <Restaurant restaurant={restaurant} images={images} key={index} />;
+            })}
+        </Carousel>
+    );
+    const renderTopCarousel = (restaurants) => {
+        return (
+            <Carousel responsive={responsive} infinite autoPlay autoPlaySpeed={3000}>
+                {restaurants.map((restaurantInfo, index) => {
+                    const { restaurant, images } = restaurantInfo;
+                    console.log("Restaurant:", restaurant);
+                    console.log("Images:", images);
+
+                    // Ensure you return the component here
+                    return <Restaurant restaurant={restaurant} images={images} key={index} />;
+                })}
+            </Carousel>
+        );
+    };
 
     return (
         <div>
-            <h2>Top Restaurants</h2>
-            {renderTopCarousel(topRestaurants)}
-            {topRestaurants.length > 0 ? (
-                renderTopCarousel(topRestaurants)
-            ) : (
-                <p>No top restaurants available.</p>
-            )}
             {isUser && (
                 <>
-                    <h2>Suggested Restaurants</h2>
-                    {suggestedRestaurants.length > 0 ? (
+                    <h2>Suggested Restaurants based on ChatGPT</h2>
+                    {loadingSuggestions ? (
+                        <div className="loading-spinner">Loading...</div> // Replace with your spinner component or animation
+                    ) : suggestedRestaurants.length > 0 ? (
                         renderSuggestedCarousel(suggestedRestaurants)
                     ) : (
                         <p>No suggested restaurants available.</p>
                     )}
                 </>
             )}
+
+            <h2>Top Restaurants</h2>
+            {loadingTopRestaurants ? (
+                <div className="loading-spinner">Loading...</div> // Replace with your spinner component or animation
+            ) : topRestaurants.length > 0 ? (
+                renderTopCarousel(topRestaurants)
+            ) : (
+                <p>No top restaurants available.</p>
+            )}
         </div>
+
     );
 };
 

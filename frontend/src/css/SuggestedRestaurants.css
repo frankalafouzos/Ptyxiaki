@@ -1,0 +1,22 @@
+.suggested-restaurants {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .restaurant-card {
+    text-align: center;
+    padding: 15px;
+  }
+  
+  .restaurant-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+  
+  .restaurant-info {
+    margin-top: 10px;
+  }
