@@ -308,10 +308,10 @@ const Restaurant = ({ restaurant, index, images }) => {
           show={showAdminModal}
           handleClose={handleCloseAdminModal}
           handleDelete={handleAdminDelete}
-          title="Confirm Delete"
-          body="Are you sure you want to delete This Restaurant?"
+          title="Confirm Removal"
+          body="Are you sure you want to remove This Restaurant?"
           cancelLabel="No, Go Back"
-          confirmLabel="Yes, Delete"
+          confirmLabel="Yes, Remove"
         />
 
 

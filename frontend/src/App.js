@@ -59,6 +59,7 @@ import AdminRestaurants from './screens/Admin/AdminRestaurants';
 import AdminHeader from './components/Admin/AdminHeader.component';
 import AdminEditProfile from './screens/Admin/AdminEditProfile';
 import AdminEditPassword from './screens/Admin/AdminEditPassword';
+import AdminPendingRestaurants from './screens/Admin/AdminPendingApprovalRestaurants';
 
 
 
@@ -140,6 +141,7 @@ function App() {
           <Route path="/admin/EditProfile" element={<AdminProtectedRoute element={<AdminEditProfile />} />} />
           <Route path="/admin/users" element={<AdminProtectedRoute element={<AdminUsers />} />} />
           <Route path="/admin/restaurants" element={<AdminProtectedRoute element={<AdminRestaurants />} />} />
+          <Route path="/admin/pending-restaurants" element={<AdminProtectedRoute element={<AdminPendingRestaurants />} />} />
 
 
 

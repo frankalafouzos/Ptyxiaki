@@ -4,6 +4,8 @@ let BookingRating = require("../models/bookingRating.model");
 let RestaurantCapacity = require("../models/restaurantCapacity.model");
 let Restaurant = require("../models/restaurant.model");
 let User = require("../models/users.model");
+let { sendCustomerConfirmationMail } = require("../functions/notifications");
+// const fetch = require('node-fetch'); 
 
 router.route("/").get((req, res) => {
   Booking.find()
@@ -105,64 +107,56 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
       if (partyNumber <= 2) {
         if (trueCapacityFor2 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${
-              slot % 60 === 0 ? "00" : slot % 60
-            }`,
+            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
+              }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${
-              slot % 60 === 0 ? "00" : slot % 60
-            }`,
+            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
+              }`,
             available: false,
           });
         }
       } else if (partyNumber <= 4) {
         if (trueCapacityFor4 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${
-              slot % 60 === 0 ? "00" : slot % 60
-            }`,
+            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
+              }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${
-              slot % 60 === 0 ? "00" : slot % 60
-            }`,
+            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
+              }`,
             available: false,
           });
         }
       } else if (partyNumber <= 6) {
         if (trueCapacityFor6 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${
-              slot % 60 === 0 ? "00" : slot % 60
-            }`,
+            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
+              }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${
-              slot % 60 === 0 ? "00" : slot % 60
-            }`,
+            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
+              }`,
             available: false,
           });
         }
       } else if (partyNumber <= 8) {
         if (trueCapacityFor8 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${
-              slot % 60 === 0 ? "00" : slot % 60
-            }`,
+            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
+              }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${
-              slot % 60 === 0 ? "00" : slot % 60
-            }`,
+            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
+              }`,
             available: false,
           });
         }
@@ -181,7 +175,7 @@ router.route("/availability/:restaurantId").get(async (req, res) => {
   const partyNumber = req.query.partyNumber; // Ensure partyNumber is an integer
 
   // Assuming the date string is in "YYYY-MM-DD" format
-  const dateString = req.query.date; 
+  const dateString = req.query.date;
   const parts = dateString.split("-");
 
   // Note: parts[1] - 1 because months are 0-indexed in JavaScript Date objects
@@ -237,7 +231,7 @@ router.route("/create").post(async (req, res) => {
     } else if (partySize <= 6) {
       tableCapacity = 6;
     } else {
-      tableCapacity = 8; 
+      tableCapacity = 8;
     }
 
     const newBooking = new Booking({
@@ -255,9 +249,74 @@ router.route("/create").post(async (req, res) => {
     const booking = await newBooking.save();
     const bookingID = booking._id.toString();
     console.log({ message: "Booking created successfully", id: bookingID });
-    return res
+    res
       .status(201)
       .json({ message: "Booking created successfully", id: `${bookingID}` });
+
+    const response = await fetch("http://localhost:5000/users/getuserbyid?id=" + userid, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }).then((user) => {
+      console.log("User fetched successfully:", user);
+    });
+    const user = await response.body;
+    console.log(user);
+
+    // const apiUrl = "http://localhost:5000/notifications/mail"; // Replace with your backend's endpoint
+
+    const emailData = {
+      toName: user.firstname + " " + user.lastname,
+      toEmail: user.email,
+      restaurantName: restaurant.name,
+      bookingDate: date,
+      bookingTime: time,
+      guestCount: partySize
+    };
+
+    // const emailData = {
+    //   toName: "Frank Alafouzos",
+    //   toEmail: "frankalafouzos@gmail.com",
+    //   restaurantName: "Test",
+    //   bookingDate: "test",
+    //   bookingTime: "test",
+    //   guestCount: "test"
+    // };
+
+    try {
+      const result = await sendCustomerConfirmationMail(emailData);
+      if (result.success) {
+        res.status(200).json(result);
+      } else {
+        res.status(500).json(result);
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+    // fetch(apiUrl, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   },
+    //   body: JSON.stringify(emailData)
+    // })
+    //   .then(response => {
+    //     if (!response.ok) {
+    //       throw new Error(`HTTP error! status: ${response.status}`);
+    //     }
+    //     return res.json();
+    //   })
+    //   .then(data => {
+    //     console.log("Email sent successfully:", data);
+    //   })
+    //   .catch(error => {
+    //     console.error("Error sending email:", error.message);
+    //   });
+
+
+
   } catch (error) {
     console.error("Error creating booking:", error);
     return res
@@ -320,7 +379,7 @@ router.route("/deleteone/:id").delete((req, res) => {
 });
 
 router.route("/getonebyid").get(async (req, res) => {
-  const {id} = req.query;
+  const { id } = req.query;
   const booking = await Booking.findById(id)
 
   if (!booking) {

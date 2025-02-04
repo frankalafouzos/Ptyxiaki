@@ -1,6 +1,7 @@
 const router = require("express").Router();
 let User = require("../models/users.model");
 let Restaurant = require("../models/restaurant.model");
+let pendingApprovalRestaurant = require("../models/pendingApprovalRestaurant.model");
 let Owner = require("../models/restaurantOwner.model");
 const bcrypt = require("bcrypt");
 const { nanoid } = require("nanoid");
@@ -221,6 +222,10 @@ router.post('/filter', async (req, res) => {
       .skip((page - 1) * itemsPerPage)
       .limit(parseInt(itemsPerPage));
 
+    const pendingRestaurants = await Restaurant.find(query)
+      .sort({ [sortField]: sortOrder })
+      .skip((page - 1) * itemsPerPage)
+      .limit(parseInt(itemsPerPage));
     const images = await Image.find();
 
     const totalPages = Math.ceil((await Restaurant.countDocuments(query)) / itemsPerPage);
@@ -335,31 +340,31 @@ router.post('/addAdmin', async (req, res) => {
   console.log("Body: " + JSON.stringify(req.body))
   // Check if all required fields are provided
   if (!firstname || !lastname || !email || !password || !location) {
-      return res.status(400).json({ message: 'All fields are required' });
+    return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
-      // Check if a user with the provided email already exists
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-          return res.status(400).json({ message: 'Email is already in use' });
-      }
+    // Check if a user with the provided email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email is already in use' });
+    }
 
-      // Create a new user with the admin flag set to true
-      const newUser = new User({
-          firstname,
-          lastname,
-          email,
-          password, // This will be hashed automatically by the pre-save hook
-          location,
-          admin: true
-      });
+    // Create a new user with the admin flag set to true
+    const newUser = new User({
+      firstname,
+      lastname,
+      email,
+      password, // This will be hashed automatically by the pre-save hook
+      location,
+      admin: true
+    });
 
-      await newUser.save();
-      res.status(201).json({ message: 'Admin user created successfully', user: newUser });
+    await newUser.save();
+    res.status(201).json({ message: 'Admin user created successfully', user: newUser });
   } catch (error) {
-      console.error('Error creating admin:', error);
-      res.status(500).json({ message: 'Server error' });
+    console.error('Error creating admin:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

@@ -25,10 +25,11 @@ const OwnerHeader = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
+              <Nav.Link href="/admin/pending-restaurants">Requests</Nav.Link>
               <Nav.Link href="/admin/restaurants">Restaurants</Nav.Link>
-              <Nav.Link href="/admin/profile">Profile</Nav.Link>
               <Nav.Link href="/admin/users">Users</Nav.Link> 
               <Nav.Link href="/admin/add-administrator">Add Administrator</Nav.Link>
+              <Nav.Link href="/admin/profile">Profile</Nav.Link>
               {isAuthenticated() ? (
                 // Elements to render when owner is authenticated
                 <>

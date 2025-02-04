@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Restaurant from "../../components/Restaurant.component";
+import Restaurant from "../../components/Admin/PendingRestaurant.component";
 import PaginationComponent from "../../components/Pagination.component";
 import FilterRestaurants from "../../components/Admin/AdminFilterRestaurants.component";
 import SortForm from "../../components/Admin/AdminSortRestaurants.component";
@@ -7,7 +7,7 @@ import { Col, Row } from "react-bootstrap";
 import "../../css/Admin/AdminRestaurants.css";
 import { FaFilter, FaCircleXmark, FaFilterCircleXmark, FaX } from "react-icons/fa6"; // Import icons
 
-const AdminRestaurants = () => {
+const AdminPendingRestaurants = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [restaurants, setRestaurants] = useState([]);
@@ -93,7 +93,7 @@ const AdminRestaurants = () => {
       };
 
       try {
-        const response = await fetch(`http://localhost:5000/admins/filter`, {
+        const response = await fetch(`http://localhost:5000/pendingRestaurants/filter`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -132,7 +132,7 @@ const AdminRestaurants = () => {
 
   return (
     <div className="main-container">
-      <h1 className="restaurants-header">Restaurants</h1>
+      <h1 className="restaurants-header">Requests</h1>
 
       {/* Container for Search, Filters, and Sort */}
       <div className="controls-container">
@@ -231,4 +231,4 @@ const AdminRestaurants = () => {
   );
 };
 
-export default AdminRestaurants;
+export default AdminPendingRestaurants;

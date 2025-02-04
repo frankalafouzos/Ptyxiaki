@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const { nanoid } = require("nanoid");
 const jwt = require("jsonwebtoken");
 
+
 router.route("/").get((req, res) => {
   User.find()
   .then((users) => res.json(users))
@@ -235,7 +236,7 @@ router.route("/getuserbyid").get(async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    console.log(`User fetched successfully ${user}`);
+    // console.log(`User fetched successfully ${user}`);
     res.json(user);
   } catch (error) {
     console.error(error);
