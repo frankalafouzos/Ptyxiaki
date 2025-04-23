@@ -1,8 +1,10 @@
 const router = require("express").Router();
-let Owner = require("../models/restaurantOwner.model");
+const Owner = require("../models/restaurantOwner.model");
+const Restaurant = require("../models/restaurant.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { set } = require("mongoose");
+const { sendOwnerSignInConfirmationMail } = require("../functions/notifications");
 
 // Get all owners
 router.route("/").get((req, res) => {
@@ -54,6 +56,7 @@ router.post('/login', async (req, res) => {
         process.env.JWT_SECRET
       );
       res.status(200).json({ message: 'Owner logged in successfully.', token: token });
+
     } else {
       throw Error("Email does not correspond to an owner!");
     }
@@ -76,6 +79,22 @@ router.post('/signup', async (req, res) => {
     // Create a new owner
     const newOwner = new Owner({ firstname, lastname, email, password, location });
     await newOwner.save();
+
+    // Send owner sign-in confirmation email
+    const emailData = {
+      toName: newOwner.firstname + " " + newOwner.lastname,
+      toEmail: newOwner.email
+    };
+
+    sendOwnerSignInConfirmationMail(emailData)
+      .then(result => {
+        if (!result.success) {
+          console.error("Failed to send email:", result.error);
+        }
+      })
+      .catch(err => {
+        console.error("Unexpected email error:", err);
+      });
 
     res.status(201).json({ message: 'Owner created successfully.' });
   } catch (error) {
@@ -190,5 +209,30 @@ router.post("/addRestaurant", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+
+
+// Utility route to backfill restaurant owners
+router.post('/backfill-restaurants-owner', async (req, res) => {
+  try {
+    const owners = await Owner.find();
+
+    for (const owner of owners) {
+      if (!owner.restaurantsIds || owner.restaurantsIds.length === 0) continue;
+
+      for (const restaurantId of owner.restaurantsIds) {
+        await Restaurant.findByIdAndUpdate(restaurantId, {
+          owner: owner._id
+        });
+      }
+    }
+
+    res.status(200).json({ message: 'Backfill complete.' });
+  } catch (error) {
+    console.error('Error backfilling owners:', error);
+    res.status(500).json({ message: 'Something went wrong.', error });
+  }
+});
+
 
 module.exports = router;

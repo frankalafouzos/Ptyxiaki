@@ -115,6 +115,7 @@ const Dashboard = ({ restaurantId, year = new Date().getFullYear(), from }) => {
       
     if (error) return <Alert variant="danger">{error}</Alert>;
     if (!restaurant) return <Alert variant="warning">No restaurant data</Alert>;
+    if (restaurant.status ==="Deleted") return null;
 
     const bookingsPerDayData = {
         labels: Object.keys(stats.bookingsPerDay).sort((a, b) => {

@@ -58,13 +58,26 @@
 }
 
 .SortContainer{
+  display: flex;
+  margin-bottom: 2rem;
   width: 25%;
+}
+
+.SortContent{
+  width: 100%;
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+.SortTitle{
+  font-size: 1em;
+  margin-bottom: 5px;
 }
 
 .Sort {
   height: 3rem;
   font-size: 2rem;
-  width: 100%;
+
 }
 
 .maxPrice {

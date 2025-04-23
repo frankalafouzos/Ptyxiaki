@@ -4,8 +4,11 @@ let BookingRating = require("../models/bookingRating.model");
 let RestaurantCapacity = require("../models/restaurantCapacity.model");
 let Restaurant = require("../models/restaurant.model");
 let User = require("../models/users.model");
-let { sendCustomerConfirmationMail } = require("../functions/notifications");
+let Owner = require("../models/restaurantOwner.model");
+let { sendCustomerConfirmationMail, sendOwnerConfirmationMail, sendBookingReminderMail } = require("../functions/notifications");
 // const fetch = require('node-fetch'); 
+let GetUserByID = require("../functions/GetUser");
+let isDayClosed = require('../functions/IsDayClosed'); // Import the isDayClosed function
 
 router.route("/").get((req, res) => {
   Booking.find()
@@ -209,6 +212,12 @@ router.route("/create").post(async (req, res) => {
   const { userid, restaurantId, date, time, partySize, phone } = req.body;
   console.log(partySize);
   try {
+
+    const closed = await isDayClosed(restaurantId, date);
+    if (closed) {
+      return res.status(400).json({ message: "Cannot book on this closed day" });
+    }
+
     const restaurant = await Restaurant.find({ _id: restaurantId });
 
     if (restaurant.length === 0) {
@@ -253,23 +262,14 @@ router.route("/create").post(async (req, res) => {
       .status(201)
       .json({ message: "Booking created successfully", id: `${bookingID}` });
 
-    const response = await fetch("http://localhost:5000/users/getuserbyid?id=" + userid, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }).then((user) => {
-      console.log("User fetched successfully:", user);
-    });
-    const user = await response.body;
+    const user = await GetUserByID(userid);
     console.log(user);
 
     // const apiUrl = "http://localhost:5000/notifications/mail"; // Replace with your backend's endpoint
-
-    const emailData = {
+    const customerEmailData = {
       toName: user.firstname + " " + user.lastname,
       toEmail: user.email,
-      restaurantName: restaurant.name,
+      restaurantName: restaurant[0].name,
       bookingDate: date,
       bookingTime: time,
       guestCount: partySize
@@ -284,38 +284,59 @@ router.route("/create").post(async (req, res) => {
     //   guestCount: "test"
     // };
 
+    sendCustomerConfirmationMail(customerEmailData)
+      .then(result => {
+        if (!result.success) {
+          console.error("Failed to send email:", result.error);
+        }
+      })
+      .catch(err => {
+        console.error("Unexpected email error:", err);
+      });
+
     try {
-      const result = await sendCustomerConfirmationMail(emailData);
-      if (result.success) {
-        res.status(200).json(result);
-      } else {
-        res.status(500).json(result);
+      const owner = await Owner.findById(restaurant[0].owner);
+
+      if (!owner) {
+        console.error("Owner not found for the restaurant");
       }
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      res.status(500).json({ success: false, message: "Internal Server Error" });
+      else {
+        const ownerEmailData = {
+          toName: owner.firstname + " " + owner.lastname,
+          toEmail: owner.email,
+          restaurantName: restaurant[0].name,
+          bookingDate: date,
+          bookingTime: time,
+          guestCount: partySize
+        };
+
+        sendOwnerConfirmationMail(ownerEmailData)
+      }
+    } catch (error) {
+      console.log('Server error:' + error);
     }
-    // fetch(apiUrl, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json"
-    //   },
-    //   body: JSON.stringify(emailData)
-    // })
-    //   .then(response => {
-    //     if (!response.ok) {
-    //       throw new Error(`HTTP error! status: ${response.status}`);
-    //     }
-    //     return res.json();
-    //   })
-    //   .then(data => {
-    //     console.log("Email sent successfully:", data);
-    //   })
-    //   .catch(error => {
-    //     console.error("Error sending email:", error.message);
-    //   });
 
+    // Schedule booking reminder email for the day before the booking
+    // const bookingDate = new Date(date);
+    // const reminderDate = new Date(bookingDate);
+    // reminderDate.setDate(bookingDate.getDate() - 1);
 
+    // const now = new Date();
+    // const delay = reminderDate.getTime() - now.getTime();
+
+    // if (delay > 0) {
+    //   setTimeout(() => {
+    //     sendBookingReminderMail(customerEmailData)
+    //       .then(result => {
+    //         if (!result.success) {
+    //           console.error("Failed to send reminder email:", result.error);
+    //         }
+    //       })
+    //       .catch(err => {
+    //         console.error("Unexpected reminder email error:", err);
+    //       });
+    //   }, delay);
+    // }
 
   } catch (error) {
     console.error("Error creating booking:", error);
@@ -467,7 +488,5 @@ router.post('/rate/:bookingId', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-
 
 module.exports = router;

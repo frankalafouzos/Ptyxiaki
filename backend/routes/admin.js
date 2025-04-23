@@ -2,6 +2,7 @@ const router = require("express").Router();
 let User = require("../models/users.model");
 let Restaurant = require("../models/restaurant.model");
 let pendingApprovalRestaurant = require("../models/pendingApprovalRestaurant.model");
+const PendingEdits = require('../models/pendingEdits.model');
 let Owner = require("../models/restaurantOwner.model");
 const bcrypt = require("bcrypt");
 const { nanoid } = require("nanoid");
@@ -119,23 +120,74 @@ router.route("/hide-restaurant/:id").post(async (req, res) => {
     await restaurant.save();
     res.json("Restaurant hidden!");
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message }); 
   }
 });
 
 router.route("/approve-restaurant/:id").post(async (req, res) => {
   const RestaurantID = new ObjectId(req.params.id);
+  console.log("RestaurantID: " + RestaurantID);
   try {
-    const restaurant = await Restaurant.findById(RestaurantID);
-    if (!restaurant) {
-      return res.status(404).json({ error: 'Restaurant not found' });
+    const pendingRestaurant = await pendingApprovalRestaurant.findById(RestaurantID); // Fetch from pending collection
+    if (!pendingRestaurant) {
+      return res.status(404).json({ error: 'Pending restaurant not found' });
     }
-    restaurant.status = "Approved";
 
-    await restaurant.save();
-    res.json("Restaurant approved!");
+    console.log("Existing Restaurant ID: " + pendingRestaurant.ExistingRestaurantId);
+
+    if (pendingRestaurant.ExistingRestaurantId) {
+      // Handle edit request
+      const existingRestaurant = await Restaurant.findById(pendingRestaurant.ExistingRestaurantId);
+      if (!existingRestaurant) {
+        // Return a descriptive error message if the existing restaurant is not found
+        return res.status(404).json({ error: 'Existing restaurant not found for the provided ID' });
+      }
+      console.log("Existing Restaurant: " + existingRestaurant);
+
+      // Update the existing restaurant with the new data
+      existingRestaurant.name = pendingRestaurant.name;
+      existingRestaurant.price = pendingRestaurant.price;
+      existingRestaurant.category = pendingRestaurant.category;
+      existingRestaurant.location = pendingRestaurant.location;
+      existingRestaurant.phone = pendingRestaurant.phone;
+      existingRestaurant.email = pendingRestaurant.email;
+      existingRestaurant.description = pendingRestaurant.description;
+      existingRestaurant.imageID = pendingRestaurant.imageID;
+      existingRestaurant.Bookingduration = pendingRestaurant.Bookingduration;
+      existingRestaurant.openHour = pendingRestaurant.openHour;
+      existingRestaurant.closeHour = pendingRestaurant.closeHour;
+      existingRestaurant.status = "Approved"; // Ensure the status is set to Approved
+
+      await existingRestaurant.save(); // Save the updated restaurant
+    } else {
+      // Handle new restaurant submission
+      const approvedRestaurant = new Restaurant({
+        name: pendingRestaurant.name,
+        price: pendingRestaurant.price,
+        category: pendingRestaurant.category,
+        location: pendingRestaurant.location,
+        phone: pendingRestaurant.phone,
+        email: pendingRestaurant.email,
+        description: pendingRestaurant.description,
+        imageID: pendingRestaurant.imageID,
+        status: "Approved", // Set status to Approved
+        owner: pendingRestaurant.owner,
+        Bookingduration: pendingRestaurant.Bookingduration,
+        openHour: pendingRestaurant.openHour,
+        closeHour: pendingRestaurant.closeHour,
+      });
+
+      await approvedRestaurant.save(); // Save to the main Restaurant collection
+    }
+
+    // Remove the pending restaurant from the pending collection
+    await pendingApprovalRestaurant.findByIdAndDelete(RestaurantID);
+
+    console.log("Restaurant approved and processed!");
+    res.json("Restaurant approved and processed!");
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("Error approving restaurant:", error);
+    res.status(500).json({ message: 'An error occurred while approving the restaurant', error: error.message });
   }
 });
 
@@ -369,8 +421,132 @@ router.post('/addAdmin', async (req, res) => {
 });
 
 
+// Route to approve a pending edit
+router.post('/approve-edit/:id', async (req, res) => {
+  try {
+    // Find the pending edit
+    const pendingEdit = await PendingEdits.findById(req.params.id);
+    if (!pendingEdit) {
+      return res.status(404).json({ message: 'Pending edit not found' });
+    }
 
+    // Find the restaurant
+    const restaurant = await Restaurant.findById(pendingEdit.restaurantId);
+    if (!restaurant) {
+      return res.status(404).json({ message: 'Restaurant not found' });
+    }
+    
+    // Flag to track if we need to handle closedDays separately
+    let hasClosedDaysChange = false;
+    let closedDaysValue = null;
+    
+    // Process each change
+    for (const [field, value] of Object.entries(pendingEdit.changes)) {
+      console.log(`Processing change for field: ${field}`);
+      
+      if (field === 'closedDays') {
+        // Mark for special handling after main updates
+        hasClosedDaysChange = true;
+        closedDaysValue = value.new;
+        continue;
+      }
+      
+      // Handle other fields normally
+      if (restaurant[field] !== undefined) {
+        restaurant[field] = value.new;
+      }
+    }
+    
+    // Save the restaurant with all regular field updates
+    await restaurant.save();
+    
+    // Handle closed days separately if needed
+    if (hasClosedDaysChange) {
+      console.log('Handling closed days change:', closedDaysValue);
+      
+      // Import DefaultClosedDay at the top of your file
+      const DefaultClosedDay = require('../models/DefaultClosedDays.model');
+      
+      // Delete existing closed days
+      await DefaultClosedDay.deleteMany({ restaurant: restaurant._id });
+      
+      // Create new entries for all days
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      
+      const defaultDays = dayNames.map((dayName) => {
+        const isClosed = Array.isArray(closedDaysValue) && closedDaysValue.includes(dayName);
+        return {
+          restaurant: restaurant._id,
+          dayOfWeek: dayName,
+          isClosed: isClosed
+        };
+      });
+      
+      // Insert all the new entries
+      await DefaultClosedDay.insertMany(defaultDays);
+      console.log(`Default closed days updated for restaurant ${restaurant._id}`);
+    }
+    
+    // Delete the pending edit
+    await PendingEdits.findByIdAndDelete(req.params.id);
+    
+    res.status(200).json({ message: 'Edit approved successfully' });
+  } catch (error) {
+    console.error('Error approving edit:', error);
+    res.status(500).json({ message: 'Failed to approve edit', error: error.message });
+  }
+});
 
+// Add a route specifically for processing image changes if needed
+router.post("/process-image-changes/:id", async (req, res) => {
+  try {
+    const { restaurantId, imageId, changes } = req.body;
+    
+    if (!changes || !restaurantId || !imageId) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+    
+    console.log(`Processing image changes for restaurant ${restaurantId}`);
+    
+    // Process deleted images
+    if (changes.deleted && Array.isArray(changes.deleted) && changes.deleted.length > 0) {
+      for (const img of changes.deleted) {
+        const imageId = img.id || img._id;
+        if (imageId) {
+          await Image.findByIdAndDelete(imageId);
+          console.log(`Deleted image ${imageId}`);
+        }
+      }
+    }
+    
+    // For "added" images, they should already be uploaded
+    // but we can verify they exist and are properly linked
+    
+    res.json({ message: "Image changes processed successfully" });
+  } catch (error) {
+    console.error("Error processing image changes:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Route to reject a pending edit
+router.post("/reject-edit/:id", async (req, res) => {
+  try {
+    const pendingEdit = await PendingEdits.findById(req.params.id);
+    if (!pendingEdit || pendingEdit.status !== 'pending approval') {
+      return res.status(404).json({ error: 'Pending edit not found or not in pending status' });
+    }
+
+    // Update status
+    pendingEdit.status = 'rejected';
+    await pendingEdit.save();
+
+    res.json({ message: "Edit rejected" });
+  } catch (error) {
+    console.error("Error rejecting edit:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
 module.exports = router;

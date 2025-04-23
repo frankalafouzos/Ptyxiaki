@@ -26,6 +26,7 @@ const OwnerHeader = () => {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
               <Nav.Link href="/owner/dashboard">Dashboard</Nav.Link>
+              <Nav.Link href="/owner/pending-edits">Pending Edits</Nav.Link>
               <Nav.Link href="/owner/profile">Profile</Nav.Link>
               <Nav.Link href="/owner/restaurants">My Restaurants</Nav.Link> {/* Example owner-specific link */}
               <Nav.Link href="/owner/add-restaurant">Add Establishment</Nav.Link> {/* Add Restaurant Link */}

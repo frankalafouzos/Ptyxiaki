@@ -9,6 +9,7 @@ const RestaurantCapacity = require('../models/restaurantCapacity.model');
 const Owner = require('../models/restaurantOwner.model')
 const BookingRating = require("../models/bookingRating.model");
 const Booking = require("../models/booking.model");
+const DefaultClosedDay = require('../models/DefaultClosedDays.model');
 const ClosedDate = require('../models/ClosedDates.model');
 const { Types: { ObjectId } } = require('mongoose');
 const { uploadImage, deleteImage } = require('../functions/s3-utils');
@@ -131,8 +132,9 @@ router.get('/top-restaurants', async (req, res) => {
 
 router.route('/:id').get(async (req, res) => {
   const id = new ObjectId(req.params.id);
-
+  console.log("ID: ", id)
   const restaurant = await Restaurant.findById(id);
+  console.log("Restaurant: ", restaurant)
   const images = await Image.find({ ImageID: restaurant.imageID });
   if (!restaurant) {
     res.status(404).json({ message: 'Restaurant not found' });
@@ -158,7 +160,7 @@ router.post('/add', async (req, res) => {
     Bookingduration,
     openHour,
     closeHour,
-    status: 'pending approval', // added status field
+    status: 'Pending Approval', // added status field
     owner
   });
   try {
@@ -254,7 +256,7 @@ router.post('/deleteAll/:id', async (req, res) => {
 
   const restaurant = await Restaurant.findById(id);
   const images = await Image.find({ ImageID: restaurant.imageID });
-
+ 
   for (image of images) {
     let response = await deleteImage(extractFileName(image.link))
     let response_2 = await Image.deleteOne({ _id: image._id })
@@ -264,8 +266,8 @@ router.post('/deleteAll/:id', async (req, res) => {
 
   await RestaurantCapacity.deleteOne({ restaurantid: id })
 
-
-  const result = await Owner.updateOne(
+ 
+  const result = await Owner.updateOne(  
     { _id: ownerId },
     { $pull: { restaurantsIds: restaurant._id } }
   );
@@ -426,6 +428,75 @@ router.delete('/:restaurantId/closedDates', async (req, res) => {
   }
 });
 
+// GET: Fetch default closed days for a restaurant
+router.get('/:restaurantId/default-closed-days', async (req, res) => {
+  const { restaurantId } = req.params;
+
+  try {
+    const defaults = await DefaultClosedDay.find({ restaurant: restaurantId });
+
+    
+    // Extract only the days that are closed
+    const closedDays = defaults
+      .filter(day => day.isClosed)
+      .map(day => day.dayOfWeek);
+
+    console.log("Closed days: ", closedDays)
+
+    res.status(200).json(closedDays);
+  } catch (err) {
+    console.error('Error fetching default closed days:', err);
+    res.status(500).json({ message: 'Failed to fetch default closed days.' });
+  }
+});
+
+
+// POST: Set default closed days for a restaurant
+router.post('/default-closed-days/set', async (req, res) => {
+  const { restaurantId, closedDays } = req.body;
+  console.log("Closed days (raw):", closedDays);
+  
+  try {
+    // Convert string ID to ObjectId
+    const restaurantObjectId = new ObjectId(restaurantId);
+    
+    // First, delete any existing default closed day entries for this restaurant
+    await DefaultClosedDay.deleteMany({ restaurant: restaurantObjectId });
+    
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    // Map between day names and indices
+    const dayIndices = {};
+    dayNames.forEach((name, index) => {
+      dayIndices[name] = index;
+    });
+    
+    // Create entries for all days of the week
+    const defaultDays = dayNames.map((dayName) => {
+      // Check if this day name is in the closedDays array
+      const isClosed = Array.isArray(closedDays) && closedDays.includes(dayName);
+      console.log(`Day ${dayName}: closed = ${isClosed}`);
+      
+      return {
+        restaurant: restaurantObjectId,
+        dayOfWeek: dayName,
+        isClosed: isClosed
+      };
+    });
+
+    // Insert all the new entries
+    await DefaultClosedDay.insertMany(defaultDays);
+
+    console.log(`Default closed days set for restaurant ${restaurantId}:`, closedDays);
+    res.status(200).json({ 
+      message: 'Default closed days set successfully',
+      closedDays
+    });
+  } catch (err) {
+    console.error('Error setting default closed days:', err);
+    res.status(500).json({ message: 'Failed to set default closed days' });
+  }
+});
 
 
 

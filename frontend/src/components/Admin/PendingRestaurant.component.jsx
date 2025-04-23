@@ -1,8 +1,10 @@
 import { Card, Carousel } from "react-bootstrap";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import CustomModal from "../CustomModal";
 import Logo from "../../imgs/Logo.png";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Restaurant = ({ restaurant, images }) => {
     const [showModal, setShowModal] = useState(false);
@@ -65,28 +67,37 @@ const Restaurant = ({ restaurant, images }) => {
 
     const handleAdminApprove = async () => {
         try {
-            const response = await fetch(
-                `http://localhost:5000/admins/approve-restaurant/${restaurant._id}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            if (response.ok) {
-                console.log("Restaurant approved!");
-                window.location.reload();
-            } else {
-                console.log("Action failed");
-            }
+          const response = await fetch(`http://localhost:5000/admins/approve-restaurant/${restaurant._id}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+      
+          if (response.ok) {
+            toast.success("Restaurant approved successfully!", {
+              position: "top-right",
+              autoClose: 3000, // Closes after 3 seconds
+            });
+            window.location.reload(); // Refresh the page to update the list
+          } else {
+            const errorData = await response.json(); // Parse the error response
+            console.error("Failed to approve restaurant:", errorData.error);
+            toast.error(`Error: ${errorData.error}`, {
+              position: "top-right",
+              autoClose: 5000, // Closes after 5 seconds
+            });
+          }
         } catch (error) {
-            console.error("An error occurred:", error);
+          console.error("Error approving restaurant:", error);
+          toast.error("An unexpected error occurred. Please try again.", {
+            position: "top-right",
+            autoClose: 5000,
+          });
         }
-
+      
         setShowAdminApproveModal(false);
-    };
+      };
 
     const handleShowModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);

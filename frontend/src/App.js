@@ -46,8 +46,10 @@ import OwnerProfile from './screens/Owner/OwnerProfile';
 import OwnerEditProfile from './screens/Owner/OwnerEditProfile';
 import OwnerEditPassword from './screens/Owner/OwnerEditPassword';
 import OwnerRestaurantCalendar from './screens/Owner/OwnerRestaurantCalendar';
-
-
+import AddBooking from './screens/Owner/AddBooking';
+import OwnerConfirmBooking from './screens/Owner/ConfirmBooking';
+import OwnerPendingEditsList from './components/Owner/OwnerPendingEditsList.component';
+import OwnerPendingEditDetail from './components/Owner/OwnerPendingEditDetail.component';
 
 // Admin
 import AdminHome from './screens/Admin/AdminHome';
@@ -60,6 +62,13 @@ import AdminHeader from './components/Admin/AdminHeader.component';
 import AdminEditProfile from './screens/Admin/AdminEditProfile';
 import AdminEditPassword from './screens/Admin/AdminEditPassword';
 import AdminPendingRestaurants from './screens/Admin/AdminPendingApprovalRestaurants';
+import AdminPendingEdits from './components/Admin/AdminPendingEdits.component';
+import AdminPendingEditDetail from './components/Admin/AdminPendingEditDetail.component';
+
+// Dark Mode
+import DarkModeToggle from './components/DarkModeToggler.component';
+
+
 
 
 
@@ -87,6 +96,7 @@ function App() {
   }
   
   return (
+    <>
     <Router>
       {auth.isAuthenticated && role.role === 'owner' ? (
           <OwnerHeader />
@@ -97,7 +107,8 @@ function App() {
       ):(
           <Header />
       )}
-      <main>
+      <main >
+        
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -131,7 +142,10 @@ function App() {
           <Route path="/owner/EditPassword" element={<OwnerProtectedRoute element={<OwnerEditPassword />} />} />
           <Route path="/owner/EditProfile" element={<OwnerProtectedRoute element={<OwnerEditProfile />} />} />
           <Route path="/owner/restaurant/:restaurantId/calendar" element={<OwnerProtectedRoute element={<OwnerRestaurantCalendar />} />} />
-
+          <Route path="/owner/add-booking/:restaurantId" element={<OwnerProtectedRoute element={<AddBooking />} />} />
+          <Route path="/owner/confirm-booking" element={<OwnerProtectedRoute element={<OwnerConfirmBooking />} />} />
+          <Route path="/owner/pending-edits" element={<OwnerProtectedRoute element={<OwnerPendingEditsList />} />} />
+          <Route path="/owner/pending-edits/:id" element={<OwnerProtectedRoute element={<OwnerPendingEditDetail />} />} />
 
           {/* Admin Pages */}
           <Route path="/admin" element={<AdminProtectedRoute element={<AdminHome />} />} />
@@ -142,15 +156,17 @@ function App() {
           <Route path="/admin/users" element={<AdminProtectedRoute element={<AdminUsers />} />} />
           <Route path="/admin/restaurants" element={<AdminProtectedRoute element={<AdminRestaurants />} />} />
           <Route path="/admin/pending-restaurants" element={<AdminProtectedRoute element={<AdminPendingRestaurants />} />} />
-
-
-
-
+          <Route path="/admin/pending-edits" element={<AdminProtectedRoute element={<AdminPendingEdits />} />} />
+          <Route path="/admin/pending-edits/:id" element={<AdminProtectedRoute element={<AdminPendingEditDetail />} />} />
 
         </Routes>
+        
       </main>
+      
       <Footer />
     </Router>
+    <DarkModeToggle />
+    </>
   );
 }
 
@@ -159,3 +175,4 @@ export default () => (
     <App />
   </AuthProvider>
 );
+

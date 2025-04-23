@@ -25,74 +25,96 @@ const openai = new OpenAI({
 
 router.post('/', async (req, res) => {
     try {
-        // Fetch user bookings
+        // 1️⃣ Fetch all user bookings
         const userBookings = await Booking.find({ userid: req.body.userId }).lean();
 
-        // Aggregate bookings and fetch restaurant details
-        const bookingWithRestaurants = await Promise.all(
-            userBookings.map(async (booking) => {
-                const restaurant = await Restaurant.findById(booking.restaurantid).lean();
-                return {
-                    booking,
-                    restaurant,
-                };
-            })
-        );
+        if (userBookings.length === 0) {
+            return res.json({ suggestions: [] }); // No bookings = No recommendations
+        }
 
-        // Filter out any bookings where restaurant data is not found
-        const validBookings = bookingWithRestaurants.filter(entry => entry.restaurant);
+        // 2️⃣ Batch Fetch All Restaurants (Only Approved & Visible)
+        const restaurantIds = userBookings.map(booking => booking.restaurantid);
+        const restaurants = await Restaurant.find({ _id: { $in: restaurantIds }, hide: false, status: 'Approved' }).lean();
 
-        // Summarize restaurants for OpenAI
-        const summarizedRestaurants = validBookings.map(entry => [
-            entry.restaurant._id.toString(),
-            entry.restaurant.price,
-        ]);
+        if (restaurants.length === 0) {
+            return res.json({ suggestions: [] }); // No active restaurants found
+        }
 
-        // Limit restaurants to the first 100
+        // 3️⃣ Create a Map for Fast Lookup
+        const restaurantMap = new Map(restaurants.map(r => [r._id.toString(), r]));
+
+        // 4️⃣ Associate Bookings with Restaurants (Filtering out missing ones)
+        const validBookings = userBookings
+            .map(booking => ({
+                booking,
+                restaurant: restaurantMap.get(booking.restaurantid.toString())
+            }))
+            .filter(entry => entry.restaurant); // Remove null entries
+
+        // 5️⃣ Summarize Restaurants for OpenAI (More Features!)
+        const summarizedRestaurants = validBookings.map(entry => ({
+            id: entry.restaurant._id.toString(),
+            price: Math.round(entry.restaurant.price / 10), // Normalize price (Less tokens)
+            category: entry.restaurant.category,
+            location: entry.restaurant.location,
+            popularity: entry.restaurant.visitCounter, // More visited = better suggestion
+            open: entry.restaurant.openHour, // Opening time (in minutes of the day)
+            close: entry.restaurant.closeHour, // Closing time
+            duration: entry.restaurant.Bookingduration, // Usual booking duration
+        }));
+
+        // 6️⃣ Select More Restaurants (Up to 300) Without Overloading Tokens
         const limitedSummarizedRestaurants = summarizedRestaurants
-            .sort((a, b) => b[1] - a[1]) // Sort by price
-            .slice(0, 100);
+            .sort((a, b) => b.popularity - a.popularity) // Sort by most visited
+            .slice(0, 300);
+        const totalGPTRestaurants = await Restaurant.countDocuments({});
+        console.log("Total Restaurants Sent to GPT:", totalGPTRestaurants);
+        const totalRestaurants = await Restaurant.countDocuments({});
+        console.log("Total Restaurants in DB:", totalRestaurants);
+        
 
-        // Aggregate bookings for OpenAI input
+
+        // 7️⃣ Aggregate Bookings for OpenAI
         const aggregatedBookings = validBookings.reduce((acc, entry) => {
             const { restaurantid } = entry.booking;
-            acc[restaurantid] = (acc[restaurantid] || 0) + 1;
+            acc[restaurantid] = (acc[restaurantid] || 0) + 1; // Count number of times booked
             return acc;
         }, {});
 
-        const aggregatedBookingArray = Object.entries(aggregatedBookings).slice(0, 50);
+        const aggregatedBookingArray = Object.entries(aggregatedBookings)
+            .map(([id, count]) => ({ id, count }))
+            .slice(0, 100); // Increased from 50 to 100
 
-        // Call OpenAI API
+        // 8️⃣ Call OpenAI API (Optimized Input)
         const response = await openai.chat.completions.create({
-            model: "gpt-4",
+            model: "gpt-4o-mini", // Fastest & most affordable
             messages: [
-                { role: "system", content: "You are a helpful assistant that recommends new restaurants based on user bookings. Firstly I need the answer as fast as possible! Important Note: I need only the restaurant ids in a json! Keep in mind I pass to you the first 150 restaurants. Find the patterns between the restaurants the user has already made a booking based on all of the info you get and bring back your suggestions." },
+                { role: "system", content: "Recommend restaurants based on user bookings. Respond only with restaurant IDs in JSON." },
                 {
                     role: "user",
-                    content: `Restaurants are represented as [Restaurant ID, Price].\n` +
-                             `Bookings are represented as [Restaurant ID, Booking Count].\n` +
-                             `Restaurants:\n${JSON.stringify(limitedSummarizedRestaurants)}\n` +
-                             `Bookings:\n${JSON.stringify(aggregatedBookingArray)}\n` +
-                             `Provide only the restaurant IDs as a JSON array. Example: ["id1", "id2", "id3"]`,
+                    content: `Restaurants: ${JSON.stringify(limitedSummarizedRestaurants)}\n` +
+                        `Bookings: ${JSON.stringify(aggregatedBookingArray)}\n` +
+                        `Return only a JSON array of 8 recommended restaurant IDs with the key "recommended_ids".`,
                 },
             ],
+            response_format: { "type": "json_object" },
+            temperature: 0.3,
+            max_completion_tokens: 1000,
+            top_p: 0.9
         });
 
-        // Parse GPT response
-        const gptResponse = response.choices[0].message.content;
-        console.log("GPT-4 Response Content:", gptResponse);
-
-        let suggestedIds;
-        const match = gptResponse.match(/\[.*?\]/s); // Match the first JSON-like array
-        if (match) {
-            suggestedIds = JSON.parse(match[0]);
-        } else {
-            throw new Error("No JSON array found in GPT response");
+        // 9️⃣ Parse OpenAI Response (Error Handling)
+        let suggestedIds = [];
+        try {
+            const parsedResponse = JSON.parse(response.choices[0].message.content);
+            if (parsedResponse && Array.isArray(parsedResponse.recommended_ids)) {
+                suggestedIds = parsedResponse.recommended_ids;
+            }
+        } catch (error) {
+            console.error("Error parsing GPT response:", error);
         }
 
-        console.log("Extracted Suggested IDs:", suggestedIds);
-
-        // Fetch suggested restaurants details
+        // 🔟 Batch Fetch Suggested Restaurants (Avoids Multiple Queries)
         const suggestedRestaurants = await Promise.all(
             suggestedIds.map(async id => {
                 const restaurant = await Restaurant.findById(id).lean();
@@ -100,18 +122,15 @@ router.post('/', async (req, res) => {
                 return { restaurant, images };
             })
         );
-
+        console.log("Response:", response.choices[0].message.content);
         const validSuggestedRestaurants = suggestedRestaurants.filter(r => r.restaurant);
 
-        // Respond with the enriched bookings and suggestions
-        res.json({
-            suggestions: validSuggestedRestaurants,
-        });
+        // Respond with the recommended restaurants
+        res.json({ suggestions: validSuggestedRestaurants });
     } catch (error) {
-        console.error("Error:", error.response ? error.response.data : error.message);
+        console.error("Error:", error.message);
         res.status(500).json({ error: "Failed to fetch restaurant recommendations" });
     }
 });
-
 
 module.exports = router;

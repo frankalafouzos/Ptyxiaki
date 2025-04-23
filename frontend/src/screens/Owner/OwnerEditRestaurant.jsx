@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import RestaurantForm from '../../components/Owner/RestaurantForm.component';
+import RestaurantForm from '../../components/Owner/NewRestaurantForm.component';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -9,6 +9,7 @@ const EditRestaurant = () => {
   const [restaurantData, setRestaurantData] = useState(null);
   const [capacities, setCapacities] = useState(null);
   const [images, setImages] = useState(null);
+  const [defaultClosedDays, setDefaultClosedDays] = useState(null);
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -22,10 +23,19 @@ const EditRestaurant = () => {
         if (!capacitiesResponse.ok) {
           throw new Error('Failed to fetch restaurant capacities');
         }
-        const capacitiyData = await capacitiesResponse.json();
+
+        const defaultClosedDatesResponse = await fetch(`http://localhost:5000/restaurants/${id}/default-closed-days`);
+        if (!defaultClosedDatesResponse) {
+          throw new Error('Failed to fetch restaurant closed dates');
+        }
+        const defaultClosedDatesData = await defaultClosedDatesResponse.json();
+        console.log("Defauly Closed Dates:"+defaultClosedDatesData)
+
+        const capacityData = await capacitiesResponse.json();
         setRestaurantData(data.restaurant);
-        setCapacities(capacitiyData);
+        setCapacities(capacityData);
         setImages(data.images)
+        setDefaultClosedDays(defaultClosedDatesData);
       } catch (error) {
         toast.error(error.message, {
           position: 'top-center',
@@ -38,19 +48,16 @@ const EditRestaurant = () => {
 
   const handleSubmit = async (formData) => {
     try {
-      const response = await fetch(`http://localhost:5000/restaurants/edit/${id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to edit restaurant');
-      }
-
-      toast.success('Restaurant edited successfully', {
+      // We don't need this direct edit anymore as we're using the pending edits flow
+      // that's now integrated into the RestaurantForm component
+      
+      // NOTE: The actual submission logic is now handled in the RestaurantForm's onSubmitEdit function,
+      // which detects changes and sends them through the pending edits system
+      
+      // This function is still needed as it's passed as a prop to RestaurantForm,
+      // but we can just leave it as a no-op or use it to handle any post-submission actions
+      
+      toast.success('Changes submitted for approval', {
         position: 'top-center',
         autoClose: 2000,
       });
@@ -63,7 +70,16 @@ const EditRestaurant = () => {
     }
   };
 
-  return restaurantData ? <RestaurantForm restaurantData={restaurantData} capacities={capacities} handleSubmit={handleSubmit} images={images}/> : <div>Loading...</div>;
+  return restaurantData ? (
+    <RestaurantForm 
+      restaurantData={restaurantData} 
+      capacities={capacities} 
+      DefaultClosedDays={defaultClosedDays} 
+      handleSubmit={handleSubmit}
+      images={images}
+      screenType="edit" // Add this prop to indicate edit mode
+    />
+  ) : <div>Loading...</div>;
 };
 
 export default EditRestaurant;

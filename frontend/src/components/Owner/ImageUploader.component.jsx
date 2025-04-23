@@ -5,7 +5,7 @@ import { Row, Col } from 'react-bootstrap';
 import DraggableImage from './DraggableImage.component';
 import styles from '../../css/ImageUploader.module.css';
 
-const ImageUploader = ({ setImages, initialImages = [] }) => {
+const ImageUploader = ({ setImages, initialImages = [], onExistingImageRemoved }) => {
   const [existingImages, setExistingImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
 
@@ -62,8 +62,19 @@ const ImageUploader = ({ setImages, initialImages = [] }) => {
 
   const removeImage = (index, type) => {
     if (type === 'existing') {
-      const updatedImages = existingImages.filter((_, i) => i !== index);
-      setExistingImages(updatedImages);
+      console.log("1");
+      const removedImage = existingImages[index]; // Get the image before filtering
+      console.log("2");
+      // Update the existingImages state
+      setExistingImages(prevImages => {
+        return prevImages.filter((_, i) => i !== index);
+      });
+      console.log("3");
+      // Notify parent about the deletion
+      if (onExistingImageRemoved) {
+        onExistingImageRemoved(removedImage);
+      }
+      console.log("4");
     } else {
       const updatedImages = newImages.filter((_, i) => i !== index);
       setNewImages(updatedImages);

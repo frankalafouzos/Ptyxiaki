@@ -9,12 +9,12 @@ const OwnerDashboard = () => {
     const authUser = useAuthUser();
     const email = authUser.email;
     const [owner, setOwner] = useState(null);
-    const [restaurantIds, setRestaurantIds] = useState([]);
+    const [validRestaurants, setValidRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchOwner = async (email) => {
+        const fetchOwnerAndRestaurants = async () => {
             try {
                 console.log("Fetching user data for email:", email);
                 setLoading(true);
@@ -33,29 +33,45 @@ const OwnerDashboard = () => {
                     throw new Error("Owner not found");
                 }
 
-                let data = await response.json(); // Await the JSON conversion
-                console.log("Received owner data:", data);
-                setOwner(data);
-                setRestaurantIds(data.restaurantsIds);
+                let ownerData = await response.json();
+                console.log("Received owner data:", ownerData);
+                setOwner(ownerData);
+
+                // Create array to store valid restaurant data
+                const activeRestaurants = [];
+                
+                // Process each restaurant ID individually
+                for (const id of ownerData.restaurantsIds) {
+                    try {
+                        const restaurantResponse = await fetch(`http://localhost:5000/restaurants/${id}`);
+                        
+                        if (!restaurantResponse.ok) {
+                            console.warn(`Restaurant ${id} not found or inaccessible`);
+                            continue; // Skip to the next restaurant
+                        }
+                        
+                        const data = await restaurantResponse.json();
+                        // Skip restaurants with status "deleted"
+                        if (data.restaurant && data.restaurant.status !== "Deleted") {
+                            activeRestaurants.push(id);
+                        }
+                    } catch (err) {
+                        console.warn(`Error fetching restaurant ${id}:`, err);
+                        // Continue with other restaurants
+                    }
+                }
+                
+                setValidRestaurants(activeRestaurants);
             } catch (error) {
                 console.error(error);
+                setError(error.message);
             } finally {
                 setLoading(false);
             }
         };
 
-
-
-        const fetchInfo = async () => {
-            try {
-                await fetchOwner(email);
-            } catch (error) {
-                setError(error.message);
-            }
-        };
-
-        fetchInfo();
-    }, [authUser]);
+        fetchOwnerAndRestaurants();
+    }, [email]);
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
@@ -63,13 +79,13 @@ const OwnerDashboard = () => {
     return (
         <div className='dashboard-container'>
             <h1 className='dashboard-title'>Restaurants Dashboard</h1>
-            {restaurantIds.length > 0 ? (
+            {validRestaurants.length > 0 ? (
                 <Row className="row">
-                {restaurantIds.map(id => (
+                {validRestaurants.map(id => (
                     <Col key={id} sm={12} md={6} lg={6} xl={6} xxl={6}>
                     <Link 
                         key={id} 
-                        to={`http://localhost:3000/owner/restaurant-dashboard/${id}`} 
+                        to={`/owner/restaurant-dashboard/${id}`} 
                         style={{ textDecoration: 'none', color: 'inherit' }}
                     >
                         <Dashboard key={id} restaurantId={id} />

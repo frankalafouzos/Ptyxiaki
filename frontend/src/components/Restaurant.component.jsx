@@ -58,7 +58,7 @@ const Restaurant = ({ restaurant, index, images }) => {
 
   const handleAdminDelete = async () => {
     try {
-      const response = await fetch("http://localhost:5000/restaurants/" + restaurant._id, {
+      const response = await fetch("http://localhost:5000/restaurants/deleteAll/" + restaurant._id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -148,6 +148,10 @@ const Restaurant = ({ restaurant, index, images }) => {
 
   const restaurantImages = getImagesForRestaurant(restaurant.imageID);
 
+  if (restaurant.status === "Deleted" && role !== "admin") {
+    return null; // or return an empty fragment: return <></>;
+  }
+
   return (
     <Card className="Restaurant rounded">
       <Link to={`/restaurant/${restaurant._id}`}>
@@ -197,8 +201,11 @@ const Restaurant = ({ restaurant, index, images }) => {
             {restaurant.status === "Deleted" && (
               <span className="badge bg-danger">{restaurant.status}</span>
             )}
+            {restaurant.status === "pending approval" && (
+              <span className="badge bg-primary">Pending Approval</span>
+            )}
             {restaurant.status === "Pending Approval" && (
-              <span className="badge bg-primary">{restaurant.status}</span>
+              <span className="badge bg-primary">Pending Approval</span>
             )}
           </>
         )}

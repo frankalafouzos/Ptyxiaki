@@ -1,68 +1,28 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Form } from 'react-bootstrap';
 
-function formatDate(date) {
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
+const DateInputComponent = ({ onDateChange, widthofInput, value }) => {
+  const [dateValue, setDateValue] = useState(value || new Date().toISOString().split("T")[0]);
 
-function parseDate(input) {
-  const parts = input.split('/');
-  if (parts.length === 3) {
-    const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1;
-    const year = parseInt(parts[2], 10);
-    return new Date(year, month, day);
-  }
-  return new Date();
-}
+  useEffect(() => {
+    if (!value) {
+      setDateValue(new Date().toISOString().split("T")[0]);
+    }
+  }, [value]);
 
-function DateInputComponent({ onDateChange, widthofInput }) {
-  const [date, setDate] = useState(new Date());
-  const [inputType, setInputType] = useState('text');
-  const [inputValue, setInputValue] = useState(formatDate(new Date()));
-
-  const onFocus = () => {
-    setInputType('date');
-    setInputValue(date.toISOString().split('T')[0]);
-  };
-
-  const onBlur = () => {
-    setInputType('text');
-    setInputValue(formatDate(date));
-  };
-  
-  const onChange = (e) => {
-    const newDate = inputType === 'date' ? new Date(e.target.value) : parseDate(e.target.value);
-    setDate(newDate);
-    const formattedDate = inputType === 'date' ? e.target.value : formatDate(newDate);
-    setInputValue(formattedDate);
-    onDateChange(formattedDate);
+  const handleChange = (e) => {
+    setDateValue(e.target.value);
+    onDateChange(e.target.value);
   };
 
   return (
-    <>
-      <label htmlFor="date" style={{ fontWeight: '600', color: '#34495e' }}>Date of Reservation:</label>
-      <input
-        type={inputType}
-        id="date"
-        placeholder="DD/MM/YYYY"
-        value={inputValue}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        onChange={onChange}
-        style={{
-          width: widthofInput || '100%',
-          padding: '0.5rem',
-          border: '1px solid #ced4da',
-          borderRadius: '5px',
-          fontSize: '1rem',
-          color: '#495057',
-        }}
-      />
-    </>
+    <Form.Control
+      type="date"
+      value={dateValue}
+      onChange={handleChange}
+      style={{ width: widthofInput }}
+    />
   );
-}
+};
 
 export default DateInputComponent;

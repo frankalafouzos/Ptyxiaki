@@ -1,0 +1,26 @@
+.pending-edit-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.pending-edit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.pending-edit-card .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.pending-edit-card .badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+}
+
+.pending-edit-card .card-footer {
+  background-color: white;
+  border-top: 1px solid #eee;
+  padding: 0.75rem;
+}

@@ -6,7 +6,8 @@ const Image = require('../models/images.model');
 const mime = require('mime-types');
 
 
-router.route('/upload/:id').post(upload.single('image'), (req, res) => {
+router.post('/upload/:id', upload.single('image'), async (req, res) => {
+  // Revert to original logic
   console.log("Image ID from URL parameter:", req.params.id);
   console.log("File:", req.file);
   uploadImage(req.file)

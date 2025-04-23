@@ -1,7 +1,7 @@
 
 import CustomModal from "./CustomModal";
 import React, { useState, useEffect, useRef } from "react";
-import { Container, Row, Col, Modal, Button } from "react-bootstrap";
+// import { Container, Row, Col, Modal, Button } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import "../css/RestaurantPage.css";
@@ -174,6 +174,17 @@ const RestaurantPage = () => {
 
   return (
     <>
+    {restaurant.status === "Deleted" ? (
+      <div className="restaurant-container">
+        <div className="not-found-container">
+          <h1>404 - Restaurant Not Found</h1>
+          <p>This restaurant has been deleted or does not exist.</p>
+          <Link to="/" className="btn btn-primary">
+            Go Back to Home
+          </Link>
+        </div>
+      </div>
+    ) : (
       <div className="restaurant-container">
         <div className="content-layout">
 
@@ -251,7 +262,7 @@ const RestaurantPage = () => {
                     onClick={handleShowAdminHideModal}
                     className="btn btn-outline-warning mt-4"
                   >
-                    Hide
+                    {restaurant.status === "Hidden" ? "Show" : "Hide"}
                   </button>
                   <button
                     onClick={handleShowAdminModal}
@@ -265,7 +276,7 @@ const RestaurantPage = () => {
           </div>
         </div>
       </div>
-
+   )}
 
       <CustomModal
         show={showAdminModal}
@@ -285,7 +296,7 @@ const RestaurantPage = () => {
         title="Confirm Request"
         body="Are you sure you want to hide this restaurant?"
         cancelLabel="No, Go Back"
-        confirmLabel="Yes, Hide"
+        confirmLabel={restaurant.status === "Hidden" ? "Yes, Show" : "Yes, Hide"}
         isWarning={true}
       />
 

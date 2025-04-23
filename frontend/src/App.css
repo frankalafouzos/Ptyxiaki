@@ -36,3 +36,94 @@
     transform: rotate(360deg);
   }
 }
+
+
+.dark-mode {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.dark-mode footer,
+.dark-mode img, 
+.dark-mode .hero-section {
+    filter: invert(1) hue-rotate(180deg);
+}
+
+
+/* Sticky Toggle Button */
+.toggle-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 12px;
+  border-radius: 30px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Light Mode Background */
+body:not(.dark-mode) .toggle-container {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* Label Text */
+.toggle-label {
+  margin-right: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+/* Light Mode Text */
+body:not(.dark-mode) .toggle-label {
+  color: black;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  width: 50px;
+  height: 25px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 3.5px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+/* Dark mode active */
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}

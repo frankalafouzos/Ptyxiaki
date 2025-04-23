@@ -17,9 +17,10 @@ main {
 }
 
 
+
 .home-container {
     text-align: center;
-    padding: 50px;
+    /* padding: 50px; */
    
     min-height: 100vh;
   }
@@ -34,4 +35,93 @@ main {
     font-size: 1.2em;
     color: #666;
   }
+
+/* Ensure the page has a smooth scrolling effect */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 158px); /* Adjust based on your header height */
+  background: url('../imgs/Blurred_home_img.PNG') no-repeat center center/cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+}
+
+/* Hero Text Overlay */
+.hero-text {
+  background: rgba(0, 0, 0, 0.5); /* Dark transparent background */
+  padding: 20px 40px;
+  border-radius: 10px;
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Content Section (Parallax Scrolling Effect) */
+.content-section {
+  padding: 50px 10%;
+  /* background-color: #a8d0f3; */
+  transform: translateY(50px);
+  opacity: 0;
+  transition: all 1s ease-in-out;
+}
+
+/* Apply animation when scrolling */
+.content-section.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Section Title */
+.section-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+/* Add smooth scrolling */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Scrolling animation */
+@keyframes scrollIn {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply the scroll effect */
+.suggested-restaurants {
+  animation: scrollIn 1.2s ease-in-out forwards;
+  opacity: 0;
+}
+
+  
+
 

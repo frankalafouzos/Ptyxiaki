@@ -1,10 +1,19 @@
 const router = require("express").Router();
+// const nodemailer = require("nodemailer");
 let Booking = require("../models/booking.model");
 let BookingRating = require("../models/bookingRating.model");
 let RestaurantCapacity = require("../models/restaurantCapacity.model");
 let Restaurant = require("../models/restaurant.model");
 let User = require("../models/users.model");
 
+// Configure nodemailer
+// const transporter = nodemailer.createTransport({
+//   service: "Gmail",
+//   auth: {
+//     user: "your-email@gmail.com",
+//     pass: "your-email-password",
+//   },
+// });
 
 router.route("/mail").post((req, res) => {
     const mailjet = require('node-mailjet').apiConnect(
@@ -176,6 +185,5 @@ router.route("/mail").post((req, res) => {
             res.status(500).json({ success: false, message: "Failed to send email", error: err.message });
         });
 });
-
 
 module.exports = router;

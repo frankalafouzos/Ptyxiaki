@@ -5,8 +5,8 @@ import { Form } from "react-bootstrap";
 const SortForm = ({ Sort, setSort }) => {
   return (
     <Form className="SortContainer">
-      <Form.Group className="">
-        <Form.Label>Sort</Form.Label>
+      <Form.Group className="SortContent">
+        <Form.Label className="SortTitle">Sort</Form.Label>
         <Form.Control
           className="Sort"
           as="select"

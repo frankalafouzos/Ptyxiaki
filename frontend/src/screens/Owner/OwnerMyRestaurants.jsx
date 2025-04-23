@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'react-bootstrap';
-import Restaurant from '../../components/Restaurant.component'; // Adjust the import path as necessary
+import Restaurant from '../../components/Restaurant.component';
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const OwnerMyRestaurants = () => {
@@ -32,27 +32,35 @@ const OwnerMyRestaurants = () => {
 
         const ownerData = await response.json();
         console.log("Received owner data:", ownerData);
-
-        // Fetch details for each restaurant
-        const restaurantPromises = ownerData.restaurantsIds.map(id =>
-          fetch(`http://localhost:5000/restaurants/${id}`)
-            .then(response => {
-              if (!response.ok) {
-                throw new Error(`Restaurant ${id} not found`);
-              }
-              return response.json();
-            })
-        );
-
-        const restaurantDataArray = await Promise.all(restaurantPromises);
-
-        // Combine restaurant data and their images
-        const restaurantsWithImages = restaurantDataArray.map(data => ({
-          ...data.restaurant,
-          images: data.images
-        }));
-
-        setRestaurants(restaurantsWithImages);
+        
+        // Create an array to hold valid restaurant data
+        const validRestaurants = [];
+        
+        // Process each restaurant ID individually to avoid one failure affecting all
+        for (const id of ownerData.restaurantsIds) {
+          try {
+            const response = await fetch(`http://localhost:5000/restaurants/${id}`);
+            
+            if (!response.ok) {
+              console.warn(`Restaurant ${id} not found or inaccessible`);
+              continue; // Skip to the next restaurant
+            }
+            
+            const data = await response.json();
+            // Skip restaurants with status "deleted"
+            if (data.restaurant && data.restaurant.status !== "Deleted") {
+              validRestaurants.push({
+                ...data.restaurant,
+                images: data.images
+              });
+            }
+          } catch (err) {
+            console.warn(`Error fetching restaurant ${id}:`, err);
+            // Continue with other restaurants
+          }
+        }
+        
+        setRestaurants(validRestaurants);
 
       } catch (error) {
         console.error(error);

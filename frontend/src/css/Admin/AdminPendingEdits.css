@@ -1,0 +1,26 @@
+.admin-pending-edits h1 {
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.admin-pending-edits .table th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.admin-pending-edits .table td {
+  vertical-align: middle;
+}
+
+.admin-pending-edits .btn-info {
+  color: white;
+  background-color: #17a2b8;
+}
+
+.admin-pending-edits .btn-info:hover {
+  background-color: #138496;
+}
+
+.admin-pending-edits .badge {
+  font-size: 85%;
+}
