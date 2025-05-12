@@ -7,202 +7,201 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Restaurant = ({ restaurant, images }) => {
-    const [showModal, setShowModal] = useState(false);
-    const [showAdminHideModal, setShowAdminHideModal] = useState(false);
-    const [showAdminApproveModal, setShowAdminApproveModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showAdminHideModal, setShowAdminHideModal] = useState(false);
+  const [showAdminApproveModal, setShowAdminApproveModal] = useState(false);
 
-    const getImagesForRestaurant = (Id) => {
-        return images.filter((image) => image.ImageID === Id);
-    };
+  const getImagesForRestaurant = (Id) => {
+    return images.filter((image) => image.ImageID === Id);
+  };
 
-    const handleDelete = async () => {
-        try {
-            const response = await fetch(
-                `http://localhost:5000/pendingRestaurants/${restaurant._id}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            if (response.ok) {
-                console.log("Delete successful");
-                window.location.reload();
-            } else {
-                console.log("Delete failed");
-            }
-        } catch (error) {
-            console.error("An error occurred:", error);
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/pendingRestaurants/${restaurant._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
+      );
 
-        setShowModal(false);
-    };
+      if (response.ok) {
+        console.log("Delete successful");
+        window.location.reload();
+      } else {
+        console.log("Delete failed");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
 
-    const handleAdminHide = async () => {
-        try {
-            const response = await fetch(
-                `http://localhost:5000/admins/hide-restaurant/${restaurant._id}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+    setShowModal(false);
+  };
 
-            if (response.ok) {
-                console.log("Restaurant hidden!");
-                window.location.reload();
-            } else {
-                console.log("Action failed");
-            }
-        } catch (error) {
-            console.error("An error occurred:", error);
+  const handleAdminHide = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/admins/hide-restaurant/${restaurant._id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
+      );
 
-        setShowAdminHideModal(false);
-    };
+      if (response.ok) {
+        console.log("Restaurant hidden!");
+        window.location.reload();
+      } else {
+        console.log("Action failed");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
 
-    const handleAdminApprove = async () => {
-        try {
-          const response = await fetch(`http://localhost:5000/admins/approve-restaurant/${restaurant._id}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-      
-          if (response.ok) {
-            toast.success("Restaurant approved successfully!", {
-              position: "top-right",
-              autoClose: 3000, // Closes after 3 seconds
-            });
-            window.location.reload(); // Refresh the page to update the list
-          } else {
-            const errorData = await response.json(); // Parse the error response
-            console.error("Failed to approve restaurant:", errorData.error);
-            toast.error(`Error: ${errorData.error}`, {
-              position: "top-right",
-              autoClose: 5000, // Closes after 5 seconds
-            });
-          }
-        } catch (error) {
-          console.error("Error approving restaurant:", error);
-          toast.error("An unexpected error occurred. Please try again.", {
-            position: "top-right",
-            autoClose: 5000,
-          });
+    setShowAdminHideModal(false);
+  };
+
+  const handleAdminApprove = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/admins/approve-restaurant/${restaurant._id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      
-        setShowAdminApproveModal(false);
-      };
+      );
 
-    const handleShowModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
+      if (response.ok) {
+        toast.success("Restaurant approved successfully!", {
+          position: "top-right",
+          autoClose: 3000, // Closes after 3 seconds
+        });
+        window.location.reload(); // Refresh the page to update the list
+      } else {
+        const errorData = await response.json(); // Parse the error response
+        console.error("Failed to approve restaurant:", errorData.error);
+        toast.error(`Error: ${errorData.error}`, {
+          position: "top-right",
+          autoClose: 5000, // Closes after 5 seconds
+        });
+      }
+    } catch (error) {
+      console.error("Error approving restaurant:", error);
+      toast.error("An unexpected error occurred. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
+    }
 
-    const handleShowAdminHideModal = () => setShowAdminHideModal(true);
-    const handleCloseAdminHideModal = () => setShowAdminHideModal(false);
+    setShowAdminApproveModal(false);
+  };
 
-    const handleShowAdminApproveModal = () => setShowAdminApproveModal(true);
-    const handleCloseAdminApproveModal = () => setShowAdminApproveModal(false);
+  const handleShowModal = () => setShowModal(true);
+  const handleCloseModal = () => setShowModal(false);
 
-    const restaurantImages = getImagesForRestaurant(restaurant.imageID);
+  const handleShowAdminHideModal = () => setShowAdminHideModal(true);
+  const handleCloseAdminHideModal = () => setShowAdminHideModal(false);
 
-    return (
-        <Card className="Restaurant rounded">
-            
-                <Carousel fade variant="top" style={{ height: "25rem" }}>
-                    {restaurantImages.length > 0 ? (
-                        restaurantImages.map((img, idx) => (
-                            <Carousel.Item key={idx} style={{ height: "25rem" }}>
-                                <img
-                                    className="d-block w-100 rounded"
-                                    src={img.link}
-                                    alt={`Slide ${idx}`}
-                                    style={{ objectFit: "cover", height: "25rem", width: "100%" }}
-                                />
-                            </Carousel.Item>
-                        ))
-                    ) : (
-                        <Carousel.Item style={{ height: "25rem" }}>
-                            <img
-                                className="d-block w-100 rounded"
-                                src={Logo}
-                                alt="Not Available"
-                                style={{ objectFit: "cover", height: "25rem" }}
-                            />
-                        </Carousel.Item>
-                    )}
-                </Carousel>
-            
+  const handleShowAdminApproveModal = () => setShowAdminApproveModal(true);
+  const handleCloseAdminApproveModal = () => setShowAdminApproveModal(false);
 
-            <Card.Body>
+  const restaurantImages = getImagesForRestaurant(restaurant.imageID);
 
-                <Card.Title as="h3" className="restaurant-title">
-                    <strong>{restaurant.name}</strong>
-                </Card.Title>
-
-
-                <Card.Text as="h5">Price per person: ${restaurant.price}</Card.Text>
-                <Card.Text>Category: {restaurant.category}</Card.Text>
-                <Card.Text>Location: {restaurant.location}</Card.Text>
-
-                <div className="Buttons-container">
-                    
-
-                    <div className="w-50 h-100 d-flex justify-content-around">
-                        <button onClick={handleShowModal} className="h-100 btn btn-danger">
-                            Delete
-                        </button>
-                        <button
-                            onClick={handleShowAdminHideModal}
-                            className="h-100 btn btn-warning"
-                        >
-                            {restaurant.status !== "Hidden" ? "Hide" : "Show"}
-                        </button>
-                        <button
-                            onClick={handleShowAdminApproveModal}
-                            className="h-100 btn btn-success"
-                        >
-                            Approve
-                        </button>
-                    </div>
-                </div>
-            </Card.Body>
-
-            <CustomModal
-                show={showModal}
-                handleClose={handleCloseModal}
-                handleDelete={handleDelete}
-                title="Confirm Delete"
-                body="Are you sure you want to delete this restaurant?"
-                cancelLabel="No, Go Back"
-                confirmLabel="Yes, Delete"
+  return (
+    <Card className="Restaurant rounded">
+      <Carousel fade variant="top" style={{ height: "25rem" }}>
+        {restaurantImages.length > 0 ? (
+          restaurantImages.map((img, idx) => (
+            <Carousel.Item key={idx} style={{ height: "25rem" }}>
+              <img
+                className="d-block w-100 rounded"
+                src={img.link}
+                alt={`Slide ${idx}`}
+                style={{ objectFit: "cover", height: "25rem", width: "100%" }}
+              />
+            </Carousel.Item>
+          ))
+        ) : (
+          <Carousel.Item style={{ height: "25rem" }}>
+            <img
+              className="d-block w-100 rounded"
+              src={Logo}
+              alt="Not Available"
+              style={{ objectFit: "cover", height: "25rem" }}
             />
+          </Carousel.Item>
+        )}
+      </Carousel>
 
-            <CustomModal
-                show={showAdminHideModal}
-                handleClose={handleCloseAdminHideModal}
-                handleDelete={handleAdminHide}
-                title="Confirm Request"
-                body="Are you sure you want to hide this restaurant?"
-                cancelLabel="No, Go Back"
-                confirmLabel={restaurant.status === "Hidden" ? "Yes, Show" : "Yes, Hide"}
-            />
+      <Card.Body>
+        <Card.Title as="h3" className="restaurant-title">
+          <strong>{restaurant.name}</strong>
+        </Card.Title>
 
-            <CustomModal
-                show={showAdminApproveModal}
-                handleClose={handleCloseAdminApproveModal}
-                handleDelete={handleAdminApprove}
-                title="Confirm Request"
-                body="Are you sure you want to approve this restaurant?"
-                cancelLabel="No, Go Back"
-                confirmLabel="Yes, Approve"
-            />
-        </Card>
-    );
+        <Card.Text as="h5">Price per person: ${restaurant.price}</Card.Text>
+        <Card.Text>Category: {restaurant.category}</Card.Text>
+        <Card.Text>Location: {restaurant.location}</Card.Text>
+
+        <div className="Buttons-container">
+          <div className="w-50 h-100 d-flex justify-content-around">
+            <button onClick={handleShowModal} className="h-100 btn btn-danger">
+              Delete
+            </button>
+            <button
+              onClick={handleShowAdminHideModal}
+              className="h-100 btn btn-warning"
+            >
+              {restaurant.status !== "Hidden" ? "Hide" : "Show"}
+            </button>
+            <button
+              onClick={handleShowAdminApproveModal}
+              className="h-100 btn btn-success"
+            >
+              Approve
+            </button>
+          </div>
+        </div>
+      </Card.Body>
+
+      <CustomModal
+        show={showModal}
+        handleClose={handleCloseModal}
+        handleDelete={handleDelete}
+        title="Confirm Delete"
+        body="Are you sure you want to delete this restaurant?"
+        cancelLabel="No, Go Back"
+        confirmLabel="Yes, Delete"
+      />
+
+      <CustomModal
+        show={showAdminHideModal}
+        handleClose={handleCloseAdminHideModal}
+        handleDelete={handleAdminHide}
+        title="Confirm Request"
+        body="Are you sure you want to hide this restaurant?"
+        cancelLabel="No, Go Back"
+        confirmLabel={
+          restaurant.status === "Hidden" ? "Yes, Show" : "Yes, Hide"
+        }
+      />
+
+      <CustomModal
+        show={showAdminApproveModal}
+        handleClose={handleCloseAdminApproveModal}
+        handleDelete={handleAdminApprove}
+        title="Confirm Request"
+        body="Are you sure you want to approve this restaurant?"
+        cancelLabel="No, Go Back"
+        confirmLabel="Yes, Approve"
+      />
+    </Card>
+  );
 };
 
 export default Restaurant;

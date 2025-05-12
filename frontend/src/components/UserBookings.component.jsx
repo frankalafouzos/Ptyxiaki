@@ -12,7 +12,7 @@ const UserBookings = ({ display }) => {
     const fetchBookings = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/bookings/userbookings",
+          process.env.REACT_APP_API_URL + "/bookings/userbookings",
           {
             method: "POST",
             headers: {
@@ -36,7 +36,7 @@ const UserBookings = ({ display }) => {
       return;
     }
 
-    fetch(`http://localhost:5000/bookings/deleteone/${bookingId}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/bookings/deleteone/${bookingId}`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -65,7 +65,7 @@ const UserBookings = ({ display }) => {
       return;
     }
 
-    fetch(`http://localhost:5000/bookings/deleteone/${bookingId}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/bookings/deleteone/${bookingId}`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -143,7 +143,9 @@ const UserBookings = ({ display }) => {
                         <td>
                           <button
                             className="btn btn-danger"
-                            onClick={() => cancelBooking(booking._id, bookingDate)}
+                            onClick={() =>
+                              cancelBooking(booking._id, bookingDate)
+                            }
                             id="cancelButton"
                           >
                             Cancel

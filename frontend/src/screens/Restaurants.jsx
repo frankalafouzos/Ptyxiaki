@@ -9,11 +9,19 @@ import "../css/Restaurants.css";
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [images, setImages] = useState([]);
-  const [categoryFilter, setCategoryFilter] = useState(localStorage.getItem("categoryFilter") || "");
-  const [locationFilter, setLocationFilter] = useState(localStorage.getItem("locationFilter") || "");
+  const [categoryFilter, setCategoryFilter] = useState(
+    localStorage.getItem("categoryFilter") || ""
+  );
+  const [locationFilter, setLocationFilter] = useState(
+    localStorage.getItem("locationFilter") || ""
+  );
   const [sort, setSort] = useState(localStorage.getItem("Sort") || "Default");
-  const [minPriceFilter, setMinPriceFilter] = useState(localStorage.getItem("minPriceFilter") || "");
-  const [maxPriceFilter, setMaxPriceFilter] = useState(localStorage.getItem("maxPriceFilter") || "");
+  const [minPriceFilter, setMinPriceFilter] = useState(
+    localStorage.getItem("minPriceFilter") || ""
+  );
+  const [maxPriceFilter, setMaxPriceFilter] = useState(
+    localStorage.getItem("maxPriceFilter") || ""
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [totalPages, setTotalPages] = useState(0);
@@ -35,7 +43,8 @@ const Restaurants = () => {
       const queryParams = new URLSearchParams({
         page: currentPage,
         itemsPerPage: itemsPerPage,
-        sortField: sort === "Default" ? undefined : sort.split(" ")[0].toLowerCase(),
+        sortField:
+          sort === "Default" ? undefined : sort.split(" ")[0].toLowerCase(),
         sortOrder: sort.includes("Asc") ? "asc" : "dsc",
         categoryFilter: categoryFilter,
         locationFilter: locationFilter,
@@ -44,7 +53,9 @@ const Restaurants = () => {
       }).toString();
 
       try {
-        const response = await fetch(`http://localhost:5000/restaurants?${queryParams}`);
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/restaurants?${queryParams}`
+        );
         const data = await response.json();
         setRestaurants(data.restaurants);
         setImages(data.images);
@@ -55,7 +66,15 @@ const Restaurants = () => {
     };
 
     fetchRestaurants();
-  }, [currentPage, itemsPerPage, sort, categoryFilter, locationFilter, minPriceFilter, maxPriceFilter]);
+  }, [
+    currentPage,
+    itemsPerPage,
+    sort,
+    categoryFilter,
+    locationFilter,
+    minPriceFilter,
+    maxPriceFilter,
+  ]);
 
   return (
     <div className="main-container">

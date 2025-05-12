@@ -71,7 +71,7 @@ router.get('/status', async (req, res) => {
 });
 
 router.route('/').get(async (req, res) => {
-  let { page, itemsPerPage, sortField, sortOrder, categoryFilter, locationFilter, minPrice, maxPrice } = req.query;
+  let { page, itemsPerPage, sortField, sortOrder, categoryFilter, locationFilter, minPrice, maxPrice, owner } = req.query;
 
   page = parseInt(page) || 1;
   itemsPerPage = parseInt(itemsPerPage) || 12;
@@ -82,6 +82,7 @@ router.route('/').get(async (req, res) => {
   if (locationFilter) filters.location = locationFilter;
   if (minPrice) filters.price = { $gte: parseFloat(minPrice) };
   if (maxPrice) filters.price = { ...filters.price, $lte: parseFloat(maxPrice) };
+  if (owner) filters.owner = owner; 
   filters.status = "Approved";
 
   let sort = {};
@@ -135,12 +136,13 @@ router.route('/:id').get(async (req, res) => {
   console.log("ID: ", id)
   const restaurant = await Restaurant.findById(id);
   console.log("Restaurant: ", restaurant)
-  const images = await Image.find({ ImageID: restaurant.imageID });
+  
   if (!restaurant) {
-    res.status(404).json({ message: 'Restaurant not found' });
-  } else {
-    res.json({ restaurant, images });
+    return res.status(404).json({ message: 'Restaurant not found' });
   }
+  
+  const images = await Image.find({ ImageID: restaurant.imageID });
+  res.json({ restaurant, images });
 });
 
 router.post('/add', async (req, res) => {

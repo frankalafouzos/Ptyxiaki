@@ -26,17 +26,20 @@ function EditPassword() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/users/editpassword", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email : email,
-          currentPassword: currentPassword,
-          newPassword: newPassword,
-        }),
-      });
+      const response = await fetch(
+        process.env.REACT_APP_API_URL + "/users/editpassword",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -49,14 +52,14 @@ function EditPassword() {
         position: "top-center",
         autoClose: 2000,
         // onClose: () =>
-        //   window.location.replace("http://localhost:3000/profilePage"),
+        //   window.location.replace(process.env.REACT_APP_FRONTEND_URL + "/profilePage"),
       });
     } catch (error) {
       console.error("Edit profile error:", error.message);
       toast.error(error.message, {
         position: "top-center",
         autoClose: 2000,
-        // onClose: () => window.location.replace("http://localhost:3000/editPassword"),
+        // onClose: () => window.location.replace(process.env.REACT_APP_FRONTEND_URL + "/editPassword"),
       });
     }
   };
@@ -82,8 +85,11 @@ function EditPassword() {
             value={newPassword}
             onChange={handleNewPasswordChange}
           />
-          {newPassword === currentPassword && <div className="error-message">Password cannot be the same with the existing one!</div>}
-        
+          {newPassword === currentPassword && (
+            <div className="error-message">
+              Password cannot be the same with the existing one!
+            </div>
+          )}
         </div>
         <div>
           <label htmlFor="confirmPassword">Confirm Password:</label>
@@ -93,7 +99,9 @@ function EditPassword() {
             value={confirmPassword}
             onChange={handleConfirmPasswordChange}
           />
-          {newPassword !== confirmPassword && <div className="error-message">Passwords do not match!</div>}
+          {newPassword !== confirmPassword && (
+            <div className="error-message">Passwords do not match!</div>
+          )}
         </div>
 
         <button type="submit">Update Password</button>

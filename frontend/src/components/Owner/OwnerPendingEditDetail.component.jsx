@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Badge, ListGroup } from 'react-bootstrap';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Container, Row, Col, Card, Badge, ListGroup } from "react-bootstrap";
+import { toast } from "react-toastify";
 
 const OwnerPendingEditDetail = () => {
   const { id } = useParams();
@@ -12,15 +12,17 @@ const OwnerPendingEditDetail = () => {
   useEffect(() => {
     const fetchEditDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/pending-edits/${id}`);
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/api/pending-edits/${id}`
+        );
         if (!response.ok) {
-          throw new Error('Failed to fetch edit details');
+          throw new Error("Failed to fetch edit details");
         }
         const data = await response.json();
         setEditDetails(data);
       } catch (error) {
-        console.error('Error fetching edit details:', error);
-        toast.error('Could not retrieve edit details');
+        console.error("Error fetching edit details:", error);
+        toast.error("Could not retrieve edit details");
       } finally {
         setLoading(false);
       }
@@ -32,11 +34,11 @@ const OwnerPendingEditDetail = () => {
   // Helper function to display badge based on status
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'pending approval':
+      case "pending approval":
         return <Badge bg="warning">Pending Approval</Badge>;
-      case 'approved':
+      case "approved":
         return <Badge bg="success">Approved</Badge>;
-      case 'rejected':
+      case "rejected":
         return <Badge bg="danger">Rejected</Badge>;
       default:
         return <Badge bg="secondary">{status}</Badge>;
@@ -46,58 +48,64 @@ const OwnerPendingEditDetail = () => {
   // Format date nicely
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   // Format field name for display
   const formatFieldName = (field) => {
     const fieldMappings = {
-      name: 'Restaurant Name',
-      price: 'Price',
-      category: 'Category',
-      location: 'Location',
-      phone: 'Phone Number',
-      email: 'Email',
-      description: 'Description',
-      Bookingduration: 'Booking Duration (min)',
-      openHour: 'Opening Time',
-      closeHour: 'Closing Time',
-      images_changes: 'Image Changes'
+      name: "Restaurant Name",
+      price: "Price",
+      category: "Category",
+      location: "Location",
+      phone: "Phone Number",
+      email: "Email",
+      description: "Description",
+      Bookingduration: "Booking Duration (min)",
+      openHour: "Opening Time",
+      closeHour: "Closing Time",
+      images_changes: "Image Changes",
     };
-    
+
     return fieldMappings[field] || field;
   };
 
   // Format field value for display
   const formatFieldValue = (field, value) => {
-    if (field === 'openHour' || field === 'closeHour') {
+    if (field === "openHour" || field === "closeHour") {
       // Convert minutes to hours:minutes
       const hours = Math.floor(value / 60);
       const minutes = value % 60;
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
     }
-    
-    if (field === 'images_changes') {
+
+    if (field === "images_changes") {
       if (value.added && value.added.length > 0) {
         return `Added ${value.added.length} image(s)`;
       }
       if (value.deleted && value.deleted.length > 0) {
         return `Removed ${value.deleted.length} image(s)`;
       }
-      return 'No image changes';
+      return "No image changes";
     }
-    
+
     return value;
   };
 
   if (loading) {
-    return <div className="d-flex justify-content-center pt-5"><div className="loader"></div></div>;
+    return (
+      <div className="d-flex justify-content-center pt-5">
+        <div className="loader"></div>
+      </div>
+    );
   }
 
   if (!editDetails || !editDetails.pendingEdit) {
@@ -107,9 +115,9 @@ const OwnerPendingEditDetail = () => {
           <Card.Body className="text-center">
             <Card.Title>Edit Not Found</Card.Title>
             <Card.Text>The requested edit could not be found.</Card.Text>
-            <button 
+            <button
               className="btn btn-primary"
-              onClick={() => navigate('/owner/pending-edits')}
+              onClick={() => navigate("/owner/pending-edits")}
             >
               Back to Pending Edits
             </button>
@@ -164,15 +172,19 @@ const OwnerPendingEditDetail = () => {
                 {Object.entries(pendingEdit.changes).map(([field, change]) => (
                   <ListGroup.Item key={field}>
                     <strong>{formatFieldName(field)}:</strong>
-                    {field === 'images_changes' ? (
+                    {field === "images_changes" ? (
                       <div>{formatFieldValue(field, change)}</div>
                     ) : (
                       <div>
                         <div className="text-danger">
-                          <small>From: {formatFieldValue(field, change.old)}</small>
+                          <small>
+                            From: {formatFieldValue(field, change.old)}
+                          </small>
                         </div>
                         <div className="text-success">
-                          <small>To: {formatFieldValue(field, change.new)}</small>
+                          <small>
+                            To: {formatFieldValue(field, change.new)}
+                          </small>
                         </div>
                       </div>
                     )}
@@ -185,9 +197,9 @@ const OwnerPendingEditDetail = () => {
       </Row>
 
       <div className="d-flex justify-content-between">
-        <button 
+        <button
           className="btn btn-secondary"
-          onClick={() => navigate('/owner/pending-edits')}
+          onClick={() => navigate("/owner/pending-edits")}
         >
           Back to Pending Edits
         </button>

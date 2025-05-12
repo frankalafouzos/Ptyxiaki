@@ -50,6 +50,9 @@ import AddBooking from './screens/Owner/AddBooking';
 import OwnerConfirmBooking from './screens/Owner/ConfirmBooking';
 import OwnerPendingEditsList from './components/Owner/OwnerPendingEditsList.component';
 import OwnerPendingEditDetail from './components/Owner/OwnerPendingEditDetail.component';
+import OwnersOffers from './screens/Owner/OwnersOffers';
+import OwnerCreateOffer from './screens/Owner/OwnerCreateOffer';
+
 
 // Admin
 import AdminHome from './screens/Admin/AdminHome';
@@ -67,6 +70,7 @@ import AdminPendingEditDetail from './components/Admin/AdminPendingEditDetail.co
 
 // Dark Mode
 import DarkModeToggle from './components/DarkModeToggler.component';
+
 
 
 
@@ -146,6 +150,8 @@ function App() {
           <Route path="/owner/confirm-booking" element={<OwnerProtectedRoute element={<OwnerConfirmBooking />} />} />
           <Route path="/owner/pending-edits" element={<OwnerProtectedRoute element={<OwnerPendingEditsList />} />} />
           <Route path="/owner/pending-edits/:id" element={<OwnerProtectedRoute element={<OwnerPendingEditDetail />} />} />
+          <Route path="/owner/offers" element={<OwnerProtectedRoute element={<OwnersOffers />} />} />
+          <Route path="/owner/offers/create" element={<OwnerProtectedRoute element={<OwnerCreateOffer />} />} />
 
           {/* Admin Pages */}
           <Route path="/admin" element={<AdminProtectedRoute element={<AdminHome />} />} />
@@ -162,7 +168,7 @@ function App() {
         </Routes>
         
       </main>
-      
+       
       <Footer />
     </Router>
     <DarkModeToggle />

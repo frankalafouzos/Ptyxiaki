@@ -39,7 +39,7 @@ const MakeABooking = () => {
     }).toString();
 
     try {
-      const response = await fetch(`http://localhost:3000/bookings/availability/${restaurantId}?${queryParams}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/bookings/availability/${restaurantId}?${queryParams}`, {
         method: "GET",
         headers: { Accept: "application/json" },
       });
@@ -86,7 +86,9 @@ const MakeABooking = () => {
       </Form>
       <div className="availability-container">
         {loading ? (
-          <div className="loader"></div>
+          <div className={`global-spinner`}>
+            <div className="spinner"></div>
+          </div>
         ) : (
           availability.length > 0 && (
             <>

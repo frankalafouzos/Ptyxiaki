@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { Form, Button, Container } from 'react-bootstrap';
+import { Form, Button, Container } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import { fetchUser } from "../scripts/fetchUser";
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formatTime = (time) => {
   // Assuming time is something like "1:00" or "9:30", convert it to "01:00" or "09:30"
@@ -44,11 +44,11 @@ const ConfirmBooking = () => {
       if (email) {
         try {
           await fetchUser(email, setLoading, setUser); // Assuming fetchUser correctly fetches the user data
-        //   setReservation((prevState) => ({
-        //     ...prevState,
-        //     userid: user._id,
-        //     name: `${user.firstname} ${user.lastname}`,
-        //   }));
+          //   setReservation((prevState) => ({
+          //     ...prevState,
+          //     userid: user._id,
+          //     name: `${user.firstname} ${user.lastname}`,
+          //   }));
         } catch (error) {
           console.error("Failed to fetch user data:", error);
         } finally {
@@ -83,125 +83,153 @@ const ConfirmBooking = () => {
     e.preventDefault();
     console.log("Submitting reservation:", reservation);
     try {
-      const response = await fetch("http://localhost:5000/bookings/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(reservation),
-      });
+      const response = await fetch(
+        process.env.REACT_APP_API_URL + "/bookings/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(reservation),
+        }
+      );
       if (response.ok) {
         const responseData = await response.json();
         console.log(`Reservation created successfully ${responseData.id}`);
         toast.success("Reservation created successfully", {
           position: "top-center",
           autoClose: 2000,
-          onClose: () => window.location.replace(`http://localhost:3000/bookingThankYou/${responseData.id}`)
-        })
+          onClose: () =>
+            window.location.replace(
+              `${process.env.REACT_APP_API_URL}/bookingThankYou/${responseData.id}`
+            ),
+        });
         // Handle success case here
       } else {
         const responseData = await response.json();
-        console.error("Failed to create reservation"+response.status+response.message);
+        console.error(
+          "Failed to create reservation" + response.status + response.message
+        );
         toast.error("Failed to create reservation", {
           position: "top-center",
           autoClose: 2000,
-          onClose: () => window.location.replace(`http://localhost:3000/restaurant/${reservation.restaurantId}`)
-          });
+          onClose: () =>
+            window.location.replace(
+              `${process.env.REACT_APP_API_URL}/restaurant/${reservation.restaurantId}`
+            ),
+        });
       }
     } catch (error) {
       console.error("Failed to create reservation:", error);
       toast.error("Failed to create reservation", {
         position: "top-center",
         autoClose: 2000,
-        onClose: () => window.location.replace(`http://localhost:3000/restaurant/${reservation.restaurantId}`)
-        });
+        onClose: () =>
+          window.location.replace(
+            `${process.env.REACT_APP_API_URL}/restaurant/${reservation.restaurantId}`
+          ),
+      });
     }
   };
-  
 
   if (loading) return <div>Loading user data...</div>;
 
-
-
   return (
-      <Container className="p-4 mt-4 shadow-sm bg-white rounded" style={{ maxWidth: '600px' }}>
-          <h1 className="text-center mb-4" style={{ fontSize: '1.75rem', color: '#333' }}>Confirm Your Reservation</h1>
-          <Form onSubmit={handleSubmit} className="w-100">
-              <Form.Group className="mb-3">
-                  <Form.Label htmlFor="name" style={{ fontWeight: 'bold' }}>Name</Form.Label>
-                  <Form.Control
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={reservation.name}
-                      onChange={handleChange}
-                      placeholder="Name"
-                      disabled
-                      className="form-control-lg"
-                  />
-              </Form.Group>
-  
-              <Form.Group className="mb-3">
-                  <Form.Label htmlFor="date" style={{ fontWeight: 'bold' }}>Date</Form.Label>
-                  <Form.Control
-                      type="date"
-                      id="date"
-                      name="date"
-                      value={reservation.date}
-                      onChange={handleChange}
-                      disabled
-                      className="form-control-lg"
-                  />
-              </Form.Group>
-  
-              <Form.Group className="mb-3">
-                  <Form.Label htmlFor="time" style={{ fontWeight: 'bold' }}>Time</Form.Label>
-                  <Form.Control
-                      type="time"
-                      id="time"
-                      name="time"
-                      value={reservation.time}
-                      onChange={handleChange}
-                      disabled
-                      className="form-control-lg"
-                  />
-              </Form.Group>
-  
-              <Form.Group className="mb-3">
-                  <Form.Label htmlFor="partySize" style={{ fontWeight: 'bold' }}>Party Size</Form.Label>
-                  <Form.Control
-                      type="number"
-                      id="partySize"
-                      name="partySize"
-                      value={reservation.partySize}
-                      onChange={handleChange}
-                      placeholder="Party Size"
-                      disabled
-                      className="form-control-lg"
-                  />
-              </Form.Group>
-  
-              <Form.Group className="mb-3">
-                  <Form.Label htmlFor="phone" style={{ fontWeight: 'bold' }}>Contact Phone</Form.Label>
-                  <Form.Control
-                      type="phone"
-                      id="phone"
-                      name="phone"
-                      value={reservation.phone}
-                      onChange={handleChange}
-                      placeholder="Contact Phone"
-                      required
-                      className="form-control-lg"
-                  />
-              </Form.Group>
-  
-              <Button type="submit" variant="primary" className="w-100 btn-lg mt-3">
-                  Confirm Your Reservation
-              </Button>
-          </Form>
-      </Container>
+    <Container
+      className="p-4 mt-4 shadow-sm bg-white rounded"
+      style={{ maxWidth: "600px" }}
+    >
+      <h1
+        className="text-center mb-4"
+        style={{ fontSize: "1.75rem", color: "#333" }}
+      >
+        Confirm Your Reservation
+      </h1>
+      <Form onSubmit={handleSubmit} className="w-100">
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="name" style={{ fontWeight: "bold" }}>
+            Name
+          </Form.Label>
+          <Form.Control
+            type="text"
+            id="name"
+            name="name"
+            value={reservation.name}
+            onChange={handleChange}
+            placeholder="Name"
+            disabled
+            className="form-control-lg"
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="date" style={{ fontWeight: "bold" }}>
+            Date
+          </Form.Label>
+          <Form.Control
+            type="date"
+            id="date"
+            name="date"
+            value={reservation.date}
+            onChange={handleChange}
+            disabled
+            className="form-control-lg"
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="time" style={{ fontWeight: "bold" }}>
+            Time
+          </Form.Label>
+          <Form.Control
+            type="time"
+            id="time"
+            name="time"
+            value={reservation.time}
+            onChange={handleChange}
+            disabled
+            className="form-control-lg"
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="partySize" style={{ fontWeight: "bold" }}>
+            Party Size
+          </Form.Label>
+          <Form.Control
+            type="number"
+            id="partySize"
+            name="partySize"
+            value={reservation.partySize}
+            onChange={handleChange}
+            placeholder="Party Size"
+            disabled
+            className="form-control-lg"
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="phone" style={{ fontWeight: "bold" }}>
+            Contact Phone
+          </Form.Label>
+          <Form.Control
+            type="phone"
+            id="phone"
+            name="phone"
+            value={reservation.phone}
+            onChange={handleChange}
+            placeholder="Contact Phone"
+            required
+            className="form-control-lg"
+          />
+        </Form.Group>
+
+        <Button type="submit" variant="primary" className="w-100 btn-lg mt-3">
+          Confirm Your Reservation
+        </Button>
+      </Form>
+    </Container>
   );
-  
 };
 
 export default ConfirmBooking;

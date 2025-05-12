@@ -1,4 +1,3 @@
-
 import CustomModal from "./CustomModal";
 import React, { useState, useEffect, useRef } from "react";
 // import { Container, Row, Col, Modal, Button } from "react-bootstrap";
@@ -22,7 +21,7 @@ const RestaurantPage = () => {
   useEffect(() => {
     console.log("Fetching restaurant data for ID:", id);
 
-    fetch(`http://localhost:5000/restaurants/${id}`)
+    fetch(`${process.env.REACT_APP_API_URL}/restaurants/${id}`)
       .then((response) => {
         if (!response.ok) {
           console.log(response);
@@ -42,17 +41,19 @@ const RestaurantPage = () => {
         setLoading(false);
       });
   }, [id]);
-  
+
   useEffect(() => {
-    
     if (role.role !== "admin") {
       console.log("Increementing visit counter for restaurant ID:", id);
-      fetch(`http://localhost:5000/restaurants/increnmentVisitCounter/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+      fetch(
+        `${process.env.REACT_APP_API_URL}/restaurants/increnmentVisitCounter/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((response) => {
           if (!response.ok) {
             console.log(response);
@@ -70,17 +71,20 @@ const RestaurantPage = () => {
     if (role.role === "user") {
       const incrementVisitCounter = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/restaurants/${restaurant._id}/incrementVisitCounter`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
+          const response = await fetch(
+            `${process.env.REACT_APP_API_URL}/restaurants/${restaurant._id}/incrementVisitCounter`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
           if (!response.ok) {
-            console.error('Error incrementing visit counter');
+            console.error("Error incrementing visit counter");
           }
         } catch (error) {
-          console.error('Error:', error);
+          console.error("Error:", error);
         }
       };
 
@@ -109,58 +113,63 @@ const RestaurantPage = () => {
     );
   };
 
-
   const handleAdminDelete = async () => {
     try {
-      const response = await fetch("http://localhost:5000/owners/delete/" + restaurant._id, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        process.env.REACT_APP_API_URL + "/owners/delete/" + restaurant._id,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (response.ok) {
-        console.log('Delete successful');
+        console.log("Delete successful");
         window.location.reload();
         // Handle successful deletion (e.g., refresh data, show a message)
       } else {
-        console.log('Delete failed');
+        console.log("Delete failed");
         // Handle deletion failure
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
       // Handle error
     }
 
     setShowAdminModal(false); // Close the modal
   };
 
-
   const handleAdminHide = async () => {
     try {
-      const response = await fetch("http://localhost:5000/admins/hide-restaurant/" + restaurant._id, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        process.env.REACT_APP_API_URL +
+          "/admins/hide-restaurant/" +
+          restaurant._id,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (response.ok) {
-        console.log('Restaurant hidden!');
+        console.log("Restaurant hidden!");
         window.location.reload();
         // Handle successful deletion (e.g., refresh data, show a message)
       } else {
-        console.log('Delete failed');
+        console.log("Delete failed");
         // Handle deletion failure
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
       // Handle error
     }
 
     setShowAdminHideModal(false); // Close the modal
   };
-
 
   const handleShowAdminModal = () => setShowAdminModal(true);
   const handleCloseAdminModal = () => setShowAdminModal(false);
@@ -174,109 +183,124 @@ const RestaurantPage = () => {
 
   return (
     <>
-    {restaurant.status === "Deleted" ? (
-      <div className="restaurant-container">
-        <div className="not-found-container">
-          <h1>404 - Restaurant Not Found</h1>
-          <p>This restaurant has been deleted or does not exist.</p>
-          <Link to="/" className="btn btn-primary">
-            Go Back to Home
-          </Link>
+      {restaurant.status === "Deleted" ? (
+        <div className="restaurant-container">
+          <div className="not-found-container">
+            <h1>404 - Restaurant Not Found</h1>
+            <p>This restaurant has been deleted or does not exist.</p>
+            <Link to="/" className="btn btn-primary">
+              Go Back to Home
+            </Link>
+          </div>
         </div>
-      </div>
-    ) : (
-      <div className="restaurant-container">
-        <div className="content-layout">
-
-          <div className="carousel-container">
-            <div className="image-wrapper">
-              {images.map((img, idx) => (
-                <img
-                  key={idx}
-                  className={`carousel-image ${idx === activeImage ? "active" : ""
+      ) : (
+        <div className="restaurant-container">
+          <div className="content-layout">
+            <div className="carousel-container">
+              <div className="image-wrapper">
+                {images.map((img, idx) => (
+                  <img
+                    key={idx}
+                    className={`carousel-image ${
+                      idx === activeImage ? "active" : ""
                     }`}
-                  src={img.link}
-                  alt={`Restaurant ${idx}`}
-                />
-              ))}
-              <div className="button-wrapper">
-                <button className="carousel-control prev" onClick={prevImage}>
-                  &lt;
-                </button>
-                <button className="carousel-control next" onClick={nextImage}>
-                  &gt;
-                </button>
+                    src={img.link}
+                    alt={`Restaurant ${idx}`}
+                  />
+                ))}
+                <div className="button-wrapper">
+                  <button className="carousel-control prev" onClick={prevImage}>
+                    &lt;
+                  </button>
+                  <button className="carousel-control next" onClick={nextImage}>
+                    &gt;
+                  </button>
+                </div>
               </div>
             </div>
 
-          </div>
-
-          <div className="info-container">
-            <div className="info-top">
-              <h2>{restaurant.name}</h2>
-              <h5 className="info">
-                Average price per person: {restaurant.price}
-              </h5><br />
-              <h6 className="info">About us: {restaurant.description}</h6><br />
-              <h7 className="info">Category: {restaurant.category}</h7><br />
-              <h7 className="info">Location: {restaurant.location}</h7><br />
-              <h7 className="info">
-                Phone number:
-                <a
-                  className="text-decoration-none text-info"
-                  href={`tel:+${restaurant.phone}`}
-                >
-                  {restaurant.phone}
-                </a>
-              </h7><br />
-              <h7 className="info">
-                Email:
-                <a
-                  className="text-decoration-none text-info"
-                  href={`mailto:${restaurant.email}`}
-                >
-                  {restaurant.email}
-                </a>
-              </h7><br /><br /><br />
-            </div>
-            <div className="booking-button">
-              {role.role === "user" && (
-                <Link
-                  to={`/booking/${restaurant._id}`}
-                  className="btn btn-outline-success "
-                >
-                  Book a Table
-                </Link>
-              )}
-              {role.role === "owner" && (
-                <Link
-                  to={`/owner/edit-restaurant/${restaurant._id}`}
-                  className="btn btn-outline-warning "
-                >
-                  Edit
-                </Link>
-              )}
-              {role.role === "admin" && (
-                <div className="" style={{ display: "flex", flexDirection: "column", overflow: "hidden", height: "auto" }}>
-                  <button
-                    onClick={handleShowAdminHideModal}
-                    className="btn btn-outline-warning mt-4"
+            <div className="info-container">
+              <div className="info-top">
+                <h2>{restaurant.name}</h2>
+                <h5 className="info">
+                  Average price per person: {restaurant.price}
+                </h5>
+                <br />
+                <h6 className="info">About us: {restaurant.description}</h6>
+                <br />
+                <h7 className="info">Category: {restaurant.category}</h7>
+                <br />
+                <h7 className="info">Location: {restaurant.location}</h7>
+                <br />
+                <h7 className="info">
+                  Phone number:
+                  <a
+                    className="text-decoration-none text-info"
+                    href={`tel:+${restaurant.phone}`}
                   >
-                    {restaurant.status === "Hidden" ? "Show" : "Hide"}
-                  </button>
-                  <button
-                    onClick={handleShowAdminModal}
-                    className="btn btn-outline-danger mt-4"
+                    {restaurant.phone}
+                  </a>
+                </h7>
+                <br />
+                <h7 className="info">
+                  Email:
+                  <a
+                    className="text-decoration-none text-info"
+                    href={`mailto:${restaurant.email}`}
                   >
-                    Delete
-                  </button>
-                </div>
-              )}
+                    {restaurant.email}
+                  </a>
+                </h7>
+                <br />
+                <br />
+                <br />
+              </div>
+              <div className="booking-button">
+                {role.role === "user" && (
+                  <Link
+                    to={`/booking/${restaurant._id}`}
+                    className="btn btn-outline-success "
+                  >
+                    Book a Table
+                  </Link>
+                )}
+                {role.role === "owner" && (
+                  <Link
+                    to={`/owner/edit-restaurant/${restaurant._id}`}
+                    className="btn btn-outline-warning "
+                  >
+                    Edit
+                  </Link>
+                )}
+                {role.role === "admin" && (
+                  <div
+                    className=""
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      overflow: "hidden",
+                      height: "auto",
+                    }}
+                  >
+                    <button
+                      onClick={handleShowAdminHideModal}
+                      className="btn btn-outline-warning mt-4"
+                    >
+                      {restaurant.status === "Hidden" ? "Show" : "Hide"}
+                    </button>
+                    <button
+                      onClick={handleShowAdminModal}
+                      className="btn btn-outline-danger mt-4"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-   )}
+      )}
 
       <CustomModal
         show={showAdminModal}
@@ -288,7 +312,6 @@ const RestaurantPage = () => {
         confirmLabel="Delete Restaurant"
       />
 
-
       <CustomModal
         show={showAdminHideModal}
         handleClose={handleCloseAdminHideModal}
@@ -296,10 +319,11 @@ const RestaurantPage = () => {
         title="Confirm Request"
         body="Are you sure you want to hide this restaurant?"
         cancelLabel="No, Go Back"
-        confirmLabel={restaurant.status === "Hidden" ? "Yes, Show" : "Yes, Hide"}
+        confirmLabel={
+          restaurant.status === "Hidden" ? "Yes, Show" : "Yes, Hide"
+        }
         isWarning={true}
       />
-
 
       {/* <Modal show={showAdminHideModal} onHide={handleCloseAdminHideModal}>
         <Modal.Header closeButton>
@@ -316,7 +340,6 @@ const RestaurantPage = () => {
         </Modal.Footer>
       </Modal> */}
     </>
-
   );
 };
 export default RestaurantPage;

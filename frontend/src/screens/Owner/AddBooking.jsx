@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Form, Button, Row, Col } from 'react-bootstrap';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import DateInputComponent from '../../components/DatePicker.component';
+import React, { useState, useEffect } from "react";
+import { Container, Form, Button, Row, Col } from "react-bootstrap";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import DateInputComponent from "../../components/DatePicker.component";
 
 const AddBooking = () => {
   const { restaurantId } = useParams();
   const location = useLocation();
   const [partySize, setPartySize] = useState(1);
-  const [date, setDate] = useState(location.state?.selectedDate || new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(
+    location.state?.selectedDate || new Date().toISOString().split("T")[0]
+  );
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -36,10 +38,13 @@ const AddBooking = () => {
     }).toString();
 
     try {
-      const response = await fetch(`http://localhost:5000/bookings/availability/${restaurantId}?${queryParams}`, {
-        method: "GET",
-        headers: { Accept: "application/json" },
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/bookings/availability/${restaurantId}?${queryParams}`,
+        {
+          method: "GET",
+          headers: { Accept: "application/json" },
+        }
+      );
       const data = await response.json();
       setAvailability(data);
       setLoading(false);
@@ -60,7 +65,11 @@ const AddBooking = () => {
       <Form className="booking-form" onSubmit={handleSearchAvailability}>
         <h1 className="booking-title">Add a Booking</h1>
         <Form.Group controlId="date" className="mb-3">
-          <DateInputComponent onDateChange={handleDateChange} widthofInput="100%" value={date} />
+          <DateInputComponent
+            onDateChange={handleDateChange}
+            widthofInput="100%"
+            value={date}
+          />
         </Form.Group>
         <Form.Group controlId="partySize" className="mb-3">
           <Form.Label>Party Size:</Form.Label>
@@ -75,30 +84,44 @@ const AddBooking = () => {
             required
           />
           <Form.Text className="text-muted">
-            Note: We can only make reservations for up to 8 people. Contact the restaurant/coffee shop if your party is larger.
+            Note: We can only make reservations for up to 8 people. Contact the
+            restaurant/coffee shop if your party is larger.
           </Form.Text>
         </Form.Group>
-        <Button type="submit" variant="primary" className="w-100">Search for available hours</Button>
+        <Button type="submit" variant="primary" className="w-100">
+          Search for available hours
+        </Button>
       </Form>
       <div className="availability-container">
         {loading ? (
-          <div className="loader"></div>
+            <div className={`global-spinner`}>
+              <div className="spinner"></div>
+            </div> 
         ) : (
           availability.length > 0 && (
             <>
               <h2 className="availability-title">Available Times</h2>
               <Row className="time-slots">
-                {availability.filter(slot => slot.available).map((slot, index) => (
-                  <Col key={index} xs={6} sm={4} md={3} lg={2} className="time-slot-col">
-                    <Button
-                      onClick={() => handleTimeSelect(slot.time)}
-                      variant="success"
-                      className="time-slot-btn"
+                {availability
+                  .filter((slot) => slot.available)
+                  .map((slot, index) => (
+                    <Col
+                      key={index}
+                      xs={6}
+                      sm={4}
+                      md={3}
+                      lg={2}
+                      className="time-slot-col"
                     >
-                      {slot.time}
-                    </Button>
-                  </Col>
-                ))}
+                      <Button
+                        onClick={() => handleTimeSelect(slot.time)}
+                        variant="success"
+                        className="time-slot-btn"
+                      >
+                        {slot.time}
+                      </Button>
+                    </Col>
+                  ))}
               </Row>
             </>
           )

@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 const uri = process.env.ATLAS_URI;
 mongoose.connect(uri, { useNewUrlParser: true});
@@ -34,6 +34,7 @@ const suggestionsRouter = require('./routes/suggestions');
 const notificationsRouter = require('./routes/notifications');
 const calendarRouter = require('./routes/calendar');
 const pendingEditsRoutes = require('./routes/pendingEditsRoutes');
+const offersRouter = require('./routes/offers');
 
 app.use('/users', usersRouter);
 app.use('/restaurants', restaurantsRouter);
@@ -48,8 +49,9 @@ app.use('/suggestions', suggestionsRouter);
 app.use('/notifications', notificationsRouter);
 app.use('/calendar', calendarRouter);
 app.use('/api/pending-edits', pendingEditsRoutes);
+app.use('/offers', offersRouter);
 
 
 app.listen(port, () => {
-    console.log(`Server is running on port: ${port}`)
+    console.log(`Server is running on port: ${port}`) 
 })

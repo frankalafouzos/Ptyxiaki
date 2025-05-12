@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Row, Col } from 'react-bootstrap';
 import DraggableImage from './DraggableImage.component';
 import styles from '../../css/ImageUploader.module.css';
 
-const ImageUploader = ({ setImages, initialImages = [], onExistingImageRemoved }) => {
+const ImageUploader = forwardRef(({ setImages, initialImages = [], onExistingImageRemoved }, ref) => {
   const [existingImages, setExistingImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
 
@@ -15,6 +15,16 @@ const ImageUploader = ({ setImages, initialImages = [], onExistingImageRemoved }
       src: image.link // Assuming the fetched images have a 'link' field
     })));
   }, [initialImages]);
+
+  // Expose methods to the parent component
+  useImperativeHandle(ref, () => ({
+    getOrderedImages: () => {
+      return {
+        existingImages: existingImages,
+        newImages: newImages.map(image => image.file)
+      };
+    }
+  }));
 
   const moveImage = (fromIndex, toIndex, type) => {
     let updatedImages = [];
@@ -30,6 +40,8 @@ const ImageUploader = ({ setImages, initialImages = [], onExistingImageRemoved }
       setExistingImages(updatedImages);
     } else {
       setNewImages(updatedImages);
+      // Update the parent component with the new order of files
+      setImages(updatedImages.map(image => image.file));
     }
   };
 
@@ -52,9 +64,9 @@ const ImageUploader = ({ setImages, initialImages = [], onExistingImageRemoved }
             reader.readAsDataURL(file);
           });
         })
-      ).then((newImages) => {
-        setNewImages((prevImages) => [...prevImages, ...newImages]);
-        setImages((prevImages) => [...prevImages, ...newImages.map(image => image.file)]);
+      ).then((newUploadedImages) => {
+        setNewImages((prevImages) => [...prevImages, ...newUploadedImages]);
+        setImages((prevImages) => [...prevImages, ...newUploadedImages.map(image => image.file)]);
       });
     };
     fileInput.click();
@@ -62,19 +74,17 @@ const ImageUploader = ({ setImages, initialImages = [], onExistingImageRemoved }
 
   const removeImage = (index, type) => {
     if (type === 'existing') {
-      console.log("1");
       const removedImage = existingImages[index]; // Get the image before filtering
-      console.log("2");
+      
       // Update the existingImages state
       setExistingImages(prevImages => {
         return prevImages.filter((_, i) => i !== index);
       });
-      console.log("3");
+      
       // Notify parent about the deletion
       if (onExistingImageRemoved) {
         onExistingImageRemoved(removedImage);
       }
-      console.log("4");
     } else {
       const updatedImages = newImages.filter((_, i) => i !== index);
       setNewImages(updatedImages);
@@ -113,6 +123,6 @@ const ImageUploader = ({ setImages, initialImages = [], onExistingImageRemoved }
       </div>
     </DndProvider>
   );
-};
+});
 
 export default ImageUploader;

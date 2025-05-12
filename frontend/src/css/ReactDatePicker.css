@@ -1,0 +1,104 @@
+/* Override date picker styles */
+.react-datepicker {
+  background-color: white !important;
+  color: #333 !important;
+  font-family: inherit !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.react-datepicker__header {
+  background-color: #f8f9fa !important;
+  border-bottom: 1px solid #ddd !important;
+}
+
+.react-datepicker__day-name, 
+.react-datepicker__day, 
+.react-datepicker__time-name {
+  color: #333 !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: #e9ecef !important;
+}
+
+.react-datepicker__input-container input {
+  width: 100% !important;
+}
+
+/* Fix the time selector if you're using it */
+.react-datepicker__time-container {
+  background-color: white !important;
+}
+
+/* Fix native select dropdown for react-datepicker */
+.react-datepicker__month-dropdown-container select,
+.react-datepicker__year-dropdown-container select {
+  background: #fff !important;
+  color: #333 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  width: auto !important;
+  min-width: 80px !important;
+  max-width: 120px !important;
+  padding: 4px 8px !important;
+  box-shadow: none !important;
+  appearance: menulist !important;
+}
+
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}
+
+.react-datepicker {
+  overflow-y: auto !important;
+  max-height: 400px !important; /* Or whatever you need */
+}
+.react-datepicker__month {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: space-between !important;
+  max-width: 280px; /* optional: adjust based on your layout */
+  margin: 0 auto;
+}
+
+.react-datepicker__week {
+  display: flex !important;
+  width: 100% !important;
+}
+
+.react-datepicker__day {
+  width: 14.28% !important; /* 100% / 7 days */
+  text-align: center;
+  margin: 2px 0;
+}
+
+
+/* Ensures the month view lays out days in weeks */
+.react-datepicker__month {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Each week is one row with 7 days */
+.react-datepicker__week {
+  display: flex !important;
+  justify-content: space-between !important;
+}
+
+/* Each day gets equal width */
+.react-datepicker__day {
+  width: 14.28% !important; /* 100% / 7 = ~14.28% per day */
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+
+

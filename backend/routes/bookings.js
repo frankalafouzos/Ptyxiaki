@@ -5,10 +5,14 @@ let RestaurantCapacity = require("../models/restaurantCapacity.model");
 let Restaurant = require("../models/restaurant.model");
 let User = require("../models/users.model");
 let Owner = require("../models/restaurantOwner.model");
-let { sendCustomerConfirmationMail, sendOwnerConfirmationMail, sendBookingReminderMail } = require("../functions/notifications");
-// const fetch = require('node-fetch'); 
+let {
+  sendCustomerConfirmationMail,
+  sendOwnerConfirmationMail,
+  sendBookingReminderMail,
+} = require("../functions/notifications");
+// const fetch = require('node-fetch');
 let GetUserByID = require("../functions/GetUser");
-let isDayClosed = require('../functions/IsDayClosed'); // Import the isDayClosed function
+let isDayClosed = require("../functions/IsDayClosed"); // Import the isDayClosed function
 
 router.route("/").get((req, res) => {
   Booking.find()
@@ -61,7 +65,7 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
         restaurantid: restaurantId,
         date: {
           $gte: startOfDay,
-          $lt: endOfDay
+          $lt: endOfDay,
         },
         $or: [
           {
@@ -110,56 +114,64 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
       if (partyNumber <= 2) {
         if (trueCapacityFor2 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: false,
           });
         }
       } else if (partyNumber <= 4) {
         if (trueCapacityFor4 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: false,
           });
         }
       } else if (partyNumber <= 6) {
         if (trueCapacityFor6 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: false,
           });
         }
       } else if (partyNumber <= 8) {
         if (trueCapacityFor8 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: false,
           });
         }
@@ -212,10 +224,11 @@ router.route("/create").post(async (req, res) => {
   const { userid, restaurantId, date, time, partySize, phone } = req.body;
   console.log(partySize);
   try {
-
     const closed = await isDayClosed(restaurantId, date);
     if (closed) {
-      return res.status(400).json({ message: "Cannot book on this closed day" });
+      return res
+        .status(400)
+        .json({ message: "Cannot book on this closed day" });
     }
 
     const restaurant = await Restaurant.find({ _id: restaurantId });
@@ -265,14 +278,14 @@ router.route("/create").post(async (req, res) => {
     const user = await GetUserByID(userid);
     console.log(user);
 
-    // const apiUrl = "http://localhost:5000/notifications/mail"; // Replace with your backend's endpoint
+    // const apiUrl = process.env.REACT_APP_API_URL + "/notifications/mail"; // Replace with your backend's endpoint
     const customerEmailData = {
       toName: user.firstname + " " + user.lastname,
       toEmail: user.email,
       restaurantName: restaurant[0].name,
       bookingDate: date,
       bookingTime: time,
-      guestCount: partySize
+      guestCount: partySize,
     };
 
     // const emailData = {
@@ -285,12 +298,12 @@ router.route("/create").post(async (req, res) => {
     // };
 
     sendCustomerConfirmationMail(customerEmailData)
-      .then(result => {
+      .then((result) => {
         if (!result.success) {
           console.error("Failed to send email:", result.error);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Unexpected email error:", err);
       });
 
@@ -299,21 +312,20 @@ router.route("/create").post(async (req, res) => {
 
       if (!owner) {
         console.error("Owner not found for the restaurant");
-      }
-      else {
+      } else {
         const ownerEmailData = {
           toName: owner.firstname + " " + owner.lastname,
           toEmail: owner.email,
           restaurantName: restaurant[0].name,
           bookingDate: date,
           bookingTime: time,
-          guestCount: partySize
+          guestCount: partySize,
         };
 
-        sendOwnerConfirmationMail(ownerEmailData)
+        sendOwnerConfirmationMail(ownerEmailData);
       }
     } catch (error) {
-      console.log('Server error:' + error);
+      console.log("Server error:" + error);
     }
 
     // Schedule booking reminder email for the day before the booking
@@ -337,7 +349,6 @@ router.route("/create").post(async (req, res) => {
     //       });
     //   }, delay);
     // }
-
   } catch (error) {
     console.error("Error creating booking:", error);
     return res
@@ -357,7 +368,9 @@ router.route("/userbookings").post(async (req, res) => {
     const formatTime = (minutesFromMidnight) => {
       const hours = Math.floor(minutesFromMidnight / 60);
       const minutes = minutesFromMidnight % 60;
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
     };
 
     const userid = user._id;
@@ -366,10 +379,10 @@ router.route("/userbookings").post(async (req, res) => {
     let bookings = await Booking.find({ userid: userid }).sort({ date: -1 });
 
     // Fetch restaurant names in a single query
-    const restaurantIds = bookings.map(booking => booking.restaurantid);
+    const restaurantIds = bookings.map((booking) => booking.restaurantid);
     const restaurants = await Restaurant.find({
-      '_id': { $in: restaurantIds }
-    }).select('name _id');
+      _id: { $in: restaurantIds },
+    }).select("name _id");
 
     // Create a mapping of restaurant ID to restaurant name
     const restaurantNameMap = restaurants.reduce((acc, restaurant) => {
@@ -378,10 +391,14 @@ router.route("/userbookings").post(async (req, res) => {
     }, {});
 
     // Add restaurantName to each booking
-    bookings = bookings.map(booking => {
+    bookings = bookings.map((booking) => {
       const bookingObject = booking.toObject(); // Convert Mongoose document to plain JavaScript object
-      bookingObject.restaurantName = restaurantNameMap[booking.restaurantid.toString()] || 'Restaurant name not found';
-      bookingObject.formattedStartingTime = formatTime(bookingObject.startingTime);
+      bookingObject.restaurantName =
+        restaurantNameMap[booking.restaurantid.toString()] ||
+        "Restaurant name not found";
+      bookingObject.formattedStartingTime = formatTime(
+        bookingObject.startingTime
+      );
       bookingObject.formattedEndingTime = formatTime(bookingObject.endingTime);
       return bookingObject;
     });
@@ -389,7 +406,9 @@ router.route("/userbookings").post(async (req, res) => {
     return res.json(bookings);
   } catch (error) {
     console.error("Error retrieving bookings:", error);
-    return res.status(500).json({ message: "An error occurred while fetching bookings" });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while fetching bookings" });
   }
 });
 
@@ -401,7 +420,7 @@ router.route("/deleteone/:id").delete((req, res) => {
 
 router.route("/getonebyid").get(async (req, res) => {
   const { id } = req.query;
-  const booking = await Booking.findById(id)
+  const booking = await Booking.findById(id);
 
   if (!booking) {
     return res.status(404).json({ message: "Booking not found" });
@@ -409,7 +428,6 @@ router.route("/getonebyid").get(async (req, res) => {
 
   console.log(`Booking fetched successfully ${booking}`);
   return res.json(booking);
-
 });
 
 router.route("/edit/:id").post((req, res) => {
@@ -433,13 +451,11 @@ router.route("/edit/:id").post((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-
-router.get('/getbookings/:restaurantid', (req, res) => {
+router.get("/getbookings/:restaurantid", (req, res) => {
   Booking.find({ restaurantid: req.params.restaurantid })
-    .then(bookings => res.json(bookings))
-    .catch(err => res.status(400).json('Error: ' + err));
+    .then((bookings) => res.json(bookings))
+    .catch((err) => res.status(400).json("Error: " + err));
 });
-
 
 router.get("/:bookingId", async (req, res) => {
   try {
@@ -449,7 +465,8 @@ router.get("/:bookingId", async (req, res) => {
 
     // Fetch the restaurant associated with the booking
     const restaurant = await Restaurant.findById(booking.restaurantid);
-    if (!restaurant) return res.status(404).json({ message: "Restaurant not found" });
+    if (!restaurant)
+      return res.status(404).json({ message: "Restaurant not found" });
 
     // Combine the booking and restaurant data in the response
     res.status(200).json({
@@ -462,15 +479,14 @@ router.get("/:bookingId", async (req, res) => {
   }
 });
 
-
-router.post('/rate/:bookingId', async (req, res) => {
+router.post("/rate/:bookingId", async (req, res) => {
   const { rating, feedback } = req.body;
   const bookingId = req.params.bookingId;
 
   try {
     const booking = await Booking.findById(bookingId);
     if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+      return res.status(404).json({ message: "Booking not found" });
     }
 
     const newRating = new BookingRating({
@@ -482,10 +498,12 @@ router.post('/rate/:bookingId', async (req, res) => {
     });
 
     await newRating.save();
-    res.status(201).json({ message: 'Rating saved successfully', rating: newRating });
+    res
+      .status(201)
+      .json({ message: "Rating saved successfully", rating: newRating });
   } catch (error) {
-    console.error('Error saving rating:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error saving rating:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
