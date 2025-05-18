@@ -31,7 +31,7 @@ const OfferCard = ({ id, offer, restaurantId, onOfferDeleted }) => {
                 throw new Error('Failed to fetch restaurant data');
             }
             const data = await response.json();
-            return data.name;
+            return data.restaurant.name;
         } catch (error) {
             console.error(error);
             return 'Unknown Restaurant';
@@ -41,6 +41,7 @@ const OfferCard = ({ id, offer, restaurantId, onOfferDeleted }) => {
     useEffect(() => {
         const fetchRestaurantName = async () => {
             const name = await getRestaurantName(restaurantId);
+            console.log("Restaurant name fetched:", name);
             setRestaurantName(name);
         };
         fetchRestaurantName();

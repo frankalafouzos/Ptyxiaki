@@ -10,11 +10,12 @@ const app = express();
 const port = process.env.PORT || 5001;
 
 const uri = process.env.ATLAS_URI;
-mongoose.connect(uri, { useNewUrlParser: true});
+mongoose.connect(uri, { useNewUrlParser: true });
 const connection = mongoose.connection;
 connection.once('open', () => {
-console.log("MongoDB database connection established successfully");
-}) 
+    console.log("MongoDB database connection established successfully");
+    require('./agenda/expireOffers');
+})
 
 app.use(cookieParser());
 
@@ -53,5 +54,5 @@ app.use('/offers', offersRouter);
 
 
 app.listen(port, () => {
-    console.log(`Server is running on port: ${port}`) 
+    console.log(`Server is running on port: ${port}`)
 })

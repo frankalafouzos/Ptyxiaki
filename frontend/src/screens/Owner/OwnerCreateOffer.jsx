@@ -1,9 +1,11 @@
+// eslint-disable-next-line
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../css/ReactDatePicker.css';
 import '../../css/Owner/OwnerCreateOffer.css';
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { toast } from "react-toastify";
 import { fetchOwner } from "../../scripts/fetchUser"; // Adjust path if needed
 
 const OwnerCreateOffer = () => {
@@ -94,7 +96,6 @@ const OwnerCreateOffer = () => {
             });
             const data = await res.json();
             if (res.ok) {
-                setMessage('Offer created successfully!');
                 setOfferDetails({
                     title: '',
                     description: '',
@@ -104,11 +105,24 @@ const OwnerCreateOffer = () => {
                     endDate: null,
                     restaurantId: '',
                 });
+                toast.success("Offer created successfully!", {
+                    position: "top-center",
+                    autoClose: 2000,
+                    onClose: () => window.location.replace('/owner/offers')
+                });
             } else {
-                setMessage(data.error || 'Failed to create offer.');
+                toast.error("Failed to create offer.", {
+                    position: "top-center",
+                    autoClose: 2000,
+                    onClose: () => window.location.replace('/owner/offers/create')
+                });
             }
         } catch (err) {
-            setMessage('Server error.');
+            toast.error("Server error.", {
+                position: "top-center",
+                autoClose: 2000,
+                onClose: () => window.location.replace('/owner/offers/create')
+            });
         }
     };
 
@@ -129,7 +143,7 @@ const OwnerCreateOffer = () => {
             <h1 className="create-offer-title">Create a New Offer</h1>
             <h3 className="create-offer-subtitle">Please add the information of your offer below:</h3>
 
-            {message && <div className="create-offer-message">{message}</div>}
+            
 
             <div className="create-offer-field">
                 <label htmlFor="restaurantId">Restaurant:</label>

@@ -5,6 +5,9 @@ let RestaurantCapacity = require("../models/restaurantCapacity.model");
 let Restaurant = require("../models/restaurant.model");
 let User = require("../models/users.model");
 let Owner = require("../models/restaurantOwner.model");
+const ClosedDates = require("../models/ClosedDates.model");
+const DefaultClosedDays = require("../models/DefaultClosedDays.model");
+const forcedOpenDates = require("../models/forcedOpenDates.model");
 let {
   sendCustomerConfirmationMail,
   sendOwnerConfirmationMail,
@@ -30,14 +33,45 @@ function generateTimeSlots(startTime, endTime, interval) {
   return timeArray;
 }
 
+async function checkIfClosed(restaurantId, date) {
+  // Convert date to start and end of the day in UTC for accurate matching
+  const startOfDay = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0));
+  const endOfDay = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999));
+
+  // Check ForcedOpenDate first (overrides all)
+  const forcedOpen = await forcedOpenDates.findOne({
+    restaurant: restaurantId,
+    date: { $gte: startOfDay, $lte: endOfDay }
+  });
+  if (forcedOpen) return false;
+
+  // Check ForcedClosedDate (overrides regular closed)
+  const forcedClosed = await ClosedDates.findOne({
+    restaurant: restaurantId,
+    date: { $gte: startOfDay, $lte: endOfDay }
+  });
+  if (forcedClosed) return true;
+
+  // Check regular ClosedDate
+  const closed = await DefaultClosedDays.findOne({
+    restaurant: restaurantId,
+    date: { $gte: startOfDay, $lte: endOfDay }
+  });
+  if (closed) return true;
+
+  // Not closed
+  return false;
+}
+
 const getAvailability = async (restaurantId, date, partyNumber) => {
   try {
+      
     let Capacity = await RestaurantCapacity.find({
-      restaurantid: restaurantId,
+      restaurantid: restaurantId, 
     });
-    console.log(Capacity);
+    // console.log(Capacity);
     let restaurant = await Restaurant.find({ _id: restaurantId });
-    console.log(restaurant);
+    // console.log(restaurant);
 
     if (!Capacity || !restaurant) {
       return res
@@ -59,7 +93,7 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
     availabilityPerSlot = [];
     // console.log(slots);
     for (let slot of slots) {
-      console.log("Slot: " + slot);
+      // console.log("Slot: " + slot);
 
       let bookings = await Booking.find({
         restaurantid: restaurantId,
@@ -82,7 +116,7 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
           },
         ],
       });
-      console.log(bookings);
+      // console.log(bookings);
       let booked = {
         time: slot,
         bookingsfor2: 0,
@@ -110,7 +144,7 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
       let trueCapacityFor4 = Capacity[0].tablesForFour - booked.bookingsfor4;
       let trueCapacityFor6 = Capacity[0].tablesForSix - booked.bookingsfor6;
       let trueCapacityFor8 = Capacity[0].tablesForEight - booked.bookingsfor8;
-      console.log(`True Capacity ${trueCapacityFor4}`);
+      // console.log(`True Capacity ${trueCapacityFor4}`);
       if (partyNumber <= 2) {
         if (trueCapacityFor2 > 0) {
           availabilityPerSlot.push({
@@ -119,7 +153,7 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
             }`,
             available: true,
           });
-        } else {
+        } else { 
           availabilityPerSlot.push({
             time: `${Math.floor(slot / 60)}:${
               slot % 60 === 0 ? "00" : slot % 60
@@ -177,8 +211,8 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
         }
       }
     }
-    console.log("Out of loop");
-    console.log(availabilityPerSlot);
+    // console.log("Out of loop");
+    // console.log(availabilityPerSlot);
     return availabilityPerSlot;
   } catch (error) {
     console.error("Error retrieving availability:", error);
@@ -196,12 +230,20 @@ router.route("/availability/:restaurantId").get(async (req, res) => {
   // Note: parts[1] - 1 because months are 0-indexed in JavaScript Date objects
   console.log(parts);
   const date = new Date(parts[0], parts[1] - 1, parts[2]);
-  console.log(date);
+  console.log("Date before the call:"+date);
 
+  
+ 
   try {
+
+    const closed = await checkIfClosed(restaurantId, date);
+    console.log("Closed: " + closed);
+    if (closed) {
+      return res.json({ message: "Restaurant is closed on this date" });
+    }
     // Call the getAvailability function and await its result
     const availability = await getAvailability(restaurantId, date, partyNumber);
-
+ 
     // Check if the availability array is empty or not
     if (availability.length === 0) {
       // No available slots

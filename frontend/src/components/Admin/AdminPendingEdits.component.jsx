@@ -41,7 +41,7 @@ const AdminPendingEdits = () => {
     const fetchPendingEdits = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/pending-edits/admin"
+          `${process.env.REACT_APP_API_URL}/api/pending-edits/admin`
         );
         if (!response.ok) throw new Error("Failed to fetch pending edits");
         const data = await response.json();
@@ -119,12 +119,10 @@ const AdminPendingEdits = () => {
             bVal = b.restaurant?.name || "";
             break;
           case "owner":
-            aVal = `${a.ownerDetails?.firstname || ""} ${
-              a.ownerDetails?.lastname || ""
-            }`;
-            bVal = `${b.ownerDetails?.firstname || ""} ${
-              b.ownerDetails?.lastname || ""
-            }`;
+            aVal = `${a.ownerDetails?.firstname || ""} ${a.ownerDetails?.lastname || ""
+              }`;
+            bVal = `${b.ownerDetails?.firstname || ""} ${b.ownerDetails?.lastname || ""
+              }`;
             break;
           case "submittedAt":
             aVal = new Date(a.submittedAt).getTime();
@@ -422,10 +420,10 @@ const AdminPendingEdits = () => {
               {(filters.changeTypes.length > 0 ||
                 filters.dateRange ||
                 searchTerm) && (
-                <Button variant="outline-danger" onClick={clearFilters}>
-                  Clear All Filters
-                </Button>
-              )}
+                  <Button variant="outline-danger" onClick={clearFilters}>
+                    Clear All Filters
+                  </Button>
+                )}
             </Col>
           </Row>
 

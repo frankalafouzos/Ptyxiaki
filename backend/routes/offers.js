@@ -57,39 +57,34 @@ router.route("/create").post(async (req, res) => {
 });
 
 
-router.route("/:ownerId").get(async (req, res) => {
-  
+// Get all active offers for customers, with restaurant name
+router.get('/active', async (req, res) => {
   try {
-    const { ownerId } = req.params;
-    const offers = await Offer.find({ ownerId });
+    // Find all active offers and populate restaurant name
+    const offers = await Offer.find({ isActive: true })
+      .populate({
+        path: 'restaurantId',
+        select: 'name status',
+      });
 
-    console.log("Offers: ", offers);
-    
-    if (!offers.length) {
-      return res.status(200).json({ error: 'No offers found for this owner' });
-    }
-
-    const offersByRestaurant = offers.reduce((acc, offer) => {
-        if (!acc[offer.restaurantId]) {
-            acc[offer.restaurantId] = [];
-        }
-        acc[offer.restaurantId].push(offer);
-        return acc;
-    }, {});
-
-    const bundledOffers = Object.keys(offersByRestaurant).map(restaurantId => ({
-        restaurantId,
-        offers: offersByRestaurant[restaurantId],
+    // Only include offers from restaurants that are not deleted/hidden
+    const filteredOffers = offers.filter(offer =>
+      offer.restaurantId &&
+      offer.restaurantId.status === 'Approved'
+    ).map(offer => ({
+      ...offer.toObject(),
+      restaurantName: offer.restaurantId.name,
     }));
 
-    res.status(200).json(bundledOffers);
-
-    // res.status(200).json(offers); 
+    res.status(200).json(filteredOffers);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+
+
 
 const OWNER_ID = '66508dd2beccdefca6bd8141'; // Owner ID to associate offers with
 
@@ -181,5 +176,41 @@ router.route("/delete/:offerId").delete(async (req, res) => {
     return res.status(500).json({ error: 'Server error' });
   }
 });
+
+router.route("/:ownerId").get(async (req, res) => {
+  
+  try {
+    const { ownerId } = req.params;
+    const offers = await Offer.find({ ownerId });
+
+    console.log("Offers: ", offers);
+    
+    if (!offers.length) {
+      return res.status(200).json({ error: 'No offers found for this owner' });
+    }
+
+    const offersByRestaurant = offers.reduce((acc, offer) => {
+        if (!acc[offer.restaurantId]) {
+            acc[offer.restaurantId] = [];
+        }
+        acc[offer.restaurantId].push(offer);
+        return acc;
+    }, {});
+
+    const bundledOffers = Object.keys(offersByRestaurant).map(restaurantId => ({
+        restaurantId,
+        offers: offersByRestaurant[restaurantId],
+    }));
+
+    res.status(200).json(bundledOffers);
+
+    // res.status(200).json(offers); 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
 
 module.exports = router;

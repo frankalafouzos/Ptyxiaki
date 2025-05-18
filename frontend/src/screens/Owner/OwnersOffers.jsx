@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import OfferCard from '../../components/OfferCard.component.jsx';
 import { useNavigate } from 'react-router-dom'; // Add this import
+import '../../css/Owner/OwnerOffers.css';
 import '../../css/Spinner.css';
 
 const OwnersOffers = () => {
@@ -17,36 +18,43 @@ const OwnersOffers = () => {
     useEffect(() => {
         const fetchOwnerAndOffers = async () => {
             try {
-                console.log("Fetching owner data for email:", email);
-
-                // First, get the owner ID from the email
+                // 1. Get owner
                 const ownerResponse = await fetch(
                     `${process.env.REACT_APP_API_URL}/owners/ownerprofile`,
                     {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ email: email }),
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email }),
                     }
                 );
-
-                if (!ownerResponse.ok) {
-                    throw new Error("Owner not found");
-                }
-
+                if (!ownerResponse.ok) throw new Error("Owner not found");
                 const ownerData = await ownerResponse.json();
-                console.log("Received owner data:", ownerData);
-                // setOwnerId(ownerData._id);
 
-                // Then fetch offers using the owner ID
-                const offersResponse = await fetch(`${process.env.REACT_APP_API_URL}/offers/${ownerData._id}`);
-                if (!offersResponse.ok) {
-                    throw new Error("Failed to fetch offers");
-                }
+                // 2. Get all restaurants for this owner
+                const restaurantsResponse = await fetch(
+                    `${process.env.REACT_APP_API_URL}/restaurants?owner=${ownerData._id}`
+                );
+                const restaurantsData = await restaurantsResponse.json();
+                const restaurantsArr = restaurantsData.restaurants || restaurantsData;
+                const restaurantIdToName = {};
+                restaurantsArr.forEach(r => {
+                    restaurantIdToName[r._id] = r.name;
+                });
 
+                // 3. Get offers grouped by restaurant
+                const offersResponse = await fetch(
+                    `${process.env.REACT_APP_API_URL}/offers/${ownerData._id}`
+                );
+                if (!offersResponse.ok) throw new Error("Failed to fetch offers");
                 const offersData = await offersResponse.json();
-                setOffers(offersData);
+
+                // 4. Attach restaurantName to each group
+                const offersWithNames = offersData.map(group => ({
+                    ...group,
+                    restaurantName: restaurantIdToName[group.restaurantId] || "Unknown Restaurant"
+                }));
+
+                setOffers(offersWithNames);
             } catch (err) {
                 console.error(err);
                 setError('Failed to fetch offers: ' + err.message);
@@ -68,7 +76,7 @@ const OwnersOffers = () => {
         });
     };
 
-        // Add this function to handle navigation
+    // Add this function to handle navigation
     const handleCreateOffer = () => {
         navigate('/owner/offers/create');
     };
@@ -84,18 +92,19 @@ const OwnersOffers = () => {
     return (
         <div>
             <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>My Offers</h1>
-            <button 
-                className="btn btn-primary" 
-                onClick={handleCreateOffer}
-            >
-                <i className="bi bi-plus-circle me-2"></i> Create New Offer
-            </button>
-        </div>
-            
+                <h1>My Offers</h1>
+                <button
+                    className="btn btn-primary"
+                    onClick={handleCreateOffer}
+                >
+                    <i className="bi bi-plus-circle me-2"></i> Create New Offer
+                </button>
+            </div>
+
             {offers.length > 0 ? (
                 offers.map((restaurantGroup) => (
                     <div key={restaurantGroup.restaurantId} className="restaurant-group mb-4">
+                        <h3>{restaurantGroup.restaurantName}</h3>
                         <div className="offers-container">
                             {restaurantGroup.offers.map((offer) => (
                                 <OfferCard

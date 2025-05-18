@@ -132,12 +132,12 @@ const Restaurant = ({ restaurant, index, images }) => {
       );
 
       if (response.ok) {
-        console.log("Restaurant hidden!");
+        console.log("Restaurant approved!");
         window.location.reload();
-        // Handle successful deletion (e.g., refresh data, show a message)
+        // Handle successful approval (e.g., refresh data, show a message)
       } else {
-        console.log("Delete failed");
-        // Handle deletion failure
+        console.log(response);
+        // Handle approval failure
       }
     } catch (error) {
       console.error("An error occurred:", error);

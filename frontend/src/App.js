@@ -31,6 +31,7 @@ import UserBookings from './components/UserBookings.component';
 import ThankYouForBooking from './screens/ThankYouForBooking';
 import EditBooking from './screens/EditBooking';
 import RateBooking from './screens/RateBooking';
+import Offers from './screens/Offers';
 
 // Owner
 import OwnerHome from './screens/Owner/OwnerHome';
@@ -123,6 +124,7 @@ function App() {
           <Route path="/search" element={<SearchBar />} />
           <Route path="/restaurants" element={<Restaurants />} />
           <Route path="/restaurant/:id" element={<RestaurantPage />} />
+          <Route path="/offers" element={ <Offers />} />
           <Route path="/bookingThankYou/:bookingid" element={<ThankYouForBooking />} />
 
           {/* User Protected Routes */}
@@ -134,6 +136,7 @@ function App() {
           <Route path="/restaurant/:id/confirmBooking" element={<UserProtectedRoute element={<ConfirmBooking />} />} />
           <Route path="/editBooking/:id" element={<UserProtectedRoute element={<EditBooking />} />} />
           <Route path="/ratebooking/:bookingId" element={<UserProtectedRoute element={<RateBooking />} />} />
+
 
           {/* Owner Protected Routes */}
           <Route path="/owner/home" element={<OwnerProtectedRoute element={<OwnerHome />} />} />

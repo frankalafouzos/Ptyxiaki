@@ -13,7 +13,7 @@ const AdminPendingEdits = () => {
   const fetchPendingEdits = async () => {
     try {
       const response = await fetch(
-        process.env.REACT_APP_API_URL + "/api/pending-edits/pending-edits"
+        `${process.env.REACT_APP_API_URL}/api/pending-edits/pending-edits`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch pending edits");
