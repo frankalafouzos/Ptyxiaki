@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import '../css/Offers.css';
 
 const Offers = () => {
@@ -14,12 +15,22 @@ const Offers = () => {
         if (!res.ok) throw new Error("Failed to fetch offers");
         const data = await res.json();
 
-        // Group offers by restaurantId._id
+        // Group offers by restaurantId._id (or restaurantId if not populated)
         const grouped = {};
         data.forEach(offer => {
-          const rid = offer.restaurantId?._id || offer.restaurantId;
-          const rname = offer.restaurantId?.name || "Unknown Restaurant";
-          if (!grouped[rid]) grouped[rid] = { restaurantName: rname, offers: [] };
+          // restaurantId may be an object or string, depending on backend
+          const restaurant = offer.restaurantId;
+          const rid = restaurant?._id || restaurant || offer.restaurantName;
+          if (!grouped[rid]) {
+            grouped[rid] = {
+              restaurant: {
+                ...restaurant,
+                name: offer.restaurantName,
+                restaurantImage: offer.restaurantImage,
+              },
+              offers: [],
+            };
+          }
           grouped[rid].offers.push(offer);
         });
         setOffers(Object.values(grouped));
@@ -32,65 +43,97 @@ const Offers = () => {
     fetchOffers();
   }, []);
 
-const handleClaim = (offer) => {
-    // Save offer to sessionStorage with quick expiry (e.g., 10 minutes)
+  const handleClaim = (offer) => {
     const expiry = Date.now() + 10 * 60 * 1000;
+    setClaimed(offer._id);
     sessionStorage.setItem(
-        "claimedOffer",
-        JSON.stringify({ offer, expiry })
+      "claimedOffer",
+      JSON.stringify({ offer, expiry })
     );
-    // console.log("Claimed offer:", offer);
-    // Redirect to booking page
-    window.location.href = "/booking/"+offer.restaurantId._id;
-};
+    window.location.href = "/booking/" + (offer.restaurantId?._id || offer.restaurantId);
+  };
 
   if (loading) return <div className="text-center mt-5">Loading offers...</div>;
   if (error) return <div className="text-danger mt-5 text-center">{error}</div>;
 
   return (
-    <div className="offers-container">
-      <h1 className="mb-4">Current Offers</h1>
-      {offers.length === 0 ? (
-        <p>No offers available right now. Please check back soon!</p>
-      ) : (
-        offers.map(group => (
-          <div key={group.restaurantName} className="mb-5">
-            <div className="restaurant-group-title">{group.restaurantName}</div>
-            <div className="row">
-              {group.offers.map(offer => (
-                <div className="col-md-6 col-lg-4 mb-4" key={offer._id}>
-                  <div className="offer-card">
-                    <div>
-                      <div className="offer-title">{offer.title}</div>
-                      <div className="mb-2">{offer.description}</div>
-                      <div>
-                        <strong>Discount:</strong>{" "}
-                        {offer.discountType === "percentage"
-                          ? `${offer.discountValue}%`
-                          : `€${offer.discountValue}`}
-                      </div>
-                      <div>
-                        <strong>Valid:</strong>{" "}
-                        {new Date(offer.startDate).toLocaleDateString()} -{" "}
-                        {new Date(offer.endDate).toLocaleDateString()}
-                      </div>
+    <div className="offers-bg">
+      <div className="offers-container">
+        <h1 className="mb-4 text-center">Current Offers</h1>
+        {offers.length === 0 ? (
+          <p>No offers available right now. Please check back soon!</p>
+        ) : (
+          offers.map(group => (
+            <div key={group.restaurant?._id || group.restaurant.name} className="mb-5">
+              <div className="restaurant-info-card mb-4 p-4 d-flex align-items-center shadow-sm rounded">
+                {group.restaurant?.restaurantImage && (
+                  <img
+                    src={group.restaurant.restaurantImage}
+                    alt={group.restaurant.name}
+                    className="restaurant-logo me-3"
+                    style={{ width: 70, height: 70, objectFit: "cover", borderRadius: "50%" }}
+                  />
+                )}
+                <div className="flex-grow-1">
+                  <h3 className="mb-1">
+                    <Link to={`/restaurant/${group.restaurant._id}`} className="restaurant-link">
+                      {group.restaurant?.name || "Unknown Restaurant"}
+                    </Link>
+                  </h3>
+                  <div className="text-muted" style={{ fontSize: "1rem" }}>
+                    {group.restaurant?.category && <span>{group.restaurant.category} | </span>}
+                    {group.restaurant?.location && <span>{group.restaurant.location}</span>}
+                  </div>
+                  {group.restaurant?.phone && (
+                    <div className="text-muted" style={{ fontSize: "0.95rem" }}>
+                      <strong>Phone:</strong> {group.restaurant.phone}
                     </div>
-                    <div className="offer-actions">
-                      <button
-                        className="btn-claim"
-                        onClick={() => handleClaim(offer)}
-                        disabled={claimed === offer._id}
-                      >
-                        {claimed === offer._id ? "Claimed!" : "Claim Offer"}
-                      </button>
+                  )}
+                </div>
+                <Link
+                  to={`/restaurant/${group.restaurant._id}`}
+                  className="btn btn-outline-primary ms-3"
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  View Restaurant
+                </Link>
+              </div>
+              <div className="row g-4">
+                {group.offers.map(offer => (
+                  <div className="col-md-6 col-lg-4" key={offer._id}>
+                    <div className="offer-card shadow-sm rounded h-100 d-flex flex-column">
+                      <div>
+                        <div className="offer-title">{offer.title}</div>
+                        <div className="mb-2">{offer.description}</div>
+                        <div>
+                          <strong>Discount:</strong>{" "}
+                          {offer.discountType === "percentage"
+                            ? `${offer.discountValue}%`
+                            : `€${offer.discountValue}`}
+                        </div>
+                        <div>
+                          <strong>Valid:</strong>{" "}
+                          {new Date(offer.startDate).toLocaleDateString()} -{" "}
+                          {new Date(offer.endDate).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="offer-actions mt-auto">
+                        <button
+                          className="btn-claim"
+                          onClick={() => handleClaim(offer)}
+                          disabled={claimed === offer._id}
+                        >
+                          {claimed === offer._id ? "Claimed!" : "Claim Offer"}
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        ))
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };

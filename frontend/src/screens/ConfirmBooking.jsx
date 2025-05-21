@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { Form, Button, Container } from "react-bootstrap";
+import { Form, Button, Container, Alert } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import { fetchUser } from "../scripts/fetchUser";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const formatTime = (time) => {
-  // Assuming time is something like "1:00" or "9:30", convert it to "01:00" or "09:30"
   if (!time) return "";
   const [hours, minutes] = time.split(":");
   return `${hours.padStart(2, "0")}:${minutes}`;
 };
 
-// Use formatTime when setting the initial time state
-
 const ConfirmBooking = () => {
   const location = useLocation();
   const authUser = useAuthUser();
-  const email = authUser.email; // Make sure this correctly calls the function
+  const email = authUser.email;
+
+  // Get offer from navigation state
+  const offer = location.state?.offer;
 
   // Initial state setup based on passed state or default values
   const initialState = {
@@ -29,6 +29,7 @@ const ConfirmBooking = () => {
     time: formatTime(location.state?.time),
     partySize: location.state?.partySize || "",
     phone: "",
+    offerId: offer?._id || null, // Pass offerId if present
   };
 
   const [reservation, setReservation] = useState(initialState);
@@ -43,12 +44,7 @@ const ConfirmBooking = () => {
     const fetchData = async () => {
       if (email) {
         try {
-          await fetchUser(email, setLoading, setUser); // Assuming fetchUser correctly fetches the user data
-          //   setReservation((prevState) => ({
-          //     ...prevState,
-          //     userid: user._id,
-          //     name: `${user.firstname} ${user.lastname}`,
-          //   }));
+          await fetchUser(email, setLoading, setUser);
         } catch (error) {
           console.error("Failed to fetch user data:", error);
         } finally {
@@ -56,7 +52,6 @@ const ConfirmBooking = () => {
         }
       }
     };
-
     fetchData();
   }, [email]);
 
@@ -69,7 +64,7 @@ const ConfirmBooking = () => {
         name: `${user.firstname} ${user.lastname}`,
       }));
     }
-  }, [user]); // Depend on user state
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -81,7 +76,6 @@ const ConfirmBooking = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting reservation:", reservation);
     try {
       const response = await fetch(
         process.env.REACT_APP_API_URL + "/bookings/create",
@@ -95,38 +89,33 @@ const ConfirmBooking = () => {
       );
       if (response.ok) {
         const responseData = await response.json();
-        console.log(`Reservation created successfully ${responseData.id}`);
         toast.success("Reservation created successfully", {
           position: "top-center",
           autoClose: 2000,
           onClose: () =>
+            // window.location.reload(),
             window.location.replace(
               `${process.env.REACT_APP_API_URL}/bookingThankYou/${responseData.id}`
             ),
         });
-        // Handle success case here
       } else {
         const responseData = await response.json();
-        console.error(
-          "Failed to create reservation" + response.status + response.message
-        );
         toast.error("Failed to create reservation", {
           position: "top-center",
           autoClose: 2000,
           onClose: () =>
             window.location.replace(
-              `${process.env.REACT_APP_API_URL}/restaurant/${reservation.restaurantId}`
+              `/restaurant/${reservation.restaurantId}`
             ),
         });
       }
     } catch (error) {
-      console.error("Failed to create reservation:", error);
       toast.error("Failed to create reservation", {
         position: "top-center",
         autoClose: 2000,
         onClose: () =>
           window.location.replace(
-            `${process.env.REACT_APP_API_URL}/restaurant/${reservation.restaurantId}`
+            `/restaurant/${reservation.restaurantId}`
           ),
       });
     }
@@ -145,6 +134,27 @@ const ConfirmBooking = () => {
       >
         Confirm Your Reservation
       </h1>
+
+      {/* Show offer details if present */}
+      {offer && (
+        <Alert variant="info" className="mb-4">
+          <div>
+            <strong>Offer Applied:</strong> {offer.title}
+            <br />
+            <span>{offer.description}</span>
+            <br />
+            <strong>Discount:</strong>{" "}
+            {offer.discountType === "percentage"
+              ? `${offer.discountValue}%`
+              : `€${offer.discountValue}`}
+            <br />
+            <strong>Valid:</strong>{" "}
+            {new Date(offer.startDate).toLocaleDateString()} -{" "}
+            {new Date(offer.endDate).toLocaleDateString()}
+          </div>
+        </Alert>
+      )}
+
       <Form onSubmit={handleSubmit} className="w-100">
         <Form.Group className="mb-3">
           <Form.Label htmlFor="name" style={{ fontWeight: "bold" }}>

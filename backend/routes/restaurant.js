@@ -281,7 +281,7 @@ router.post('/deleteAll/:id', async (req, res) => {
     .catch(err => res.status(404).json('Error: ' + err));
 });
 
-//Get restaurant capacities by restaurant ID
+//Get restaurant capacities by restaurant ID 
 router.get('/restaurant-capacities/:id', async (req, res) => {
   try {
     const restaurantId = req.params.id;

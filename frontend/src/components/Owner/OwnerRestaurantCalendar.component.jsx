@@ -5,6 +5,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { Container, Modal, Table, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../../css/Owner/OwnerRestaurantCalendar.css";
+import ViewOfferButton from "../DisplayOfferModal.component"; 
 
 const OwnerRestaurantCalendar = ({ restaurantId }) => {
   const [events, setEvents] = useState([]);
@@ -35,18 +36,16 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
         }
 
         const data = await response.json();
-        console.log("Fetched data:", data); // Debugging log
-
         const formattedEvents = data.map((day) => {
           const backgroundColor = day.closed
             ? "#f44336"
             : day.percentageBooked > 80
-            ? "#ff5252"
-            : day.percentageBooked > 50
-            ? "#ff9800"
-            : day.percentageBooked > 0
-            ? "#ffeb3b"
-            : "#4caf50";
+              ? "#ff5252"
+              : day.percentageBooked > 50
+                ? "#ff9800"
+                : day.percentageBooked > 0
+                  ? "#ffeb3b"
+                  : "#4caf50";
 
           return {
             title: day.closed ? "Closed" : `${day.bookingsCount} bookings`,
@@ -57,8 +56,6 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
             textColor: "white",
           };
         });
-
-        console.log("Formatted events:", formattedEvents); // Debugging log
 
         setEvents(formattedEvents);
       } catch (error) {
@@ -89,7 +86,6 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
       if (!response.ok)
         throw new Error("Failed to fetch bookings for the selected date.");
       const data = await response.json();
-      console.log("Fetched bookings for date:", date, data); // Debugging log
       setBookings(data.sort((a, b) => a.startingTime - b.startingTime));
       setShowModal(true);
     } catch (error) {
@@ -130,7 +126,6 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
   const { morning, afternoon, evening } = categorizeBookings(bookings);
 
   const handleAddBookingClick = () => {
-    console.log("Navigating to add booking with selected date:", selectedDate); // Debugging log
     navigate(`/owner/add-booking/${restaurantId}`, { state: { selectedDate } });
   };
 
@@ -151,54 +146,84 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
   const handleToggleClosedStatus = async () => {
     try {
       // Determine which endpoint to use based on current status
-      const endpoint = isDateClosed 
-        ? `${process.env.REACT_APP_API_URL}/calendar/open-date` 
+      const endpoint = isDateClosed
+        ? `${process.env.REACT_APP_API_URL}/calendar/open-date`
         : `${process.env.REACT_APP_API_URL}/calendar/close-date`;
-      
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          restaurantId: restaurantId, 
+        body: JSON.stringify({
+          restaurantId: restaurantId,
           date: selectedDate,
           reason: isDateClosed ? "Forced Open" : "Closed by owner"
         }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update closed status");
       }
-      
+
       // Update the local state
       setIsDateClosed(!isDateClosed);
-      
+
       // Refresh calendar data
       const updatedEvents = [...events];
       const eventIndex = updatedEvents.findIndex(
         event => new Date(event.start).toISOString().split('T')[0] === selectedDate
       );
-      
+
       if (eventIndex !== -1) {
         updatedEvents[eventIndex] = {
           ...updatedEvents[eventIndex],
           title: !isDateClosed ? "Closed" : `${bookings.length} bookings`,
-          backgroundColor: !isDateClosed ? "#f44336" : 
-            bookings.length > 0 ? 
-            (bookings.length > 5 ? "#ff5252" : 
-             bookings.length > 3 ? "#ff9800" : "#ffeb3b") : 
-            "#4caf50",
+          backgroundColor: !isDateClosed ? "#f44336" :
+            bookings.length > 0 ?
+              (bookings.length > 5 ? "#ff5252" :
+                bookings.length > 3 ? "#ff9800" : "#ffeb3b") :
+              "#4caf50",
         };
         setEvents(updatedEvents);
       }
-      
+
     } catch (error) {
       console.error("Failed to toggle closed status:", error);
       alert(error.message || "Failed to update restaurant availability");
     }
   };
+
+  // Helper to render booking rows with Offer column using ViewOfferButton
+  const renderBookingRows = (bookingList) =>
+    bookingList.map((booking) => (
+      <tr key={booking._id}>
+        <td>{`${Math.floor(booking.startingTime / 60)}:${(booking.startingTime % 60).toString().padStart(2, "0")}`}</td>
+        <td>{booking.partySize}</td>
+        <td>{booking.phone}</td>
+        <td>
+          {booking.offerId ? (
+            <ViewOfferButton offerId={booking.offerId} />
+          ) : (
+            <span style={{ color: "#888" }}>—</span>
+          )}
+        </td>
+        <td>
+          {isFutureDate(
+            selectedDate,
+            `${Math.floor(booking.startingTime / 60)}:${(booking.startingTime % 60).toString().padStart(2, "0")}`
+          ) && (
+              <Button
+                variant="danger"
+                onClick={() => handleRemoveBooking(booking._id)}
+              >
+                Remove
+              </Button>
+            )}
+        </td>
+      </tr>
+    ));
 
   return (
     <Container className="calendar-container pb-5">
@@ -240,17 +265,17 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
       <Modal show={showModal} onHide={closeModal} centered size="lg">
         <Modal.Header closeButton>
           <Modal.Title>
-              {isDateClosed 
-                ? `${selectedDate} - RESTAURANT CLOSED` 
-                : `Bookings for ${selectedDate}`}
+            {isDateClosed
+              ? `${selectedDate} - RESTAURANT CLOSED`
+              : `Bookings for ${selectedDate}`}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {isDateClosed ? (
-              <div className="alert alert-danger">
-                <h5>This restaurant is closed on this date.</h5>
-                <p>No bookings can be made or are available for closed dates.</p>
-              </div>
+            <div className="alert alert-danger">
+              <h5>This restaurant is closed on this date.</h5>
+              <p>No bookings can be made or are available for closed dates.</p>
+            </div>
           ) : bookings.length > 0 ? (
             <>
               <h5 className="mt-3">Morning</h5>
@@ -260,39 +285,11 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
                     <th>Time</th>
                     <th>Party Size</th>
                     <th>Contact</th>
+                    <th>Offer</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {morning.map((booking) => (
-                    <tr key={booking._id}>
-                      <td>{`${Math.floor(booking.startingTime / 60)}:${(
-                        booking.startingTime % 60
-                      )
-                        .toString()
-                        .padStart(2, "0")}`}</td>
-                      <td>{booking.partySize}</td>
-                      <td>{booking.phone}</td>
-                      <td>
-                        {isFutureDate(
-                          selectedDate,
-                          `${Math.floor(booking.startingTime / 60)}:${(
-                            booking.startingTime % 60
-                          )
-                            .toString()
-                            .padStart(2, "0")}`
-                        ) && (
-                          <Button
-                            variant="danger"
-                            onClick={() => handleRemoveBooking(booking._id)}
-                          >
-                            Remove
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+                <tbody>{renderBookingRows(morning)}</tbody>
               </Table>
               <h5 className="mt-3">Afternoon</h5>
               <Table striped bordered hover className="mb-4">
@@ -301,39 +298,11 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
                     <th>Time</th>
                     <th>Party Size</th>
                     <th>Contact</th>
+                    <th>Offer</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {afternoon.map((booking) => (
-                    <tr key={booking._id}>
-                      <td>{`${Math.floor(booking.startingTime / 60)}:${(
-                        booking.startingTime % 60
-                      )
-                        .toString()
-                        .padStart(2, "0")}`}</td>
-                      <td>{booking.partySize}</td>
-                      <td>{booking.phone}</td>
-                      <td>
-                        {isFutureDate(
-                          selectedDate,
-                          `${Math.floor(booking.startingTime / 60)}:${(
-                            booking.startingTime % 60
-                          )
-                            .toString()
-                            .padStart(2, "0")}`
-                        ) && (
-                          <Button
-                            variant="danger"
-                            onClick={() => handleRemoveBooking(booking._id)}
-                          >
-                            Remove
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+                <tbody>{renderBookingRows(afternoon)}</tbody>
               </Table>
               <h5 className="mt-3">Evening</h5>
               <Table striped bordered hover className="mb-4">
@@ -342,39 +311,11 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
                     <th>Time</th>
                     <th>Party Size</th>
                     <th>Contact</th>
+                    <th>Offer</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {evening.map((booking) => (
-                    <tr key={booking._id}>
-                      <td>{`${Math.floor(booking.startingTime / 60)}:${(
-                        booking.startingTime % 60
-                      )
-                        .toString()
-                        .padStart(2, "0")}`}</td>
-                      <td>{booking.partySize}</td>
-                      <td>{booking.phone}</td>
-                      <td>
-                        {isFutureDate(
-                          selectedDate,
-                          `${Math.floor(booking.startingTime / 60)}:${(
-                            booking.startingTime % 60
-                          )
-                            .toString()
-                            .padStart(2, "0")}`
-                        ) && (
-                          <Button
-                            variant="danger"
-                            onClick={() => handleRemoveBooking(booking._id)}
-                          >
-                            Remove
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+                <tbody>{renderBookingRows(evening)}</tbody>
               </Table>
             </>
           ) : (
@@ -388,12 +329,12 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
         </Modal.Body>
         <Modal.Footer>
           {isFutureDate(selectedDate, "00:00") && (
-              <Button 
-                variant={isDateClosed ? "success" : "danger"} 
-                onClick={handleToggleClosedStatus}
-              >
-                {isDateClosed ? "Mark as Open" : "Mark as Closed"}
-              </Button>
+            <Button
+              variant={isDateClosed ? "success" : "danger"}
+              onClick={handleToggleClosedStatus}
+            >
+              {isDateClosed ? "Mark as Open" : "Mark as Closed"}
+            </Button>
           )}
           <Button variant="secondary" onClick={closeModal}>
             Close

@@ -69,9 +69,9 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
     let Capacity = await RestaurantCapacity.find({
       restaurantid: restaurantId, 
     });
-    // console.log(Capacity);
+    console.log("Capacity:", Capacity); 
     let restaurant = await Restaurant.find({ _id: restaurantId });
-    // console.log(restaurant);
+    console.log("Restaurant:", restaurant);
 
     if (!Capacity || !restaurant) {
       return res
@@ -79,11 +79,12 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
         .json({ message: "Restaurant or capacity not found" });
     }
     let interval = 30;
-    let slots = generateTimeSlots(
+    let slots = await generateTimeSlots(
       restaurant[0].openHour,
       restaurant[0].closeHour,
       interval
     );
+    console.log("Slots:", slots);
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0); // Set to the beginning of the day
 
@@ -116,7 +117,7 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
           },
         ],
       });
-      // console.log(bookings);
+      console.log("Bookings for slot " + slot + ":", bookings);
       let booked = {
         time: slot,
         bookingsfor2: 0,
@@ -249,7 +250,7 @@ router.route("/availability/:restaurantId").get(async (req, res) => {
       // No available slots
       return res.status(404).json({ message: "No available slots found" });
     }
-
+ 
     // If available slots are found, return them
     return res.json(availability);
   } catch (error) {
@@ -263,30 +264,28 @@ router.route("/availability/:restaurantId").get(async (req, res) => {
 
 router.route("/create").post(async (req, res) => {
   console.log(req.body);
-  const { userid, restaurantId, date, time, partySize, phone } = req.body;
-  console.log(partySize);
+  const { userid, restaurantId, date, time, partySize, phone, offerId } = req.body;
   try {
-    const closed = await isDayClosed(restaurantId, date);
+    // Convert date string to Date object if needed
+    const bookingDate = typeof date === "string" ? new Date(date) : date;
+
+    const closed = await checkIfClosed(restaurantId, bookingDate);
     if (closed) {
       return res
         .status(400)
         .json({ message: "Cannot book on this closed day" });
     }
 
-    const restaurant = await Restaurant.find({ _id: restaurantId });
-
+    const restaurant = await Restaurant.find({ _id: restaurantId }); 
     if (restaurant.length === 0) {
       return res.status(404).json({ message: "Restaurant not found" });
     }
 
-    const [hours, minutes] = time.split(":").map(Number); // Convert to numbers
-
+    const [hours, minutes] = time.split(":").map(Number);
     const startingTimeMinutes = hours * 60 + minutes;
-    // Ensure Bookingduration is a number and add it correctly
     const endingTimeMinutes =
       startingTimeMinutes + Number(restaurant[0].Bookingduration);
 
-    // Determine table capacity based on party size
     let tableCapacity = 0;
     if (partySize <= 2) {
       tableCapacity = 2;
@@ -298,99 +297,74 @@ router.route("/create").post(async (req, res) => {
       tableCapacity = 8;
     }
 
+    // Include offerId if present
     const newBooking = new Booking({
       userid: userid,
       restaurantid: restaurantId,
-      date: date,
+      date: bookingDate, // use the Date object here
       startingTime: startingTimeMinutes,
       endingTime: endingTimeMinutes,
       partySize: partySize,
       tableCapacity: tableCapacity,
       phone: phone,
       duration: restaurant[0].Bookingduration,
+      ...(offerId && { offerId }),
     });
 
     const booking = await newBooking.save();
     const bookingID = booking._id.toString();
-    console.log({ message: "Booking created successfully", id: bookingID });
     res
       .status(201)
       .json({ message: "Booking created successfully", id: `${bookingID}` });
 
+    // Fetch user and restaurant info for emails
     const user = await GetUserByID(userid);
-    console.log(user);
+    const restaurantObj = restaurant[0];
+    const owner = await Owner.findById(restaurantObj.owner);
 
-    // const apiUrl = process.env.REACT_APP_API_URL + "/notifications/mail"; // Replace with your backend's endpoint
+    // Prepare email data for customer
     const customerEmailData = {
       toName: user.firstname + " " + user.lastname,
       toEmail: user.email,
-      restaurantName: restaurant[0].name,
-      bookingDate: date,
+      restaurantName: restaurantObj.name,
+      bookingDate: bookingDate.toLocaleDateString("en-GB"),
       bookingTime: time,
       guestCount: partySize,
     };
 
-    // const emailData = {
-    //   toName: "Frank Alafouzos",
-    //   toEmail: "frankalafouzos@gmail.com",
-    //   restaurantName: "Test",
-    //   bookingDate: "test",
-    //   bookingTime: "test",
-    //   guestCount: "test"
-    // };
-
-    sendCustomerConfirmationMail(customerEmailData)
-      .then((result) => {
-        if (!result.success) {
-          console.error("Failed to send email:", result.error);
-        }
-      })
-      .catch((err) => {
-        console.error("Unexpected email error:", err);
-      });
-
-    try {
-      const owner = await Owner.findById(restaurant[0].owner);
-
-      if (!owner) {
-        console.error("Owner not found for the restaurant");
-      } else {
-        const ownerEmailData = {
-          toName: owner.firstname + " " + owner.lastname,
-          toEmail: owner.email,
-          restaurantName: restaurant[0].name,
-          bookingDate: date,
-          bookingTime: time,
-          guestCount: partySize,
-        };
-
-        sendOwnerConfirmationMail(ownerEmailData);
-      }
-    } catch (error) {
-      console.log("Server error:" + error);
+    // Prepare email data for owner
+    if (owner) {
+      const ownerEmailData = {
+        toName: owner.firstname + " " + owner.lastname,
+        toEmail: owner.email,
+        restaurantName: restaurantObj.name,
+        bookingDate: bookingDate.toLocaleDateString("en-GB"),
+        bookingTime: time,
+        guestCount: partySize,
+      };
+      sendOwnerConfirmationMail(ownerEmailData)
+        .then(result => {
+          if (!result.success) {
+            console.error("Failed to send owner email:", result.error);
+          }
+        })
+        .catch(error => {
+          console.error("Unexpected owner email error:", error);
+        });
+    } else {
+      console.error("Owner not found for the restaurant");
     }
 
-    // Schedule booking reminder email for the day before the booking
-    // const bookingDate = new Date(date);
-    // const reminderDate = new Date(bookingDate);
-    // reminderDate.setDate(bookingDate.getDate() - 1);
-
-    // const now = new Date();
-    // const delay = reminderDate.getTime() - now.getTime();
-
-    // if (delay > 0) {
-    //   setTimeout(() => {
-    //     sendBookingReminderMail(customerEmailData)
-    //       .then(result => {
-    //         if (!result.success) {
-    //           console.error("Failed to send reminder email:", result.error);
-    //         }
-    //       })
-    //       .catch(err => {
-    //         console.error("Unexpected reminder email error:", err);
-    //       });
-    //   }, delay);
-    // }
+    // Send confirmation to customer
+    sendCustomerConfirmationMail(customerEmailData)
+      .then(result => {
+        if (!result.success) {
+          console.error("Failed to send customer email:", result.error);
+        }
+      })
+      .catch(error => {
+        console.error("Unexpected customer email error:", error);
+      });
   } catch (error) {
     console.error("Error creating booking:", error);
     return res
@@ -530,11 +504,12 @@ router.post("/rate/:bookingId", async (req, res) => {
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
+    console.log("Booking found:", booking);
 
     const newRating = new BookingRating({
       bookingId: booking._id,
-      restaurantId: booking.restaurantId,
-      userId: booking.userId,
+      restaurantId: booking.restaurantid,
+      userId: booking.userid,
       rating,
       feedback,
     });

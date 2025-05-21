@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../css/UserBookings.css";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import ViewOfferButton from "./DisplayOfferModal.component"; 
 
 const UserBookings = ({ display }) => {
   const [bookings, setBookings] = useState([]);
@@ -98,6 +99,7 @@ const UserBookings = ({ display }) => {
                 <th>Duration (min)</th>
                 <th>Date</th>
                 <th>Time</th>
+                <th>Applied Offer</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -125,6 +127,13 @@ const UserBookings = ({ display }) => {
                       <td>{booking.duration}</td>
                       <td>{bookingDate.toLocaleDateString("en-GB")}</td>
                       <td>{booking.formattedStartingTime}</td>
+                      <td>
+                        {booking.offerId ? (
+                          <ViewOfferButton offerId={booking.offerId} />
+                        ) : (
+                          <span style={{ color: "#888" }}>—</span>
+                        )}
+                      </td>
                       <td>
                         {isAfterToday && (
                           <button

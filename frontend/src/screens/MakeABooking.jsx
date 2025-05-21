@@ -104,16 +104,32 @@ const MakeABooking = () => {
     });
   };
 
+
+  function getDateOnlyLocal(dateStr) {
+    // Accepts 'YYYY-MM-DD' or Date
+    if (typeof dateStr === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return dateStr;
+    }
+    const d = new Date(dateStr);
+    return (
+      d.getFullYear() +
+      "-" +
+      String(d.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(d.getDate()).padStart(2, "0")
+    );
+  }
+
   // Check if the selected date is outside the offer window
   const isOutOfOfferWindow =
     claimedOffer &&
     bookingData.date &&
     (
-      new Date(bookingData.date) < new Date(claimedOffer.startDate) ||
-      new Date(bookingData.date) > new Date(claimedOffer.endDate)
+      getDateOnlyLocal(bookingData.date) < getDateOnlyLocal(claimedOffer.startDate) ||
+      getDateOnlyLocal(bookingData.date) > getDateOnlyLocal(claimedOffer.endDate)
     );
 
-    
+
   return (
     <Container className="booking-container">
       {claimedOffer && !offerExpired && (

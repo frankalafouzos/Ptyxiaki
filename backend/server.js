@@ -36,6 +36,7 @@ const notificationsRouter = require('./routes/notifications');
 const calendarRouter = require('./routes/calendar');
 const pendingEditsRoutes = require('./routes/pendingEditsRoutes');
 const offersRouter = require('./routes/offers');
+const restaurantRatingsRouter = require('./routes/restaurantRatings');
 
 app.use('/users', usersRouter);
 app.use('/restaurants', restaurantsRouter);
@@ -51,6 +52,7 @@ app.use('/notifications', notificationsRouter);
 app.use('/calendar', calendarRouter);
 app.use('/api/pending-edits', pendingEditsRoutes);
 app.use('/offers', offersRouter);
+app.use('/restaurantRatings', restaurantRatingsRouter);
 
 
 app.listen(port, () => {

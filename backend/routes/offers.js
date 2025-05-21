@@ -8,6 +8,7 @@ const Image = require('../models/images.model');
 const { Types: { ObjectId } } = require('mongoose');
 
 
+
 // /admins
 
 router.route("/create").post(async (req, res) => {
@@ -57,24 +58,58 @@ router.route("/create").post(async (req, res) => {
 });
 
 
-// Get all active offers for customers, with restaurant name
 router.get('/active', async (req, res) => {
   try {
-    // Find all active offers and populate restaurant name
     const offers = await Offer.find({ isActive: true })
       .populate({
         path: 'restaurantId',
-        select: 'name status',
+        select: 'name status address phone category location imageID',
       });
 
-    // Only include offers from restaurants that are not deleted/hidden
+    // Get unique imageIDs from restaurants
+    const imageIDs = [
+      ...new Set(
+        offers
+          .map(offer => offer.restaurantId && offer.restaurantId.imageID)
+          .filter(Boolean)
+      ),
+    ];
+    console.log("Image IDs: ", imageIDs);
+
+    // Fetch all images for these imageIDs (ignore order in query)
+    const images = await Image.find({ ImageID: { $in: imageIDs } });
+    console.log("Images: ", images);
+
+    // Map: for each ImageID, pick the image with the lowest order, or the first if order is missing
+    const imageMap = {};
+    images.forEach(img => {
+      if (!imageMap[img.ImageID]) {
+        imageMap[img.ImageID] = img;
+      } else {
+        // If current img has lower order, or previous has no order, replace
+        const prev = imageMap[img.ImageID];
+        if (
+          (typeof img.order === "number" && typeof prev.order !== "number") ||
+          (typeof img.order === "number" && typeof prev.order === "number" && img.order < prev.order)
+        ) {
+          imageMap[img.ImageID] = img;
+        }
+      }
+    });
+
+    console.log("Images Map: ", imageMap);
+    // Attach image link to each restaurant
     const filteredOffers = offers.filter(offer =>
       offer.restaurantId &&
       offer.restaurantId.status === 'Approved'
-    ).map(offer => ({
-      ...offer.toObject(),
-      restaurantName: offer.restaurantId.name,
-    }));
+    ).map(offer => {
+      const obj = offer.toObject();
+      obj.restaurantName = offer.restaurantId.name;
+      obj.restaurantImage = imageMap[offer.restaurantId.imageID]?.link || null;
+      return obj;
+    });
+
+    console.log("Filtered Offers: ", filteredOffers);
 
     res.status(200).json(filteredOffers);
   } catch (error) {
@@ -211,6 +246,27 @@ router.route("/:ownerId").get(async (req, res) => {
   }
 });
 
+router.get('/getOffer/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const offer = await Offer.findById(id).populate({
+      path: 'restaurantId',
+      select: 'name status address phone category location imageID',
+    });
+
+    if (!offer) {
+      return res.status(404).json({ error: 'Offer not found' });
+    }
+
+
+    const offerObj = offer.toObject();
+
+    res.status(200).json(offerObj);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 
 module.exports = router;
