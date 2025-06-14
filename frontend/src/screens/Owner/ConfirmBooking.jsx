@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Container, Form, Button } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useState } from "react";
+import { Container, Form, Button } from "react-bootstrap";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ConfirmBooking = () => {
   const location = useLocation();
@@ -31,18 +31,24 @@ const ConfirmBooking = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/calendar/add-booking", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bookingDetails),
-      });
+      const response = await fetch(
+        process.env.REACT_APP_API_URL + "/calendar/add-booking",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bookingDetails),
+        }
+      );
       if (response.ok) {
         toast.success("Booking created successfully", {
           position: "top-center",
           autoClose: 2000,
-          onClose: () => navigate(`/owner/restaurant/${bookingDetails.restaurantId}/calendar`)
+          onClose: () =>
+            navigate(
+              `/owner/restaurant/${bookingDetails.restaurantId}/calendar`
+            ),
         });
       } else {
         toast.error("Failed to create booking", {
@@ -60,11 +66,21 @@ const ConfirmBooking = () => {
   };
 
   return (
-    <Container className="p-4 mt-4 shadow-sm bg-white rounded" style={{ maxWidth: '600px' }}>
-      <h1 className="text-center mb-4" style={{ fontSize: '1.75rem', color: '#333' }}>Confirm Booking</h1>
+    <Container
+      className="p-4 mt-4 shadow-sm bg-white rounded"
+      style={{ maxWidth: "600px" }}
+    >
+      <h1
+        className="text-center mb-4"
+        style={{ fontSize: "1.75rem", color: "#333" }}
+      >
+        Confirm Booking
+      </h1>
       <Form onSubmit={handleSubmit} className="w-100">
         <Form.Group className="mb-3">
-          <Form.Label htmlFor="firstname" style={{ fontWeight: 'bold' }}>First Name</Form.Label>
+          <Form.Label htmlFor="firstname" style={{ fontWeight: "bold" }}>
+            First Name
+          </Form.Label>
           <Form.Control
             type="text"
             id="firstname"
@@ -77,7 +93,9 @@ const ConfirmBooking = () => {
           />
         </Form.Group>
         <Form.Group className="mb-3">
-          <Form.Label htmlFor="lastname" style={{ fontWeight: 'bold' }}>Last Name</Form.Label>
+          <Form.Label htmlFor="lastname" style={{ fontWeight: "bold" }}>
+            Last Name
+          </Form.Label>
           <Form.Control
             type="text"
             id="lastname"
@@ -90,7 +108,9 @@ const ConfirmBooking = () => {
           />
         </Form.Group>
         <Form.Group className="mb-3">
-          <Form.Label htmlFor="phone" style={{ fontWeight: 'bold' }}>Phone</Form.Label>
+          <Form.Label htmlFor="phone" style={{ fontWeight: "bold" }}>
+            Phone
+          </Form.Label>
           <Form.Control
             type="text"
             id="phone"
@@ -103,7 +123,9 @@ const ConfirmBooking = () => {
           />
         </Form.Group>
         <Form.Group className="mb-3">
-          <Form.Label htmlFor="email" style={{ fontWeight: 'bold' }}>Email</Form.Label>
+          <Form.Label htmlFor="email" style={{ fontWeight: "bold" }}>
+            Email
+          </Form.Label>
           <Form.Control
             type="email"
             id="email"

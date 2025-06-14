@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../css/UserBookings.css";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import ViewOfferButton from "./DisplayOfferModal.component"; 
 
 const UserBookings = ({ display }) => {
   const [bookings, setBookings] = useState([]);
@@ -12,7 +13,7 @@ const UserBookings = ({ display }) => {
     const fetchBookings = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/bookings/userbookings",
+          process.env.REACT_APP_API_URL + "/bookings/userbookings",
           {
             method: "POST",
             headers: {
@@ -36,7 +37,7 @@ const UserBookings = ({ display }) => {
       return;
     }
 
-    fetch(`http://localhost:5000/bookings/deleteone/${bookingId}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/bookings/deleteone/${bookingId}`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -65,7 +66,7 @@ const UserBookings = ({ display }) => {
       return;
     }
 
-    fetch(`http://localhost:5000/bookings/deleteone/${bookingId}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/bookings/deleteone/${bookingId}`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -98,6 +99,7 @@ const UserBookings = ({ display }) => {
                 <th>Duration (min)</th>
                 <th>Date</th>
                 <th>Time</th>
+                <th>Applied Offer</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -126,6 +128,13 @@ const UserBookings = ({ display }) => {
                       <td>{bookingDate.toLocaleDateString("en-GB")}</td>
                       <td>{booking.formattedStartingTime}</td>
                       <td>
+                        {booking.offerId ? (
+                          <ViewOfferButton offerId={booking.offerId} />
+                        ) : (
+                          <span style={{ color: "#888" }}>—</span>
+                        )}
+                      </td>
+                      <td>
                         {isAfterToday && (
                           <button
                             onClick={() =>
@@ -143,7 +152,9 @@ const UserBookings = ({ display }) => {
                         <td>
                           <button
                             className="btn btn-danger"
-                            onClick={() => cancelBooking(booking._id, bookingDate)}
+                            onClick={() =>
+                              cancelBooking(booking._id, bookingDate)
+                            }
                             id="cancelButton"
                           >
                             Cancel

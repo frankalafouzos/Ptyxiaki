@@ -12,7 +12,9 @@ const AdminPendingEdits = () => {
 
   const fetchPendingEdits = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/pending-edits/pending-edits");
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/pending-edits/pending-edits`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch pending edits");
       }
@@ -27,14 +29,17 @@ const AdminPendingEdits = () => {
 
   const handleApprove = async (editId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/pending-edits/approve/${editId}`, {
-        method: "POST",
-      });
-      
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/pending-edits/approve/${editId}`,
+        {
+          method: "POST",
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to approve edit");
       }
-      
+
       fetchPendingEdits(); // Refresh the list
     } catch (error) {
       console.error("Error approving edit:", error);
@@ -44,14 +49,17 @@ const AdminPendingEdits = () => {
 
   const handleReject = async (editId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/pending-edits/reject/${editId}`, {
-        method: "POST",
-      });
-      
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/pending-edits/reject/${editId}`,
+        {
+          method: "POST",
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to reject edit");
       }
-      
+
       fetchPendingEdits(); // Refresh the list
     } catch (error) {
       console.error("Error rejecting edit:", error);
@@ -70,7 +78,7 @@ const AdminPendingEdits = () => {
   return (
     <Container className="main-container">
       <h1 className="restaurants-header">Pending Restaurant Edits</h1>
-      
+
       {pendingEdits.length === 0 ? (
         <div className="text-center mt-5">
           <h3>No pending edits found</h3>
@@ -86,7 +94,8 @@ const AdminPendingEdits = () => {
                     <Badge bg="warning">Pending Approval</Badge>
                   </h5>
                   <small>
-                    Submitted by: {edit.ownerId.firstname} {edit.ownerId.lastname}
+                    Submitted by: {edit.ownerId.firstname}{" "}
+                    {edit.ownerId.lastname}
                   </small>
                 </Card.Header>
                 <Card.Body>
@@ -94,14 +103,18 @@ const AdminPendingEdits = () => {
                   <ul className="list-group mb-3">
                     {Object.entries(edit.changes).map(([field, value]) => (
                       <li key={field} className="list-group-item">
-                        <strong>{field.charAt(0).toUpperCase() + field.slice(1)}:</strong>{" "}
+                        <strong>
+                          {field.charAt(0).toUpperCase() + field.slice(1)}:
+                        </strong>{" "}
                         {field === "images_changes" ? (
                           <span>
                             {value.added?.length > 0 && (
                               <span>Added: {value.added.length} images. </span>
                             )}
                             {value.deleted?.length > 0 && (
-                              <span>Removed: {value.deleted.length} images.</span>
+                              <span>
+                                Removed: {value.deleted.length} images.
+                              </span>
                             )}
                           </span>
                         ) : (

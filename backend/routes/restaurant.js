@@ -71,17 +71,28 @@ router.get('/status', async (req, res) => {
 });
 
 router.route('/').get(async (req, res) => {
-  let { page, itemsPerPage, sortField, sortOrder, categoryFilter, locationFilter, minPrice, maxPrice } = req.query;
+  let { page, itemsPerPage, sortField, sortOrder, categoryFilter, locationFilter, minPrice, maxPrice, owner, searchQuery } = req.query;
+
+  const regex = new RegExp(searchQuery, 'i');
+
+  const filters = {
+    $or: [
+      { name: { $regex: regex } },
+      { category: { $regex: regex } },
+      { location: { $regex: regex } }
+    ]
+  };
 
   page = parseInt(page) || 1;
   itemsPerPage = parseInt(itemsPerPage) || 12;
   sortOrder = sortOrder === 'asc' ? 1 : -1;
 
-  let filters = {};
+
   if (categoryFilter) filters.category = categoryFilter;
   if (locationFilter) filters.location = locationFilter;
   if (minPrice) filters.price = { $gte: parseFloat(minPrice) };
   if (maxPrice) filters.price = { ...filters.price, $lte: parseFloat(maxPrice) };
+  if (owner) filters.owner = owner; 
   filters.status = "Approved";
 
   let sort = {};
@@ -135,12 +146,13 @@ router.route('/:id').get(async (req, res) => {
   console.log("ID: ", id)
   const restaurant = await Restaurant.findById(id);
   console.log("Restaurant: ", restaurant)
-  const images = await Image.find({ ImageID: restaurant.imageID });
+  
   if (!restaurant) {
-    res.status(404).json({ message: 'Restaurant not found' });
-  } else {
-    res.json({ restaurant, images });
+    return res.status(404).json({ message: 'Restaurant not found' });
   }
+  
+  const images = await Image.find({ ImageID: restaurant.imageID });
+  res.json({ restaurant, images });
 });
 
 router.post('/add', async (req, res) => {
@@ -279,7 +291,7 @@ router.post('/deleteAll/:id', async (req, res) => {
     .catch(err => res.status(404).json('Error: ' + err));
 });
 
-//Get restaurant capacities by restaurant ID
+//Get restaurant capacities by restaurant ID 
 router.get('/restaurant-capacities/:id', async (req, res) => {
   try {
     const restaurantId = req.params.id;

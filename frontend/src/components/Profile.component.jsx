@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 // import { useParams } from "react-router-dom";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { fetchUser, fetchOwner } from '../scripts/fetchUser';
+import { fetchUser, fetchOwner } from "../scripts/fetchUser";
 import "../css/Profile.css";
 import { Modal } from "react-bootstrap";
 
@@ -11,14 +11,13 @@ const Profile = () => {
   const [user, setUser] = useState(null); // Initialize user as null
   const authUser = useAuthUser();
   const email = authUser.email;
-  const role = JSON.parse(localStorage.getItem('role')).role;
+  const role = JSON.parse(localStorage.getItem("role")).role;
   const [isUser, setIsUser] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-
     if (role == "user") {
       fetchUser(email, setLoading, setUser);
       setIsUser(true);
@@ -36,11 +35,14 @@ const Profile = () => {
     }
   }, [email]);
 
-
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
   if (loading) {
-    return <div className="d-flex justify-content-center pt-5"><div className="loader"></div></div>
+    return (
+      <div className="d-flex justify-content-center pt-5">
+        <div className="loader"></div>
+      </div>
+    );
   }
 
   // // Check if user is loaded
@@ -49,31 +51,30 @@ const Profile = () => {
   }
 
   const handleTypeChange = () => {
-
-    fetch('http://localhost:5000/admins/changeRole', {
-      method: 'POST',
+    fetch(process.env.REACT_APP_API_URL + "/admins/changeRole", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         email: user.email,
-      })
+      }),
     })
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
-          throw new Error('Failed to change role');
+          throw new Error("Failed to change role");
         }
         return response.json();
       })
-      .then(data => {
-        console.log('Role changed successfully:', data);
-        localStorage.setItem('role', 'user');
-        window.location.replace("http://localhost:3000/")
+      .then((data) => {
+        console.log("Role changed successfully:", data);
+        localStorage.setItem("role", "user");
+        window.location.replace(process.env.REACT_APP_FRONTEND_URL + "/");
       })
-      .catch(error => {
-        console.error('Error:', error);
+      .catch((error) => {
+        console.error("Error:", error);
       });
-  }
+  };
 
   return (
     <Container className="my-5">
@@ -103,47 +104,58 @@ const Profile = () => {
                   <Button variant="primary" href="/editPassword">
                     Edit Password
                   </Button>
-                </div>)
-                : isOwner ? (
+                </div>
+              ) : isOwner ? (
+                <div className="d-flex justify-content-between">
+                  <Button variant="primary" href="/owner/EditProfile">
+                    Edit Profile
+                  </Button>
+                  <Button variant="primary" href="/owner/EditPassword">
+                    Edit Password
+                  </Button>
+                </div>
+              ) : isAdmin ? (
+                <>
                   <div className="d-flex justify-content-between">
-                    <Button variant="primary" href="/ownerEditProfile">
+                    <Button variant="primary" href="/admin/EditProfile">
                       Edit Profile
                     </Button>
-                    <Button variant="primary" href="/ownerEditPassword">
+                    <Button variant="primary" href="/admin/EditPassword">
                       Edit Password
                     </Button>
+                    <Button
+                      variant="danger"
+                      onClick={handleShowModal}
+                      className="hover-button"
+                    >
+                      Turn to user acccount
+                    </Button>
                   </div>
-                )
-                  : isAdmin ? (
-                    <>
-                      <div className="d-flex justify-content-between">
-                        <Button variant="primary" href="/admin/EditProfile">
-                          Edit Profile
-                        </Button>
-                        <Button variant="primary" href="/admin/EditPassword">
-                          Edit Password
-                        </Button>
-                        <Button variant="danger" onClick={handleShowModal} className="hover-button">
-                          Turn to user acccount
-                        </Button>
-                      </div>
-                      <div className="d-flex justify-content-center p-3" >
-                      </div>
-                    </>
-                  )
-                    : (
-                      <div>
-                        <p>Role not found</p>
-                      </div>
-                    )
-              }
+                  <div className="d-flex justify-content-center p-3"></div>
+                </>
+              ) : (
+                <div>
+                  <p>Role not found</p>
+                </div>
+              )}
             </Card.Body>
             <>
               <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
                   <Modal.Title>Confirm Type Change</Modal.Title>
                 </Modal.Header>
-                <Modal.Body style={{ display:"flex", justifyContent:"center", flexDirection : "column"}}><p>Are you sure you want to change this Accounts type to User?</p> <b style={{fontSize:"150%"}}>This action is permenant!</b></Modal.Body>
+                <Modal.Body
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                  }}
+                >
+                  <p>
+                    Are you sure you want to change this Accounts type to User?
+                  </p>{" "}
+                  <b style={{ fontSize: "150%" }}>This action is permenant!</b>
+                </Modal.Body>
                 <Modal.Footer>
                   <Button variant="secondary" onClick={handleCloseModal}>
                     Cancel

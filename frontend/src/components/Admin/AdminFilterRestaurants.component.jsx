@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const FilterRestaurants = ({
   categoryFilter,
@@ -24,11 +24,12 @@ const FilterRestaurants = ({
   useEffect(() => {
     const fetchCategoriesAndLocations = async () => {
       try {
-        const [categoriesResponse, locationsResponse, statusResponse] = await Promise.all([
-          fetch('http://localhost:5000/restaurants/categories'),
-          fetch('http://localhost:5000/restaurants/locations'),
-          fetch('http://localhost:5000/restaurants/status')
-        ]);
+        const [categoriesResponse, locationsResponse, statusResponse] =
+          await Promise.all([
+            fetch(process.env.REACT_APP_API_URL + "/restaurants/categories"),
+            fetch(process.env.REACT_APP_API_URL + "/restaurants/locations"),
+            fetch(process.env.REACT_APP_API_URL + "/restaurants/status"),
+          ]);
 
         const categoriesData = await categoriesResponse.json();
         const locationsData = await locationsResponse.json();
@@ -38,7 +39,7 @@ const FilterRestaurants = ({
         setLocations(locationsData);
         setStatus(statusData);
       } catch (error) {
-        console.error('Error fetching categories and locations:', error);
+        console.error("Error fetching categories and locations:", error);
       }
     };
 
@@ -50,7 +51,11 @@ const FilterRestaurants = ({
       {/* Category dropdown */}
       <div className="form-group">
         <label>Category:</label>
-        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="form-control">
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="form-control"
+        >
           <option value="">All</option>
           {categories.map((category, index) => (
             <option key={index} value={category}>
@@ -63,7 +68,11 @@ const FilterRestaurants = ({
       {/* Location dropdown */}
       <div className="form-group">
         <label>Location:</label>
-        <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} className="form-control">
+        <select
+          value={locationFilter}
+          onChange={(e) => setLocationFilter(e.target.value)}
+          className="form-control"
+        >
           <option value="">All</option>
           {locations.map((location, index) => (
             <option key={index} value={location}>
@@ -98,8 +107,12 @@ const FilterRestaurants = ({
       {/* Status dropdown (admin-specific) */}
       <div className="form-group">
         <label>Status:</label>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="form-control">
-        <option value="">All</option>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="form-control"
+        >
+          <option value="">All</option>
           {statuses.map((status, index) => (
             <option key={index} value={status}>
               {status}

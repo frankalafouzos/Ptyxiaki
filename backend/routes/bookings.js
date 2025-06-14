@@ -5,10 +5,17 @@ let RestaurantCapacity = require("../models/restaurantCapacity.model");
 let Restaurant = require("../models/restaurant.model");
 let User = require("../models/users.model");
 let Owner = require("../models/restaurantOwner.model");
-let { sendCustomerConfirmationMail, sendOwnerConfirmationMail, sendBookingReminderMail } = require("../functions/notifications");
-// const fetch = require('node-fetch'); 
+const ClosedDates = require("../models/ClosedDates.model");
+const DefaultClosedDays = require("../models/DefaultClosedDays.model");
+const forcedOpenDates = require("../models/forcedOpenDates.model");
+let {
+  sendCustomerConfirmationMail,
+  sendOwnerConfirmationMail,
+  sendBookingReminderMail,
+} = require("../functions/notifications");
+// const fetch = require('node-fetch');
 let GetUserByID = require("../functions/GetUser");
-let isDayClosed = require('../functions/IsDayClosed'); // Import the isDayClosed function
+let isDayClosed = require("../functions/IsDayClosed"); // Import the isDayClosed function
 
 router.route("/").get((req, res) => {
   Booking.find()
@@ -26,14 +33,45 @@ function generateTimeSlots(startTime, endTime, interval) {
   return timeArray;
 }
 
+async function checkIfClosed(restaurantId, date) {
+  // Convert date to start and end of the day in UTC for accurate matching
+  const startOfDay = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0));
+  const endOfDay = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999));
+
+  // Check ForcedOpenDate first (overrides all)
+  const forcedOpen = await forcedOpenDates.findOne({
+    restaurant: restaurantId,
+    date: { $gte: startOfDay, $lte: endOfDay }
+  });
+  if (forcedOpen) return false;
+
+  // Check ForcedClosedDate (overrides regular closed)
+  const forcedClosed = await ClosedDates.findOne({
+    restaurant: restaurantId,
+    date: { $gte: startOfDay, $lte: endOfDay }
+  });
+  if (forcedClosed) return true;
+
+  // Check regular ClosedDate
+  const closed = await DefaultClosedDays.findOne({
+    restaurant: restaurantId,
+    date: { $gte: startOfDay, $lte: endOfDay }
+  });
+  if (closed) return true;
+
+  // Not closed
+  return false;
+}
+
 const getAvailability = async (restaurantId, date, partyNumber) => {
   try {
+      
     let Capacity = await RestaurantCapacity.find({
-      restaurantid: restaurantId,
+      restaurantid: restaurantId, 
     });
-    console.log(Capacity);
+    console.log("Capacity:", Capacity); 
     let restaurant = await Restaurant.find({ _id: restaurantId });
-    console.log(restaurant);
+    console.log("Restaurant:", restaurant);
 
     if (!Capacity || !restaurant) {
       return res
@@ -41,11 +79,12 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
         .json({ message: "Restaurant or capacity not found" });
     }
     let interval = 30;
-    let slots = generateTimeSlots(
+    let slots = await generateTimeSlots(
       restaurant[0].openHour,
       restaurant[0].closeHour,
       interval
     );
+    console.log("Slots:", slots);
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0); // Set to the beginning of the day
 
@@ -55,13 +94,13 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
     availabilityPerSlot = [];
     // console.log(slots);
     for (let slot of slots) {
-      console.log("Slot: " + slot);
+      // console.log("Slot: " + slot);
 
       let bookings = await Booking.find({
         restaurantid: restaurantId,
         date: {
           $gte: startOfDay,
-          $lt: endOfDay
+          $lt: endOfDay,
         },
         $or: [
           {
@@ -78,7 +117,7 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
           },
         ],
       });
-      console.log(bookings);
+      console.log("Bookings for slot " + slot + ":", bookings);
       let booked = {
         time: slot,
         bookingsfor2: 0,
@@ -106,67 +145,75 @@ const getAvailability = async (restaurantId, date, partyNumber) => {
       let trueCapacityFor4 = Capacity[0].tablesForFour - booked.bookingsfor4;
       let trueCapacityFor6 = Capacity[0].tablesForSix - booked.bookingsfor6;
       let trueCapacityFor8 = Capacity[0].tablesForEight - booked.bookingsfor8;
-      console.log(`True Capacity ${trueCapacityFor4}`);
+      // console.log(`True Capacity ${trueCapacityFor4}`);
       if (partyNumber <= 2) {
         if (trueCapacityFor2 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: true,
           });
-        } else {
+        } else { 
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: false,
           });
         }
       } else if (partyNumber <= 4) {
         if (trueCapacityFor4 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: false,
           });
         }
       } else if (partyNumber <= 6) {
         if (trueCapacityFor6 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: false,
           });
         }
       } else if (partyNumber <= 8) {
         if (trueCapacityFor8 > 0) {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: true,
           });
         } else {
           availabilityPerSlot.push({
-            time: `${Math.floor(slot / 60)}:${slot % 60 === 0 ? "00" : slot % 60
-              }`,
+            time: `${Math.floor(slot / 60)}:${
+              slot % 60 === 0 ? "00" : slot % 60
+            }`,
             available: false,
           });
         }
       }
     }
-    console.log("Out of loop");
-    console.log(availabilityPerSlot);
+    // console.log("Out of loop");
+    // console.log(availabilityPerSlot);
     return availabilityPerSlot;
   } catch (error) {
     console.error("Error retrieving availability:", error);
@@ -184,18 +231,26 @@ router.route("/availability/:restaurantId").get(async (req, res) => {
   // Note: parts[1] - 1 because months are 0-indexed in JavaScript Date objects
   console.log(parts);
   const date = new Date(parts[0], parts[1] - 1, parts[2]);
-  console.log(date);
+  console.log("Date before the call:"+date);
 
+  
+ 
   try {
+
+    const closed = await checkIfClosed(restaurantId, date);
+    console.log("Closed: " + closed);
+    if (closed) {
+      return res.json({ message: "Restaurant is closed on this date" });
+    }
     // Call the getAvailability function and await its result
     const availability = await getAvailability(restaurantId, date, partyNumber);
-
+ 
     // Check if the availability array is empty or not
     if (availability.length === 0) {
       // No available slots
       return res.status(404).json({ message: "No available slots found" });
     }
-
+ 
     // If available slots are found, return them
     return res.json(availability);
   } catch (error) {
@@ -209,29 +264,28 @@ router.route("/availability/:restaurantId").get(async (req, res) => {
 
 router.route("/create").post(async (req, res) => {
   console.log(req.body);
-  const { userid, restaurantId, date, time, partySize, phone } = req.body;
-  console.log(partySize);
+  const { userid, restaurantId, date, time, partySize, phone, offerId } = req.body;
   try {
+    // Convert date string to Date object if needed
+    const bookingDate = typeof date === "string" ? new Date(date) : date;
 
-    const closed = await isDayClosed(restaurantId, date);
+    const closed = await checkIfClosed(restaurantId, bookingDate);
     if (closed) {
-      return res.status(400).json({ message: "Cannot book on this closed day" });
+      return res
+        .status(400)
+        .json({ message: "Cannot book on this closed day" });
     }
 
-    const restaurant = await Restaurant.find({ _id: restaurantId });
-
+    const restaurant = await Restaurant.find({ _id: restaurantId }); 
     if (restaurant.length === 0) {
       return res.status(404).json({ message: "Restaurant not found" });
     }
 
-    const [hours, minutes] = time.split(":").map(Number); // Convert to numbers
-
+    const [hours, minutes] = time.split(":").map(Number);
     const startingTimeMinutes = hours * 60 + minutes;
-    // Ensure Bookingduration is a number and add it correctly
     const endingTimeMinutes =
       startingTimeMinutes + Number(restaurant[0].Bookingduration);
 
-    // Determine table capacity based on party size
     let tableCapacity = 0;
     if (partySize <= 2) {
       tableCapacity = 2;
@@ -243,101 +297,74 @@ router.route("/create").post(async (req, res) => {
       tableCapacity = 8;
     }
 
+    // Include offerId if present
     const newBooking = new Booking({
       userid: userid,
       restaurantid: restaurantId,
-      date: date,
+      date: bookingDate, // use the Date object here
       startingTime: startingTimeMinutes,
       endingTime: endingTimeMinutes,
       partySize: partySize,
       tableCapacity: tableCapacity,
       phone: phone,
       duration: restaurant[0].Bookingduration,
+      ...(offerId && { offerId }),
     });
 
     const booking = await newBooking.save();
     const bookingID = booking._id.toString();
-    console.log({ message: "Booking created successfully", id: bookingID });
     res
       .status(201)
       .json({ message: "Booking created successfully", id: `${bookingID}` });
 
+    // Fetch user and restaurant info for emails
     const user = await GetUserByID(userid);
-    console.log(user);
+    const restaurantObj = restaurant[0];
+    const owner = await Owner.findById(restaurantObj.owner);
 
-    // const apiUrl = "http://localhost:5000/notifications/mail"; // Replace with your backend's endpoint
+    // Prepare email data for customer
     const customerEmailData = {
       toName: user.firstname + " " + user.lastname,
       toEmail: user.email,
-      restaurantName: restaurant[0].name,
-      bookingDate: date,
+      restaurantName: restaurantObj.name,
+      bookingDate: bookingDate.toLocaleDateString("en-GB"),
       bookingTime: time,
-      guestCount: partySize
+      guestCount: partySize,
     };
 
-    // const emailData = {
-    //   toName: "Frank Alafouzos",
-    //   toEmail: "frankalafouzos@gmail.com",
-    //   restaurantName: "Test",
-    //   bookingDate: "test",
-    //   bookingTime: "test",
-    //   guestCount: "test"
-    // };
+    // Prepare email data for owner
+    if (owner) {
+      const ownerEmailData = {
+        toName: owner.firstname + " " + owner.lastname,
+        toEmail: owner.email,
+        restaurantName: restaurantObj.name,
+        bookingDate: bookingDate.toLocaleDateString("en-GB"),
+        bookingTime: time,
+        guestCount: partySize,
+      };
+      sendOwnerConfirmationMail(ownerEmailData)
+        .then(result => {
+          if (!result.success) {
+            console.error("Failed to send owner email:", result.error);
+          }
+        })
+        .catch(error => {
+          console.error("Unexpected owner email error:", error);
+        });
+    } else {
+      console.error("Owner not found for the restaurant");
+    }
 
+    // Send confirmation to customer
     sendCustomerConfirmationMail(customerEmailData)
       .then(result => {
         if (!result.success) {
-          console.error("Failed to send email:", result.error);
+          console.error("Failed to send customer email:", result.error);
         }
       })
-      .catch(err => {
-        console.error("Unexpected email error:", err);
+      .catch(error => {
+        console.error("Unexpected customer email error:", error);
       });
-
-    try {
-      const owner = await Owner.findById(restaurant[0].owner);
-
-      if (!owner) {
-        console.error("Owner not found for the restaurant");
-      }
-      else {
-        const ownerEmailData = {
-          toName: owner.firstname + " " + owner.lastname,
-          toEmail: owner.email,
-          restaurantName: restaurant[0].name,
-          bookingDate: date,
-          bookingTime: time,
-          guestCount: partySize
-        };
-
-        sendOwnerConfirmationMail(ownerEmailData)
-      }
-    } catch (error) {
-      console.log('Server error:' + error);
-    }
-
-    // Schedule booking reminder email for the day before the booking
-    // const bookingDate = new Date(date);
-    // const reminderDate = new Date(bookingDate);
-    // reminderDate.setDate(bookingDate.getDate() - 1);
-
-    // const now = new Date();
-    // const delay = reminderDate.getTime() - now.getTime();
-
-    // if (delay > 0) {
-    //   setTimeout(() => {
-    //     sendBookingReminderMail(customerEmailData)
-    //       .then(result => {
-    //         if (!result.success) {
-    //           console.error("Failed to send reminder email:", result.error);
-    //         }
-    //       })
-    //       .catch(err => {
-    //         console.error("Unexpected reminder email error:", err);
-    //       });
-    //   }, delay);
-    // }
-
   } catch (error) {
     console.error("Error creating booking:", error);
     return res
@@ -357,7 +384,9 @@ router.route("/userbookings").post(async (req, res) => {
     const formatTime = (minutesFromMidnight) => {
       const hours = Math.floor(minutesFromMidnight / 60);
       const minutes = minutesFromMidnight % 60;
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
     };
 
     const userid = user._id;
@@ -366,10 +395,10 @@ router.route("/userbookings").post(async (req, res) => {
     let bookings = await Booking.find({ userid: userid }).sort({ date: -1 });
 
     // Fetch restaurant names in a single query
-    const restaurantIds = bookings.map(booking => booking.restaurantid);
+    const restaurantIds = bookings.map((booking) => booking.restaurantid);
     const restaurants = await Restaurant.find({
-      '_id': { $in: restaurantIds }
-    }).select('name _id');
+      _id: { $in: restaurantIds },
+    }).select("name _id");
 
     // Create a mapping of restaurant ID to restaurant name
     const restaurantNameMap = restaurants.reduce((acc, restaurant) => {
@@ -378,10 +407,14 @@ router.route("/userbookings").post(async (req, res) => {
     }, {});
 
     // Add restaurantName to each booking
-    bookings = bookings.map(booking => {
+    bookings = bookings.map((booking) => {
       const bookingObject = booking.toObject(); // Convert Mongoose document to plain JavaScript object
-      bookingObject.restaurantName = restaurantNameMap[booking.restaurantid.toString()] || 'Restaurant name not found';
-      bookingObject.formattedStartingTime = formatTime(bookingObject.startingTime);
+      bookingObject.restaurantName =
+        restaurantNameMap[booking.restaurantid.toString()] ||
+        "Restaurant name not found";
+      bookingObject.formattedStartingTime = formatTime(
+        bookingObject.startingTime
+      );
       bookingObject.formattedEndingTime = formatTime(bookingObject.endingTime);
       return bookingObject;
     });
@@ -389,7 +422,9 @@ router.route("/userbookings").post(async (req, res) => {
     return res.json(bookings);
   } catch (error) {
     console.error("Error retrieving bookings:", error);
-    return res.status(500).json({ message: "An error occurred while fetching bookings" });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while fetching bookings" });
   }
 });
 
@@ -401,7 +436,7 @@ router.route("/deleteone/:id").delete((req, res) => {
 
 router.route("/getonebyid").get(async (req, res) => {
   const { id } = req.query;
-  const booking = await Booking.findById(id)
+  const booking = await Booking.findById(id);
 
   if (!booking) {
     return res.status(404).json({ message: "Booking not found" });
@@ -409,7 +444,6 @@ router.route("/getonebyid").get(async (req, res) => {
 
   console.log(`Booking fetched successfully ${booking}`);
   return res.json(booking);
-
 });
 
 router.route("/edit/:id").post((req, res) => {
@@ -433,13 +467,11 @@ router.route("/edit/:id").post((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-
-router.get('/getbookings/:restaurantid', (req, res) => {
+router.get("/getbookings/:restaurantid", (req, res) => {
   Booking.find({ restaurantid: req.params.restaurantid })
-    .then(bookings => res.json(bookings))
-    .catch(err => res.status(400).json('Error: ' + err));
+    .then((bookings) => res.json(bookings))
+    .catch((err) => res.status(400).json("Error: " + err));
 });
-
 
 router.get("/:bookingId", async (req, res) => {
   try {
@@ -449,7 +481,8 @@ router.get("/:bookingId", async (req, res) => {
 
     // Fetch the restaurant associated with the booking
     const restaurant = await Restaurant.findById(booking.restaurantid);
-    if (!restaurant) return res.status(404).json({ message: "Restaurant not found" });
+    if (!restaurant)
+      return res.status(404).json({ message: "Restaurant not found" });
 
     // Combine the booking and restaurant data in the response
     res.status(200).json({
@@ -462,30 +495,32 @@ router.get("/:bookingId", async (req, res) => {
   }
 });
 
-
-router.post('/rate/:bookingId', async (req, res) => {
+router.post("/rate/:bookingId", async (req, res) => {
   const { rating, feedback } = req.body;
   const bookingId = req.params.bookingId;
 
   try {
     const booking = await Booking.findById(bookingId);
     if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+      return res.status(404).json({ message: "Booking not found" });
     }
+    console.log("Booking found:", booking);
 
     const newRating = new BookingRating({
       bookingId: booking._id,
-      restaurantId: booking.restaurantId,
-      userId: booking.userId,
+      restaurantId: booking.restaurantid,
+      userId: booking.userid,
       rating,
       feedback,
     });
 
     await newRating.save();
-    res.status(201).json({ message: 'Rating saved successfully', rating: newRating });
+    res
+      .status(201)
+      .json({ message: "Rating saved successfully", rating: newRating });
   } catch (error) {
-    console.error('Error saving rating:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error saving rating:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

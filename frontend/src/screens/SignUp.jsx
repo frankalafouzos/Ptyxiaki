@@ -1,60 +1,55 @@
-import React, { useState } from 'react';
-import styles from '../css/Form.module.css';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-
+import React, { useState } from "react";
+import styles from "../css/Form.module.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
-    firstname: '',
-    lastname: '',
-    email: '',
-    password: '',
-    location: '',
+    firstname: "",
+    lastname: "",
+    email: "",
+    password: "",
+    location: "",
   });
-
-  
-  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      
-      const response = await fetch('http://localhost:5000/users/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firstname: formData.firstname,
-          lastname: formData.lastname,
-          email: formData.email,
-          password: formData.password,
-          location: formData.location
-        })
-      });
-  
+      const response = await fetch(
+        process.env.REACT_APP_API_URL + "/users/signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstname: formData.firstname,
+            lastname: formData.lastname,
+            email: formData.email,
+            password: formData.password,
+            location: formData.location,
+          }),
+        }
+      );
+
       const data = await response.json();
-      
+
       if (response.status === 400) {
-        throw new Error(data.message || 'Failed to sign up');
+        throw new Error(data.message || "Failed to sign up");
       }
-      console.log("Sign up successful")
+      console.log("Sign up successful");
       toast.success("Sign up successful", {
         position: "top-center",
         autoClose: 2000,
-        onClose: () => window.location.replace('http://localhost:3000/login')
-      })
-      
-      
+        onClose: () => window.location.replace("${process.env.REACT_APP_API_URL}/login"),
+      });
     } catch (error) {
-      console.error('Signup error:', error);
+      console.error("Signup error:", error);
       toast.error(error.message, {
         position: "top-center",
         autoClose: 2000,
-        onClose: () => window.location.replace('http://localhost:3000/signup')
-        });
+        onClose: () => window.location.replace("${process.env.REACT_APP_API_URL}/signup"),
+      });
     }
   };
 
@@ -65,7 +60,7 @@ const SignUp = () => {
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <h1 className={styles.title}>Sign up</h1>
-      
+
       <input
         name="firstname"
         value={formData.firstname}
@@ -103,9 +98,12 @@ const SignUp = () => {
         placeholder="Location"
       />
       <button type="submit">Sign Up</button>
-      <p className='pt-2'>Already registered? <a  href="/login">Log in</a></p>
+      <p className="pt-2">
+        Already registered? <a href="/login">Log in</a>
+      </p>
       <p>
-        Do you want to add your establishment? <a href="/owner-signup">Click here</a>
+        Do you want to add your establishment?{" "}
+        <a href="/owner-signup">Click here</a>
       </p>
     </form>
   );

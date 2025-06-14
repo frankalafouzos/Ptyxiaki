@@ -1,0 +1,52 @@
+.create-offer-form {
+  background-color: #fff;
+  padding: 2rem;
+  width: 50%;
+  margin: 50px auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.create-offer-title {
+  align-self: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+.create-offer-subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.create-offer-field {
+  width: 80%;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.create-offer-input,
+.create-offer-textarea,
+.create-offer-select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.create-offer-button {
+  width: 50%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.create-offer-button:hover {
+  background-color: #0056b3;
+}

@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import styles from '../../css/Form.module.css';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useState } from "react";
+import styles from "../../css/Form.module.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const OwnerSignup = () => {
   const [formData, setFormData] = useState({
-    firstname: '',
-    lastname: '',
-    email: '',
-    password: '',
-    location: '',
+    firstname: "",
+    lastname: "",
+    email: "",
+    password: "",
+    location: "",
   });
 
   const handleChange = (e) => {
@@ -19,40 +19,42 @@ const OwnerSignup = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/owners/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        process.env.REACT_APP_API_URL + "/owners/signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to sign up');
+        throw new Error(data.message || "Failed to sign up");
       }
 
       // Assuming the backend returns a token on signup
-      localStorage.setItem('token', data.token);
+      localStorage.setItem("token", data.token);
       const now = new Date();
-        console.log('Inside owner')
+      console.log("Inside owner");
 
-        const item = {
-          role: 'owner',
-          expiry: now.getTime() + 14400000 , // current time + ttl
-        };
+      const item = {
+        role: "owner",
+        expiry: now.getTime() + 14400000, // current time + ttl
+      };
 
-        localStorage.setItem('role', JSON.stringify(item)); // Store the role in localStorage
+      localStorage.setItem("role", JSON.stringify(item)); // Store the role in localStorage
 
       toast.success("Sign up successful", {
         position: "top-center",
         autoClose: 2000,
-        onClose: () => window.location.replace('/owner/home') // Redirect to owner home page
+        onClose: () => window.location.replace("/owner/home"), // Redirect to owner home page
       });
-
     } catch (error) {
-      console.error('Signup error:', error);
+      console.error("Signup error:", error);
       toast.error(error.message, {
         position: "top-center",
         autoClose: 2000,
@@ -100,7 +102,9 @@ const OwnerSignup = () => {
         placeholder="Location"
       />
       <button type="submit">Sign Up</button>
-      <p className='pt-2'>Already registered? <a href="/owner-signin">Log in</a></p>
+      <p className="pt-2">
+        Already registered? <a href="/owner-signin">Log in</a>
+      </p>
     </form>
   );
 };

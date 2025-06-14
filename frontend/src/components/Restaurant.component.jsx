@@ -1,6 +1,6 @@
 import { Card, Carousel, Modal, Button } from "react-bootstrap";
-import React, { useState, useEffect } from 'react';
-import { fetchOwner } from '../scripts/fetchUser';
+import React, { useState, useEffect } from "react";
+import { fetchOwner } from "../scripts/fetchUser";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { Link } from "react-router-dom";
 import CustomModal from "./CustomModal";
@@ -15,7 +15,7 @@ const Restaurant = ({ restaurant, index, images }) => {
   const email = authUser ? authUser.email : null;
   const [loading, setLoading] = useState(true);
   const [Owner, setOwner] = useState(null);
-  let role = JSON.parse(localStorage.getItem('role')).role;
+  let role = JSON.parse(localStorage.getItem("role")).role;
   useEffect(() => {
     if (email && role === "owner") {
       fetchOwner(email, setLoading, setOwner);
@@ -23,7 +23,9 @@ const Restaurant = ({ restaurant, index, images }) => {
   }, [email]);
 
   const getImagesForRestaurant = (Id) => {
-    return images.filter((image) => image.ImageID === Id);
+    return images
+      .filter((image) => image.ImageID === Id)
+      .sort((a, b) => (a.order || 0) - (b.order || 0)); // Sort by order
   };
 
   const handleDelete = async () => {
@@ -31,102 +33,116 @@ const Restaurant = ({ restaurant, index, images }) => {
       console.log(restaurant._id);
       let id = restaurant._id;
       console.log(id);
-      const response = await fetch("http://localhost:5000/restaurants/delete/" + restaurant._id, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        process.env.REACT_APP_API_URL + "/restaurants/delete/" + restaurant._id,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-
-      });
+      );
 
       if (response.ok) {
-        console.log('Delete successful');
+        console.log("Delete successful");
         window.location.reload();
         // Handle successful deletion (e.g., refresh data, show a message)
       } else {
-        console.log('Delete failed');
+        console.log("Delete failed");
         // Handle deletion failure
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
       // Handle error
     }
 
     setShowModal(false); // Close the modal
   };
-
 
   const handleAdminDelete = async () => {
     try {
-      const response = await fetch("http://localhost:5000/restaurants/deleteAll/" + restaurant._id, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        process.env.REACT_APP_API_URL +
+        "/restaurants/deleteAll/" +
+        restaurant._id,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (response.ok) {
-        console.log('Delete successful');
+        console.log("Delete successful");
         window.location.reload();
         // Handle successful deletion (e.g., refresh data, show a message)
       } else {
-        console.log('Delete failed');
+        console.log("Delete failed");
         // Handle deletion failure
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
       // Handle error
     }
 
     setShowModal(false); // Close the modal
   };
 
-
   const handleAdminHide = async () => {
     try {
-      const response = await fetch("http://localhost:5000/admins/hide-restaurant/" + restaurant._id, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        process.env.REACT_APP_API_URL +
+        "/admins/hide-restaurant/" +
+        restaurant._id,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (response.ok) {
-        console.log('Restaurant hidden!');
+        console.log("Restaurant hidden!");
         window.location.reload();
         // Handle successful deletion (e.g., refresh data, show a message)
       } else {
-        console.log('Delete failed');
+        console.log("Delete failed");
         // Handle deletion failure
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
       // Handle error
     }
 
     setShowAdminHideModal(false); // Close the modal
   };
 
-
   const handleAdminApprove = async () => {
     try {
-      const response = await fetch("http://localhost:5000/admins/approve-restaurant/" + restaurant._id, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        process.env.REACT_APP_API_URL +
+        "/admins/approve-restaurant/" +
+        restaurant._id,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (response.ok) {
-        console.log('Restaurant hidden!');
+        console.log("Restaurant approved!");
         window.location.reload();
-        // Handle successful deletion (e.g., refresh data, show a message)
+        // Handle successful approval (e.g., refresh data, show a message)
       } else {
-        console.log('Delete failed');
-        // Handle deletion failure
+        console.log(response);
+        // Handle approval failure
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
       // Handle error
     }
 
@@ -135,7 +151,6 @@ const Restaurant = ({ restaurant, index, images }) => {
 
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
-
 
   const handleShowAdminModal = () => setShowAdminModal(true);
   const handleCloseAdminModal = () => setShowAdminModal(false);
@@ -210,7 +225,6 @@ const Restaurant = ({ restaurant, index, images }) => {
           </>
         )}
 
-
         <div className="Buttons-container">
           <div className="h-25">
             <Link
@@ -227,10 +241,16 @@ const Restaurant = ({ restaurant, index, images }) => {
           )}
           {role === "owner" && (
             <div className="w-50 h-100 d-flex justify-content-around">
-              <button onClick={handleShowModal} className="h-100 btn btn-danger">
+              <button
+                onClick={handleShowModal}
+                className="h-100 btn btn-danger"
+              >
                 Delete
               </button>
-              <Link to={`/owner/edit-restaurant/${restaurant._id}`} className="h-100 btn btn-warning">
+              <Link
+                to={`/owner/edit-restaurant/${restaurant._id}`}
+                className="h-100 btn btn-warning"
+              >
                 Edit
               </Link>
               {/* View Calendar Button */}
@@ -295,12 +315,9 @@ const Restaurant = ({ restaurant, index, images }) => {
               )}
             </div>
           )}
-
-
         </div>
       </Card.Body>
       <>
-
         <CustomModal
           show={showModal}
           handleClose={handleCloseModal}
@@ -321,10 +338,6 @@ const Restaurant = ({ restaurant, index, images }) => {
           confirmLabel="Yes, Remove"
         />
 
-
-
-
-
         <CustomModal
           show={showAdminHideModal}
           handleClose={handleCloseAdminHideModal}
@@ -332,7 +345,9 @@ const Restaurant = ({ restaurant, index, images }) => {
           title="Confirm Request"
           body="Are you sure you want to hide this restaurant?"
           cancelLabel="No, Go Back"
-          confirmLabel={restaurant.status === "Hidden" ? "Yes, Show" : "Yes, Hide"}
+          confirmLabel={
+            restaurant.status === "Hidden" ? "Yes, Show" : "Yes, Hide"
+          }
           isWarning={true}
         />
 
@@ -347,12 +362,6 @@ const Restaurant = ({ restaurant, index, images }) => {
           isWarning={false}
           isApprove={true}
         />
-
-
-
-
-
-
 
         {/* <CustomModal
         show={showAdminModal}

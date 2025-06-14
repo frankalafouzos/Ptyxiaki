@@ -1,13 +1,11 @@
-
-
 export const fetchUser = async (email, setLoading, setUser) => {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     console.log("Fetching user data for email:", email);
   }
   setLoading(true);
   try {
     const response = await fetch(
-      `http://localhost:5000/users/userprofile`,
+      `${process.env.REACT_APP_API_URL}/users/userprofile`,
       {
         method: "POST",
         headers: {
@@ -22,7 +20,7 @@ export const fetchUser = async (email, setLoading, setUser) => {
     }
 
     let data = await response.json();
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       console.log("Received user data:", data);
     }
     console.log("Received user data:", data);
@@ -35,13 +33,13 @@ export const fetchUser = async (email, setLoading, setUser) => {
 };
 
 export const fetchOwner = async (email, setLoading, setOwner) => {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     console.log("Fetching owner data for email:", email);
   }
   setLoading(true);
   try {
     const response = await fetch(
-      `http://localhost:5000/owners/ownerprofile`,
+      `${process.env.REACT_APP_API_URL}/owners/ownerprofile`,
       {
         method: "POST",
         headers: {
@@ -56,7 +54,7 @@ export const fetchOwner = async (email, setLoading, setOwner) => {
     }
 
     let data = await response.json();
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       console.log("Received owner data:", data);
     }
 
@@ -67,5 +65,3 @@ export const fetchOwner = async (email, setLoading, setOwner) => {
     setLoading(false);
   }
 };
-
-

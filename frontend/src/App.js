@@ -31,6 +31,7 @@ import UserBookings from './components/UserBookings.component';
 import ThankYouForBooking from './screens/ThankYouForBooking';
 import EditBooking from './screens/EditBooking';
 import RateBooking from './screens/RateBooking';
+import Offers from './screens/Offers';
 
 // Owner
 import OwnerHome from './screens/Owner/OwnerHome';
@@ -50,6 +51,9 @@ import AddBooking from './screens/Owner/AddBooking';
 import OwnerConfirmBooking from './screens/Owner/ConfirmBooking';
 import OwnerPendingEditsList from './components/Owner/OwnerPendingEditsList.component';
 import OwnerPendingEditDetail from './components/Owner/OwnerPendingEditDetail.component';
+import OwnersOffers from './screens/Owner/OwnersOffers';
+import OwnerCreateOffer from './screens/Owner/OwnerCreateOffer';
+
 
 // Admin
 import AdminHome from './screens/Admin/AdminHome';
@@ -67,6 +71,7 @@ import AdminPendingEditDetail from './components/Admin/AdminPendingEditDetail.co
 
 // Dark Mode
 import DarkModeToggle from './components/DarkModeToggler.component';
+
 
 
 
@@ -119,6 +124,7 @@ function App() {
           <Route path="/search" element={<SearchBar />} />
           <Route path="/restaurants" element={<Restaurants />} />
           <Route path="/restaurant/:id" element={<RestaurantPage />} />
+          <Route path="/offers" element={ <Offers />} />
           <Route path="/bookingThankYou/:bookingid" element={<ThankYouForBooking />} />
 
           {/* User Protected Routes */}
@@ -130,6 +136,7 @@ function App() {
           <Route path="/restaurant/:id/confirmBooking" element={<UserProtectedRoute element={<ConfirmBooking />} />} />
           <Route path="/editBooking/:id" element={<UserProtectedRoute element={<EditBooking />} />} />
           <Route path="/ratebooking/:bookingId" element={<UserProtectedRoute element={<RateBooking />} />} />
+
 
           {/* Owner Protected Routes */}
           <Route path="/owner/home" element={<OwnerProtectedRoute element={<OwnerHome />} />} />
@@ -146,6 +153,8 @@ function App() {
           <Route path="/owner/confirm-booking" element={<OwnerProtectedRoute element={<OwnerConfirmBooking />} />} />
           <Route path="/owner/pending-edits" element={<OwnerProtectedRoute element={<OwnerPendingEditsList />} />} />
           <Route path="/owner/pending-edits/:id" element={<OwnerProtectedRoute element={<OwnerPendingEditDetail />} />} />
+          <Route path="/owner/offers" element={<OwnerProtectedRoute element={<OwnersOffers />} />} />
+          <Route path="/owner/offers/create" element={<OwnerProtectedRoute element={<OwnerCreateOffer />} />} />
 
           {/* Admin Pages */}
           <Route path="/admin" element={<AdminProtectedRoute element={<AdminHome />} />} />
@@ -162,7 +171,7 @@ function App() {
         </Routes>
         
       </main>
-      
+       
       <Footer />
     </Router>
     <DarkModeToggle />

@@ -7,14 +7,15 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 const uri = process.env.ATLAS_URI;
-mongoose.connect(uri, { useNewUrlParser: true});
+mongoose.connect(uri, { useNewUrlParser: true });
 const connection = mongoose.connection;
 connection.once('open', () => {
-console.log("MongoDB database connection established successfully");
-}) 
+    console.log("MongoDB database connection established successfully");
+    require('./agenda/expireOffers');
+})
 
 app.use(cookieParser());
 
@@ -34,6 +35,8 @@ const suggestionsRouter = require('./routes/suggestions');
 const notificationsRouter = require('./routes/notifications');
 const calendarRouter = require('./routes/calendar');
 const pendingEditsRoutes = require('./routes/pendingEditsRoutes');
+const offersRouter = require('./routes/offers');
+const restaurantRatingsRouter = require('./routes/restaurantRatings');
 
 app.use('/users', usersRouter);
 app.use('/restaurants', restaurantsRouter);
@@ -48,6 +51,8 @@ app.use('/suggestions', suggestionsRouter);
 app.use('/notifications', notificationsRouter);
 app.use('/calendar', calendarRouter);
 app.use('/api/pending-edits', pendingEditsRoutes);
+app.use('/offers', offersRouter);
+app.use('/restaurantRatings', restaurantRatingsRouter);
 
 
 app.listen(port, () => {

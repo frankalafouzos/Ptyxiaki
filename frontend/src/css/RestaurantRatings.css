@@ -1,0 +1,100 @@
+.restaurant-ratings-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.restaurant-ratings-title {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.restaurant-ratings-summary {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.15rem;
+  color: #555;
+}
+
+.restaurant-ratings-stars {
+  color: #ffc107;
+  font-size: 1.2em;
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.restaurant-ratings-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.restaurant-rating-item {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 14px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.restaurant-rating-user {
+  font-weight: 500;
+  font-size: 1.08em;
+  color: #333;
+}
+
+.restaurant-rating-score {
+  margin-left: 8px;
+  color: #555;
+  font-size: 1em;
+}
+
+.restaurant-rating-feedback {
+  font-style: italic;
+  color: #444;
+  margin-top: 4px;
+  display: block;
+}
+
+.empty-star-bounce {
+    font-size: 60px;
+    color: #FFD700;
+    margin-bottom: 10px;
+    animation: bounce 1.2s infinite alternate;
+}
+@keyframes bounce {
+    0% { transform: translateY(0);}
+    100% { transform: translateY(-10px);}
+}
+
+.leave-review-btn {
+    background: #ffc107;
+    color: #222;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.leave-review-btn:hover {
+    background: #ffb300;
+}
+
+.restaurant-ratings-empty-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 400px;
+    margin: 40px auto 0 auto;
+    padding: 36px 28px 28px 28px;
+}

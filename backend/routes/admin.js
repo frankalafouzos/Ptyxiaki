@@ -126,9 +126,9 @@ router.route("/hide-restaurant/:id").post(async (req, res) => {
 
 router.route("/approve-restaurant/:id").post(async (req, res) => {
   const RestaurantID = new ObjectId(req.params.id);
-  console.log("RestaurantID: " + RestaurantID);
+  console.log("RestaurantID: " + RestaurantID+". In approve restaurant.");
   try {
-    const pendingRestaurant = await pendingApprovalRestaurant.findById(RestaurantID); // Fetch from pending collection
+    const pendingRestaurant = await Restaurant.findById(RestaurantID); // Fetch from pending collection
     if (!pendingRestaurant) {
       return res.status(404).json({ error: 'Pending restaurant not found' });
     }
@@ -160,28 +160,10 @@ router.route("/approve-restaurant/:id").post(async (req, res) => {
 
       await existingRestaurant.save(); // Save the updated restaurant
     } else {
-      // Handle new restaurant submission
-      const approvedRestaurant = new Restaurant({
-        name: pendingRestaurant.name,
-        price: pendingRestaurant.price,
-        category: pendingRestaurant.category,
-        location: pendingRestaurant.location,
-        phone: pendingRestaurant.phone,
-        email: pendingRestaurant.email,
-        description: pendingRestaurant.description,
-        imageID: pendingRestaurant.imageID,
-        status: "Approved", // Set status to Approved
-        owner: pendingRestaurant.owner,
-        Bookingduration: pendingRestaurant.Bookingduration,
-        openHour: pendingRestaurant.openHour,
-        closeHour: pendingRestaurant.closeHour,
-      });
+      pendingRestaurant.status = "Approved";
 
-      await approvedRestaurant.save(); // Save to the main Restaurant collection
+      await pendingRestaurant.save(); // Save to the main Restaurant collection
     }
-
-    // Remove the pending restaurant from the pending collection
-    await pendingApprovalRestaurant.findByIdAndDelete(RestaurantID);
 
     console.log("Restaurant approved and processed!");
     res.json("Restaurant approved and processed!");
@@ -459,7 +441,17 @@ router.post('/approve-edit/:id', async (req, res) => {
     
     // Save the restaurant with all regular field updates
     await restaurant.save();
-    
+
+    // --- IMAGE ORDER UPDATE LOGIC ---
+    if (pendingEdit.changes.images_order) {
+      const { new: newOrder } = pendingEdit.changes.images_order;
+      for (const img of newOrder) {
+        await Image.findByIdAndUpdate(img.id, { order: img.order });
+      }
+      console.log('Image order updated for restaurant images.');
+    }
+    // --- END IMAGE ORDER UPDATE LOGIC ---
+
     // Handle closed days separately if needed
     if (hasClosedDaysChange) {
       console.log('Handling closed days change:', closedDaysValue);

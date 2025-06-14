@@ -8,6 +8,7 @@ const Restaurant = require('../models/restaurant.model'); // Import Restaurant s
 const Owner = require('../models/restaurantOwner.model'); // Import Owner schema
 let isDayClosed = require('../functions/IsDayClosed'); // Import the isDayClosed function
 let { sendCustomerConfirmationMail, sendOwnerConfirmationMail, sendBookingReminderMail } = require("../functions/notifications");
+const ForcedOpenDate = require('../models/forcedOpenDates.model');
  
 // Helper: get day of week string from a Date=
 function getDayOfWeek(date) {
@@ -32,6 +33,17 @@ router.route("/:restaurantId").get(async (req, res) => {
         restaurant: restaurantId,
         date: { $gte: new Date(startDate), $lte: new Date(endDate) },
       });
+
+      // 2b. Fetch all forced open dates for that range
+      const forcedOpenDates = await ForcedOpenDate.find({
+        restaurant: restaurantId,
+        date: { $gte: new Date(startDate), $lte: new Date(endDate) },
+      });
+
+      // Create a Set of forced open date strings for quick checking
+      const forcedOpenDateSet = new Set(
+        forcedOpenDates.map((d) => d.date.toISOString().split('T')[0])
+      );
   
       // 3. Fetch capacity if needed
       const capacityDoc = await RestaurantCapacity.findOne({ restaurantid: restaurantId });
@@ -66,7 +78,9 @@ router.route("/:restaurantId").get(async (req, res) => {
       Object.keys(calendar).forEach(dayStr => {
         const dayDate = new Date(dayStr);
         const dayOfWeek = getDayOfWeek(dayDate);
-        if (closedDayOfWeekSet.has(dayOfWeek)) {
+        
+        // Only mark as closed if it's not in the forced open set
+        if (closedDayOfWeekSet.has(dayOfWeek) && !forcedOpenDateSet.has(dayStr)) {
           calendar[dayStr].closed = true;
         }
       });
@@ -114,18 +128,35 @@ router.route("/:restaurantId").get(async (req, res) => {
   // Close a date (one-off)
   router.route("/close-date").post(async (req, res) => {
     const { restaurantId, date, reason } = req.body;
-  
+
     try {
+      // 0. First check if this date is in forced open dates
+      const forcedOpenDate = await ForcedOpenDate.findOne({
+        restaurant: restaurantId,
+        date: new Date(date)
+      });
+
+      if (forcedOpenDate) {
+        // If it's a forced open date, just remove it from forced open dates
+        // This will automatically revert it to its default closed state
+        await ForcedOpenDate.deleteOne({
+          _id: forcedOpenDate._id
+        });
+        return res.status(200).json({ 
+          message: 'Date closed successfully (removed from forced open dates).' 
+        });
+      }
+
       // 1. Make sure there are no existing bookings on that day
       const existingBooking = await Booking.findOne({
         restaurantid: restaurantId,
         date: new Date(date),
       });
-  
+
       if (existingBooking) {
         return res.status(400).json({ error: 'Cannot close a date with existing bookings.' });
       }
-  
+
       // 2. Create a closed date record
       const closedDate = new ClosedDate({ 
         restaurant: restaurantId, 
@@ -133,9 +164,10 @@ router.route("/:restaurantId").get(async (req, res) => {
         reason: reason || 'Closed'
       });
       await closedDate.save();
-  
+
       res.status(200).json({ message: 'Date closed successfully.' });
     } catch (error) {
+      console.error("Error closing date:", error);
       res.status(500).json({ error: 'Error closing the date.' });
     }
   });
@@ -267,5 +299,65 @@ router.route("/remove-booking/:id").delete(async (req, res) => {
         res.status(500).json({ error: 'Error removing booking.' });
     }
 });
+
+
+router.route("/open-date").post(async (req, res) => {
+  const { restaurantId, date, reason } = req.body;
+
+  try {
+    // 1. First check if it's a one-off closed date
+    const closedDateResult = await ClosedDate.findOneAndDelete({
+      restaurant: restaurantId,
+      date: new Date(date)
+    });
+
+    if (closedDateResult) {
+      // It was a one-off closed date and has been deleted
+      return res.status(200).json({ message: 'Date opened successfully (one-off closure removed).' });
+    }
+
+    // 2. If not a one-off date, it might be a default closed day
+    // Get the day of week for this date
+    const dateObj = new Date(date);
+    const dayOfWeek = getDayOfWeek(dateObj);
+
+    // Check if this day is in the default closed days
+    const isDefaultClosed = await DefaultClosedDay.findOne({
+      restaurant: restaurantId,
+      dayOfWeek: dayOfWeek,
+      isClosed: true
+    });
+
+    if (!isDefaultClosed) {
+      // This date was not closed to begin with
+      return res.status(400).json({ error: 'This date is not closed by default.' });
+    }
+
+    // 3. It's a default closed day, so we need to add it to forced open dates
+    // First check if it's already in forced open dates
+    const existingForcedOpen = await ForcedOpenDate.findOne({
+      restaurant: restaurantId,
+      date: new Date(date)
+    });
+
+    if (existingForcedOpen) {
+      return res.status(200).json({ message: 'Date is already set to be forced open.' });
+    }
+
+    // Create a forced open date record
+    const forcedOpenDate = new ForcedOpenDate({ 
+      restaurant: restaurantId, 
+      date: new Date(date),
+      reason: reason || 'Forced Open'
+    });
+    await forcedOpenDate.save();
+
+    res.status(200).json({ message: 'Date opened successfully (added to forced open dates).' });
+  } catch (error) {
+    console.error("Error opening date:", error);
+    res.status(500).json({ error: 'Error opening the date.' });
+  }
+});
+
 
 module.exports = router;

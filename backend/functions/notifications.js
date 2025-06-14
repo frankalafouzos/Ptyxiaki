@@ -129,7 +129,7 @@ const sendCustomerConfirmationMail = async (emailData) => {
         });
 
         const result = await request;
-        console.log(result.body); // Debugging log
+        console.log("Result: " + JSON.stringify(result.body, null, 2)); // Debugging log
         return { success: true, message: "Email sent successfully", data: result.body };
     } catch (err) {
         console.error(err); // Debugging log

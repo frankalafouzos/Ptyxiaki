@@ -3,7 +3,7 @@ import styles from "../css/Form.module.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { fetchUser, fetchOwner } from '../scripts/fetchUser';
+import { fetchUser, fetchOwner } from "../scripts/fetchUser";
 
 const EditProfile = () => {
   const [formData, setFormData] = useState({
@@ -16,7 +16,7 @@ const EditProfile = () => {
   const [user, setUser] = useState(null); // Initialize user as null
   const authUser = useAuthUser();
   const email = authUser.email;
-  const role = JSON.parse(localStorage.getItem('role')).role;
+  const role = JSON.parse(localStorage.getItem("role")).role;
   const [isUser, setIsUser] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -27,28 +27,28 @@ const EditProfile = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (role === "user") {
-         fetchUser(email, setLoading, setUser);
+        fetchUser(email, setLoading, setUser);
         setIsUser(true);
         console.log("User role found");
       } else if (role === "owner") {
-         fetchOwner(email, setLoading, setUser);
+        fetchOwner(email, setLoading, setUser);
         setIsOwner(true);
         console.log(isOwner ? "Owner role found" : "Owner role not found");
       } else if (role === "admin") {
-         fetchUser(email, setLoading, setUser);
+        fetchUser(email, setLoading, setUser);
         setIsAdmin(true);
         console.log("Admin role found");
       } else {
         console.log("Role not found");
       }
-    }
+    };
 
     // const fetchUser = async () => {
     //   console.log("Fetching user data for email:", email);
 
     //   try {
     //     const response = await fetch(
-    //       `http://localhost:5000/users/userprofile`,
+    //       `${process.env.REACT_APP_API_URL}/users/userprofile`,
     //       {
     //         method: "POST",
     //         headers: {
@@ -91,25 +91,32 @@ const EditProfile = () => {
   }, [user]);
 
   if (loading) {
-    return <div className="d-flex justify-content-center pt-5"><div className="loader"></div></div>
+    return (
+      <div className="d-flex justify-content-center pt-5">
+        <div className="loader"></div>
+      </div>
+    );
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (role === "owner") {
       try {
-        const response = await fetch("http://localhost:5000/owners/editprofile", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            firstname: formData.firstname,
-            lastname: formData.lastname,
-            email: formData.email,
-            location: formData.location,
-          }),
-        });
+        const response = await fetch(
+          process.env.REACT_APP_API_URL + "/owners/editprofile",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              firstname: formData.firstname,
+              lastname: formData.lastname,
+              email: formData.email,
+              location: formData.location,
+            }),
+          }
+        );
 
         const data = await response.json();
 
@@ -122,30 +129,38 @@ const EditProfile = () => {
           position: "top-center",
           autoClose: 2000,
           onClose: () =>
-            window.location.replace("http://localhost:3000/owner-profile"),
+            window.location.replace(
+              process.env.REACT_APP_FRONTEND_URL + "/owner-profile"
+            ),
         });
       } catch (error) {
         console.error("Edit profile error:", error);
         toast.error(error.message, {
           position: "top-center",
           autoClose: 2000,
-          onClose: () => window.location.replace("http://localhost:3000/ownerEditProfile"),
+          onClose: () =>
+            window.location.replace(
+              process.env.REACT_APP_FRONTEND_URL + "/ownerEditProfile"
+            ),
         });
       }
     } else {
       try {
-        const response = await fetch("http://localhost:5000/users/editprofile", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            firstname: formData.firstname,
-            lastname: formData.lastname,
-            email: formData.email,
-            location: formData.location,
-          }),
-        });
+        const response = await fetch(
+          process.env.REACT_APP_API_URL + "/users/editprofile",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              firstname: formData.firstname,
+              lastname: formData.lastname,
+              email: formData.email,
+              location: formData.location,
+            }),
+          }
+        );
 
         const data = await response.json();
 
@@ -154,34 +169,46 @@ const EditProfile = () => {
         }
 
         console.log("Profile edited successfully");
-        if(role === "admin") {
+        if (role === "admin") {
           toast.success("Profile edited successfully", {
             position: "top-center",
             autoClose: 2000,
             onClose: () =>
-              window.location.replace("http://localhost:3000/adminProfilePage"),
+              window.location.replace(
+                process.env.REACT_APP_FRONTEND_URL + "/adminProfilePage"
+              ),
           });
         } else {
-        toast.success("Profile edited successfully", {
-          position: "top-center",
-          autoClose: 2000,
-          onClose: () =>
-            window.location.replace("http://localhost:3000/profilePage"),
-        });}
+          toast.success("Profile edited successfully", {
+            position: "top-center",
+            autoClose: 2000,
+            onClose: () =>
+              window.location.replace(
+                process.env.REACT_APP_FRONTEND_URL + "/profilePage"
+              ),
+          });
+        }
       } catch (error) {
         console.error("Edit profile error:", error);
-        if(role === "admin") {
+        if (role === "admin") {
           toast.error(error.message, {
             position: "top-center",
             autoClose: 2000,
-            onClose: () => window.location.replace("http://localhost:3000/adminEditProfile"),
+            onClose: () =>
+              window.location.replace(
+                process.env.REACT_APP_FRONTEND_URL + "/adminEditProfile"
+              ),
           });
         } else {
-        toast.error(error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          onClose: () => window.location.replace("http://localhost:3000/editProfile"),
-        });}
+          toast.error(error.message, {
+            position: "top-center",
+            autoClose: 2000,
+            onClose: () =>
+              window.location.replace(
+                process.env.REACT_APP_FRONTEND_URL + "/editProfile"
+              ),
+          });
+        }
       }
     }
   };

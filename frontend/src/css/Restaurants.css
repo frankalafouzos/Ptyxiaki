@@ -34,8 +34,8 @@
 .filters {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 2rem;
-  width: 75%;
+  /* margin-bottom: 2rem; */
+  width: 100%;
 }
 
 .form-group {
@@ -130,4 +130,60 @@
   display: flex;
   justify-content: center;
   margin: 1rem 0;
+}
+
+.search-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 18px 0 18px 0;
+  width: 100% !important;
+  /* flex: 1 1; */
+}
+
+.search-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  /* flex: 0 0 auto !important; */
+
+}
+
+.search-container input[type="text"] {
+  width: 100%;
+  padding: 10px 36px 10px 12px; /* Add right padding for the X button */
+  border-radius: 8px;
+  border: none;
+  font-size: 1.1rem;
+  /* background: #111; */
+  /* color: #fff; */
+}
+
+.search-container input[type="text"]:focus {
+  border-color: #90caf9;
+  outline: none;
+}
+
+.clear-search {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-search:hover {
+  color: #fff;
+}
+
+.search-wrapper {
+  flex: 0 0 auto !important;
 }
