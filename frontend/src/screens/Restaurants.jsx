@@ -5,7 +5,12 @@ import FilterRestaurants from "../components/FilterRestaurants.component";
 import SortForm from "../components/SortRestaurants.component";
 import { Col, Row } from "react-bootstrap";
 import "../css/Restaurants.css";
-import { FaCircleXmark } from "react-icons/fa6";
+import { 
+  FaCircleXmark, 
+  FaFilter, 
+  FaFilterCircleXmark,
+  FaX
+} from "react-icons/fa6";
 
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -26,9 +31,13 @@ const Restaurants = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [totalPages, setTotalPages] = useState(0);
-
-  // Search state
   const [searchQuery, setSearchQuery] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // Toggle filter visibility
+  const toggleFilters = () => {
+    setIsFilterOpen(!isFilterOpen);
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -82,25 +91,65 @@ const Restaurants = () => {
     searchQuery,
   ]);
 
+  // Handle resetting filters
+  const resetFilters = () => {
+    setSort("Default");
+    setSearchQuery("");
+    setCategoryFilter("");
+    setLocationFilter("");
+    setMinPriceFilter("");
+    setMaxPriceFilter("");
+    setCurrentPage(1);
+    localStorage.removeItem("categoryFilter");
+    localStorage.removeItem("locationFilter");
+    localStorage.removeItem("minPriceFilter");
+    localStorage.removeItem("maxPriceFilter");
+    localStorage.removeItem("Sort");
+  };
+
+  // Determine if any filters are applied
+  const areFiltersApplied = () => {
+    return (
+      searchQuery ||
+      minPriceFilter ||
+      maxPriceFilter ||
+      categoryFilter ||
+      locationFilter ||
+      sort !== "Default"
+    );
+  };
+
   return (
     <div className="main-container">
       <h1 className="restaurants-header">Our Restaurants:</h1>
-      <div className="Subconteiner">
-        <FilterRestaurants
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-          locationFilter={locationFilter}
-          setLocationFilter={setLocationFilter}
-          maxPriceFilter={maxPriceFilter}
-          setMaxPriceFilter={setMaxPriceFilter}
-          minPriceFilter={minPriceFilter}
-          setMinPriceFilter={setMinPriceFilter}
-          Sort={sort} 
-          setSort={setSort}
-        />
-      </div>
+      
+      {/* Container for Filters, Search, and Sort */}
+      <div className="controls-container">
+        {/* Filter Button & Filters */}
+        <div className={`filters-wrapper ${isFilterOpen ? "open" : ""}`}>
+          <button className="filter-toggle-btn" onClick={toggleFilters}>
+            <FaFilter />
+            <span>{isFilterOpen ? "Hide Filters" : "Show Filters"}</span>
+          </button>
 
-      {/* Search Field */}
+          {/* Filters Container - Only show when isFilterOpen is true */}
+          {isFilterOpen && (
+            <div className="filter-container">
+              <FilterRestaurants
+                categoryFilter={categoryFilter}
+                setCategoryFilter={setCategoryFilter}
+                locationFilter={locationFilter}
+                setLocationFilter={setLocationFilter}
+                maxPriceFilter={maxPriceFilter}
+                setMaxPriceFilter={setMaxPriceFilter}
+                minPriceFilter={minPriceFilter}
+                setMinPriceFilter={setMinPriceFilter}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Search Field */}
         <div className="search-wrapper">
           <div className="search-container">
             <input
@@ -109,7 +158,7 @@ const Restaurants = () => {
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                setCurrentPage(1); // Reset to first page on new search
+                setCurrentPage(1);
               }}
             />
             {searchQuery && (
@@ -128,26 +177,48 @@ const Restaurants = () => {
           </div>
         </div>
 
+        {/* Sort Form */}
+        <div className="sort-wrapper">
+          <SortForm Sort={sort} setSort={setSort} />
+        </div>
+      </div>
+
+      {/* Reset button container */}
+      {areFiltersApplied() && (
+        <div className="reset-button-container">
+          <button className="reset-filters-btn" onClick={resetFilters}>
+            <FaX />
+            <span>Reset Filters</span>
+          </button>
+        </div>
+      )}
+
       <PaginationComponent
         totalPages={totalPages}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
       />
 
-      <div className="restaurants-container">
-        <Row className="row">
-          {restaurants.map((restaurant, index) => (
-            <Col key={restaurant._id} sm={12} md={6} lg={6} xl={4} xxl={4}>
-              <Restaurant
-                restaurant={restaurant}
-                index={index}
-                images={images}
-                fromUsersDashboard={true}
-              />
-            </Col>
-          ))}
-        </Row>
-      </div>
+      {restaurants.length === 0 ? (
+        <div className="error">
+          <h2>No restaurants found</h2>
+        </div>
+      ) : (
+        <div className="restaurants-container">
+          <Row className="row">
+            {restaurants.map((restaurant, index) => (
+              <Col key={restaurant._id} xs={12} sm={12} md={6} lg={6} xl={4} xxl={4}>
+                <Restaurant
+                  restaurant={restaurant}
+                  index={index}
+                  images={images}
+                  fromUsersDashboard={true}
+                />
+              </Col>
+            ))}
+          </Row>
+        </div>
+      )}
 
       <PaginationComponent
         totalPages={totalPages}

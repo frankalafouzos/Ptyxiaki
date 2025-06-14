@@ -207,25 +207,7 @@ const FilterForm = ({
           onChange={(e) => setMaxPriceFilter(e.target.value)}
         />
       </Form.Group>
-      <Form.Group className=" form-group">
-            <Form.Label className="SortTitle">Sort</Form.Label>
-            <Form.Control
-              className="Sort"
-              as="select"
-              value={ Sort }
-              onChange={(e) => setSort(e.target.value)}
-            >
-              <option value="Default">Default</option>
-              <option value="Category Dsc">Category Asc</option>
-              <option value="Category Asc">Category Dsc</option>
-              <option value="Location Dsc">Location Asc</option>
-              <option value="Location Asc">Location Dsc</option>
-              <option value="Price Asc">Price Asc</option>
-              <option value="Price Dsc">Price Dsc</option>
-              <option value="Name Asc">A-Z</option>
-              <option value="Name Dsc">Z-A</option>
-            </Form.Control>
-          </Form.Group>
+
     </Form>
         </>
   );
