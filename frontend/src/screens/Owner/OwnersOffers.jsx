@@ -48,11 +48,14 @@ const OwnersOffers = () => {
                 if (!offersResponse.ok) throw new Error("Failed to fetch offers");
                 const offersData = await offersResponse.json();
 
-                // 4. Attach restaurantName to each group
-                const offersWithNames = offersData.map(group => ({
-                    ...group,
-                    restaurantName: restaurantIdToName[group.restaurantId] || "Unknown Restaurant"
-                }));
+                // 4. Attach restaurantName to each group, if offersData exists
+                let offersWithNames = [];
+                if (offersData && Array.isArray(offersData)) {
+                    offersWithNames = offersData.map(group => ({
+                        ...group,
+                        restaurantName: restaurantIdToName[group.restaurantId] || "Unknown Restaurant"
+                    }));
+                }
 
                 setOffers(offersWithNames);
             } catch (err) {

@@ -17,14 +17,28 @@ const ImageUploader = forwardRef(({ setImages, initialImages = [], onExistingIma
   }, [initialImages]);
 
   // Expose methods to the parent component
-  useImperativeHandle(ref, () => ({
-    getOrderedImages: () => {
-      return {
-        existingImages: existingImages,
-        newImages: newImages.map(image => image.file)
-      };
-    }
-  }));
+useImperativeHandle(ref, () => ({
+  getOrderedImages: () => ({
+    existingImages: existingImages.map((img, idx) => ({
+      ...img,
+      order: idx + 1,
+    })),
+    newImages: newImages.map((img, idx) => ({
+      ...img.file,
+      order: existingImages.length + idx + 1,
+    })),
+    allImages: [
+      ...existingImages.map((img, idx) => ({
+        id: img._id || img.id,
+        order: idx + 1,
+      })),
+      ...newImages.map((img, idx) => ({
+        id: img.id,
+        order: existingImages.length + idx + 1,
+      })),
+    ],
+  }),
+}));
 
   const moveImage = (fromIndex, toIndex, type) => {
     let updatedImages = [];

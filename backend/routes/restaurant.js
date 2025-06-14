@@ -71,13 +71,23 @@ router.get('/status', async (req, res) => {
 });
 
 router.route('/').get(async (req, res) => {
-  let { page, itemsPerPage, sortField, sortOrder, categoryFilter, locationFilter, minPrice, maxPrice, owner } = req.query;
+  let { page, itemsPerPage, sortField, sortOrder, categoryFilter, locationFilter, minPrice, maxPrice, owner, searchQuery } = req.query;
+
+  const regex = new RegExp(searchQuery, 'i');
+
+  const filters = {
+    $or: [
+      { name: { $regex: regex } },
+      { category: { $regex: regex } },
+      { location: { $regex: regex } }
+    ]
+  };
 
   page = parseInt(page) || 1;
   itemsPerPage = parseInt(itemsPerPage) || 12;
   sortOrder = sortOrder === 'asc' ? 1 : -1;
 
-  let filters = {};
+
   if (categoryFilter) filters.category = categoryFilter;
   if (locationFilter) filters.location = locationFilter;
   if (minPrice) filters.price = { $gte: parseFloat(minPrice) };

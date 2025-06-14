@@ -147,8 +147,8 @@ const RestaurantPage = () => {
     try {
       const response = await fetch(
         process.env.REACT_APP_API_URL +
-          "/admins/hide-restaurant/" +
-          restaurant._id,
+        "/admins/hide-restaurant/" +
+        restaurant._id,
         {
           method: "POST",
           headers: {
@@ -172,6 +172,8 @@ const RestaurantPage = () => {
 
     setShowAdminHideModal(false); // Close the modal
   };
+
+  const sortedImages = [...images].sort((a, b) => (a.order || 0) - (b.order || 0));
 
   const handleShowAdminModal = () => setShowAdminModal(true);
   const handleCloseAdminModal = () => setShowAdminModal(false);
@@ -197,108 +199,109 @@ const RestaurantPage = () => {
         </div>
       ) : (
         <><div className="restaurant-container">
-            <div className="content-layout">
-              <div className="carousel-container">
-                <div className="image-wrapper">
-                  {images.map((img, idx) => (
-                    <img
-                      key={idx}
-                      className={`carousel-image ${idx === activeImage ? "active" : ""}`}
-                      src={img.link}
-                      alt={`Restaurant ${idx}`} />
-                  ))}
-                  <div className="button-wrapper">
-                    <button className="carousel-control prev" onClick={prevImage}>
-                      &lt;
-                    </button>
-                    <button className="carousel-control next" onClick={nextImage}>
-                      &gt;
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="info-container">
-                <div className="info-top">
-                  <h2>{restaurant.name}</h2>
-                  <h5 className="info">
-                    Average price per person: {restaurant.price}
-                  </h5>
-                  <br />
-                  <h6 className="info">About us: {restaurant.description}</h6>
-                  <br />
-                  <h7 className="info">Category: {restaurant.category}</h7>
-                  <br />
-                  <h7 className="info">Location: {restaurant.location}</h7>
-                  <br />
-                  <h7 className="info">
-                    Phone number:
-                    <a
-                      className="text-decoration-none text-info"
-                      href={`tel:+${restaurant.phone}`}
-                    >
-                      {restaurant.phone}
-                    </a>
-                  </h7>
-                  <br />
-                  <h7 className="info">
-                    Email:
-                    <a
-                      className="text-decoration-none text-info"
-                      href={`mailto:${restaurant.email}`}
-                    >
-                      {restaurant.email}
-                    </a>
-                  </h7>
-                  <br />
-                  <br />
-                  <br />
-                </div>
-                <div className="booking-button">
-                  {role.role === "user" && (
-                    <Link
-                      to={`/booking/${restaurant._id}`}
-                      className="btn btn-outline-success "
-                    >
-                      Book a Table
-                    </Link>
-                  )}
-                  {role.role === "owner" && (
-                    <Link
-                      to={`/owner/edit-restaurant/${restaurant._id}`}
-                      className="btn btn-outline-warning "
-                    >
-                      Edit
-                    </Link>
-                  )}
-                  {role.role === "admin" && (
-                    <div
-                      className=""
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        overflow: "hidden",
-                        height: "auto",
-                      }}
-                    >
-                      <button
-                        onClick={handleShowAdminHideModal}
-                        className="btn btn-outline-warning mt-4"
-                      >
-                        {restaurant.status === "Hidden" ? "Show" : "Hide"}
-                      </button>
-                      <button
-                        onClick={handleShowAdminModal}
-                        className="btn btn-outline-danger mt-4"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
+          <div className="content-layout">
+            <div className="carousel-container">
+              <div className="image-wrapper">
+                {sortedImages.map((img, idx) => (
+                  <img
+                    key={idx}
+                    className={`carousel-image ${idx === activeImage ? "active" : ""}`}
+                    src={img.link}
+                    alt={`Restaurant ${idx}`}
+                  />
+                ))}
+                <div className="button-wrapper">
+                  <button className="carousel-control prev" onClick={prevImage}>
+                    &lt;
+                  </button>
+                  <button className="carousel-control next" onClick={nextImage}>
+                    &gt;
+                  </button>
                 </div>
               </div>
             </div>
-          </div><RestaurantRatings restaurantId={restaurant._id} />
+
+            <div className="info-container">
+              <div className="info-top">
+                <h2>{restaurant.name}</h2>
+                <h5 className="info">
+                  Average price per person: {restaurant.price}
+                </h5>
+                <br />
+                <h6 className="info">About us: {restaurant.description}</h6>
+                <br />
+                <h7 className="info">Category: {restaurant.category}</h7>
+                <br />
+                <h7 className="info">Location: {restaurant.location}</h7>
+                <br />
+                <h7 className="info">
+                  Phone number:
+                  <a
+                    className="text-decoration-none text-info"
+                    href={`tel:+${restaurant.phone}`}
+                  >
+                    {restaurant.phone}
+                  </a>
+                </h7>
+                <br />
+                <h7 className="info">
+                  Email:
+                  <a
+                    className="text-decoration-none text-info"
+                    href={`mailto:${restaurant.email}`}
+                  >
+                    {restaurant.email}
+                  </a>
+                </h7>
+                <br />
+                <br />
+                <br />
+              </div>
+              <div className="booking-button">
+                {role.role === "user" && (
+                  <Link
+                    to={`/booking/${restaurant._id}`}
+                    className="btn btn-outline-success "
+                  >
+                    Book a Table
+                  </Link>
+                )}
+                {role.role === "owner" && (
+                  <Link
+                    to={`/owner/edit-restaurant/${restaurant._id}`}
+                    className="btn btn-outline-warning "
+                  >
+                    Edit
+                  </Link>
+                )}
+                {role.role === "admin" && (
+                  <div
+                    className=""
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      overflow: "hidden",
+                      height: "auto",
+                    }}
+                  >
+                    <button
+                      onClick={handleShowAdminHideModal}
+                      className="btn btn-outline-warning mt-4"
+                    >
+                      {restaurant.status === "Hidden" ? "Show" : "Hide"}
+                    </button>
+                    <button
+                      onClick={handleShowAdminModal}
+                      className="btn btn-outline-danger mt-4"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div><RestaurantRatings restaurantId={restaurant._id} />
         </>
       )}
 

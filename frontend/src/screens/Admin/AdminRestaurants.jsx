@@ -160,7 +160,7 @@ const AdminRestaurants = () => {
       <div className="controls-container">
         {/* Filter Button & Filters */}
         <div className={`filters-wrapper ${isFilterOpen ? "open" : ""}`}>
-          <div className={`filters-wrapper ${isFilterOpen ? "open" : ""}`}>
+          <div className={` ${isFilterOpen ? "open" : ""}`}>
             <button className="filter-toggle-btn" onClick={toggleFilters}>
               <FaFilter />
               <span>{isFilterOpen ? "Hide Filters" : "Show Filters"}</span>
@@ -187,8 +187,8 @@ const AdminRestaurants = () => {
         </div>
 
         {/* Search Field */}
-        <div className="search-wrapper">
-          <div className="search-container">
+        <div className="admin-search-wrapper">
+          <div className="admin-search-container">
             <input
               type="text"
               placeholder="Search by name, category, location..."

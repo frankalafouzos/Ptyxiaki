@@ -10,6 +10,7 @@ const EditRestaurant = () => {
   const [capacities, setCapacities] = useState(null);
   const [images, setImages] = useState(null);
   const [defaultClosedDays, setDefaultClosedDays] = useState(null);
+  let imagesFromDatabase;
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -36,6 +37,8 @@ const EditRestaurant = () => {
         }
         const defaultClosedDatesData = await defaultClosedDatesResponse.json();
         console.log("Defauly Closed Dates:" + defaultClosedDatesData);
+
+        imagesFromDatabase= data.images
 
         const capacityData = await capacitiesResponse.json();
         setRestaurantData(data.restaurant);

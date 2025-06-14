@@ -441,7 +441,17 @@ router.post('/approve-edit/:id', async (req, res) => {
     
     // Save the restaurant with all regular field updates
     await restaurant.save();
-    
+
+    // --- IMAGE ORDER UPDATE LOGIC ---
+    if (pendingEdit.changes.images_order) {
+      const { new: newOrder } = pendingEdit.changes.images_order;
+      for (const img of newOrder) {
+        await Image.findByIdAndUpdate(img.id, { order: img.order });
+      }
+      console.log('Image order updated for restaurant images.');
+    }
+    // --- END IMAGE ORDER UPDATE LOGIC ---
+
     // Handle closed days separately if needed
     if (hasClosedDaysChange) {
       console.log('Handling closed days change:', closedDaysValue);

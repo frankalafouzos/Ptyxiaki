@@ -95,7 +95,7 @@ const ConfirmBooking = () => {
           onClose: () =>
             // window.location.reload(),
             window.location.replace(
-              `${process.env.REACT_APP_API_URL}/bookingThankYou/${responseData.id}`
+              `/bookingThankYou/${responseData.id}`
             ),
         });
       } else {

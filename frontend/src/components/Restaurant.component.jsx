@@ -23,7 +23,9 @@ const Restaurant = ({ restaurant, index, images }) => {
   }, [email]);
 
   const getImagesForRestaurant = (Id) => {
-    return images.filter((image) => image.ImageID === Id);
+    return images
+      .filter((image) => image.ImageID === Id)
+      .sort((a, b) => (a.order || 0) - (b.order || 0)); // Sort by order
   };
 
   const handleDelete = async () => {
@@ -61,8 +63,8 @@ const Restaurant = ({ restaurant, index, images }) => {
     try {
       const response = await fetch(
         process.env.REACT_APP_API_URL +
-          "/restaurants/deleteAll/" +
-          restaurant._id,
+        "/restaurants/deleteAll/" +
+        restaurant._id,
         {
           method: "DELETE",
           headers: {
@@ -91,8 +93,8 @@ const Restaurant = ({ restaurant, index, images }) => {
     try {
       const response = await fetch(
         process.env.REACT_APP_API_URL +
-          "/admins/hide-restaurant/" +
-          restaurant._id,
+        "/admins/hide-restaurant/" +
+        restaurant._id,
         {
           method: "POST",
           headers: {
@@ -121,8 +123,8 @@ const Restaurant = ({ restaurant, index, images }) => {
     try {
       const response = await fetch(
         process.env.REACT_APP_API_URL +
-          "/admins/approve-restaurant/" +
-          restaurant._id,
+        "/admins/approve-restaurant/" +
+        restaurant._id,
         {
           method: "POST",
           headers: {

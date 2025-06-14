@@ -39,7 +39,19 @@ const RestaurantRatings = ({ restaurantId }) => {
     }
 
     if (!ratingsData || !ratingsData.ratings || ratingsData.ratings.length === 0) {
-        return <div>No ratings yet for this restaurant.</div>;
+        return (
+            <div className="restaurant-ratings-empty-centered">
+                <div className="empty-star-bounce" aria-label="No ratings">
+                    ⭐
+                </div>
+                <div style={{ fontWeight: 700, fontSize: 22, marginBottom: 8 }}>
+                    No ratings yet!
+                </div>
+                <div style={{ color: "#888", marginBottom: 12, fontSize: 16 }}>
+                    Be the first to share your experience after you visit this establishment and help others!
+                </div>
+            </div>
+        );
     }
 
     return (

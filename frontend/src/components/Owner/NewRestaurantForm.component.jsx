@@ -32,7 +32,7 @@ const detectChanges = (originalData, newData) => {
         if (
           !originalData[field] ||
           JSON.stringify(newData[field].sort()) !==
-            JSON.stringify(originalData[field].sort())
+          JSON.stringify(originalData[field].sort())
         ) {
           changes[field] = {
             old: originalData[field] || [],
@@ -58,6 +58,10 @@ const trackImageChanges = (originalImages, uploadedImages, deletedImages) => {
     added: [],
     deleted: [],
   };
+
+  console.log("Original images:", originalImages);
+  console.log("Uploaded images:", uploadedImages);
+  console.log("Deleted images:", deletedImages);
 
   // Track added images - files can't be serialized in JSON
   if (uploadedImages && uploadedImages.length > 0) {
@@ -96,6 +100,17 @@ const trackImageChanges = (originalImages, uploadedImages, deletedImages) => {
   }
 
   return null;
+};
+
+// Helper function to detect order changes between original and new images
+const detectOrderChanges = (originalOrder, newOrder) => {
+  if (originalOrder.length !== newOrder.length) return true;
+  for (let i = 0; i < originalOrder.length; i++) {
+    if (originalOrder[i].id !== newOrder[i].id || originalOrder[i].order !== newOrder[i].order) {
+      return true;
+    }
+  }
+  return false;
 };
 
 // Move uploadImages function outside of component so it can be accessed by submitRestaurantEdit
@@ -160,7 +175,8 @@ const submitRestaurantEdit = async (
   deletedImages,
   owner,
   capacityChanges,
-  closedDaysChanges
+  closedDaysChanges,
+  orderChanges
 ) => {
   try {
     // Make sure owner is defined
@@ -191,8 +207,8 @@ const submitRestaurantEdit = async (
         deleted:
           deletedImages.length > 0
             ? deletedImages.map((img) => ({
-                id: img._id || img.id || "unknown",
-              }))
+              id: img._id || img.id || "unknown",
+            }))
             : [],
       };
       console.log("Image changes detected and added to request");
@@ -208,6 +224,12 @@ const submitRestaurantEdit = async (
     if (closedDaysChanges) {
       changes.closedDays = closedDaysChanges;
       console.log("Closed days changes added to request:", closedDaysChanges);
+    }
+
+        // Add image order changes if any
+    if (orderChanges) {
+      changes.images_order = orderChanges;
+      console.log("Image order changes added to request:", orderChanges);
     }
 
     // Check if there are any changes
@@ -304,6 +326,7 @@ const RestaurantForm = ({
   const [deletedImages, setDeletedImages] = useState([]);
   const [imageID, setImageID] = useState("");
   const [originalData, setOriginalData] = useState(null); // Store original data for comparison
+  const [originalImageOrder, setOriginalImageOrder] = useState([]); // Store original image order
   const authUser = useAuthUser();
   const email = authUser.email;
   const [loading, setLoading] = useState(true);
@@ -383,6 +406,7 @@ const RestaurantForm = ({
           console.log("Fetched images:", imagesData);
           setImages(imagesData);
           // Add images to original data
+          setOriginalImageOrder(imagesData.map(img => ({ id: img._id || img.id, order: img.order })));
           setOriginalData((prev) => ({ ...prev, images: imagesData }));
         } else {
           console.error("Failed to fetch images:", imagesResponse.statusText);
@@ -453,7 +477,7 @@ const RestaurantForm = ({
 
       const capacityResponse = await fetch(
         process.env.REACT_APP_API_URL +
-          "/restaurants/restaurant-capacities/add",
+        "/restaurants/restaurant-capacities/add",
         {
           method: "POST",
           headers: {
@@ -512,8 +536,8 @@ const RestaurantForm = ({
       if (restaurantId) {
         await fetch(
           process.env.REACT_APP_API_URL +
-            "/restaurants/deleteAll/" +
-            restaurantId,
+          "/restaurants/deleteAll/" +
+          restaurantId,
           {
             method: "POST",
             headers: {
@@ -540,6 +564,7 @@ const RestaurantForm = ({
     }
 
     try {
+
       const updatedFormData = {
         ...formData,
         openHour: timeToMinutes(formData.openHour),
@@ -549,23 +574,23 @@ const RestaurantForm = ({
       // Track capacity changes
       const capacityChanges =
         formData.tablesForTwo !== capacities?.tablesForTwo ||
-        formData.tablesForFour !== capacities?.tablesForFour ||
-        formData.tablesForSix !== capacities?.tablesForSix ||
-        formData.tablesForEight !== capacities?.tablesForEight
+          formData.tablesForFour !== capacities?.tablesForFour ||
+          formData.tablesForSix !== capacities?.tablesForSix ||
+          formData.tablesForEight !== capacities?.tablesForEight
           ? {
-              old: {
-                tablesForTwo: capacities?.tablesForTwo,
-                tablesForFour: capacities?.tablesForFour,
-                tablesForSix: capacities?.tablesForSix,
-                tablesForEight: capacities?.tablesForEight,
-              },
-              new: {
-                tablesForTwo: formData.tablesForTwo,
-                tablesForFour: formData.tablesForFour,
-                tablesForSix: formData.tablesForSix,
-                tablesForEight: formData.tablesForEight,
-              },
-            }
+            old: {
+              tablesForTwo: capacities?.tablesForTwo,
+              tablesForFour: capacities?.tablesForFour,
+              tablesForSix: capacities?.tablesForSix,
+              tablesForEight: capacities?.tablesForEight,
+            },
+            new: {
+              tablesForTwo: formData.tablesForTwo,
+              tablesForFour: formData.tablesForFour,
+              tablesForSix: formData.tablesForSix,
+              tablesForEight: formData.tablesForEight,
+            },
+          }
           : null;
 
       // Track closed days changes
@@ -608,9 +633,9 @@ const RestaurantForm = ({
 
       const closedDaysChanges = hasClosedDaysChanges
         ? {
-            old: originalClosedDays,
-            new: newClosedDays,
-          }
+          old: originalClosedDays,
+          new: newClosedDays,
+        }
         : null;
 
       // Verify the result
@@ -624,10 +649,19 @@ const RestaurantForm = ({
 
       // Get ordered images from the ImageUploader
       const orderedImageData = imageUploaderRef.current.getOrderedImages();
-      const orderedNewImages = orderedImageData.newImages;
-      
+      const { allImages, existingImages, newImages } = orderedImageData;
+
+      const orderChanged = detectOrderChanges(originalImageOrder, allImages);
+
+      const orderChanges = orderChanged
+        ? {
+          old: originalImageOrder,
+          new: allImages,
+        }
+        : null;
+
       // Add order property to each image before upload
-      const imagesToUpload = orderedNewImages.map((image, index) => {
+      const imagesToUpload = newImages.map((image, index) => {
         // Attach order property to the image
         image.order = index + 1;
         return image;
@@ -642,7 +676,8 @@ const RestaurantForm = ({
         deletedImages,
         Owner._id,
         capacityChanges,
-        closedDaysChanges
+        closedDaysChanges,
+        orderChanges
       );
 
       // If no changes or submission failed
@@ -945,7 +980,7 @@ const RestaurantForm = ({
         initialImages={images}
         onExistingImageRemoved={handleImageDelete}
       />
-      
+
       <button type="submit">
         {restaurantData ? "Save Changes" : "Add Restaurant"}
       </button>

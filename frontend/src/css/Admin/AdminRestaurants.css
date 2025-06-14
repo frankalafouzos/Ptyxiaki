@@ -26,24 +26,26 @@
     text-align: left;
     position: relative; /* Make filter-container relative to this wrapper */
     margin-right: 5%;
+    width: 30%; /* Adjusted width for better alignment */
 }
 
 /* Search wrapper to center search */
-.search-wrapper {
+.admin-search-wrapper {
     flex: 1;
     display: flex;
     justify-content: center;
+    width: 50%;
 }
 
-/* Search container */
-.search-container {
-    width: 50%; /* Adjusted to 35% width */
+/* admin-search container */
+.admin-search-container {
+    width: 150%; /* Adjusted to 35% width */
     position: relative; /* Make the X button positioned inside */
 }
 
-/* Search field */
-.search-container input {
-    width: 100%;
+/* admin-search field */
+.admin-search-container input {
+    width: 50%;
     padding: 0.75rem;
     border: 1px solid #ccc;
     border-radius: 6px;
@@ -73,6 +75,7 @@
     flex: 0 0 20%; /* Fixed size for sort */
     text-align: right;
     padding-left: -15%;
+    width: 20%; /* Adjusted width for better alignment */
 }
 
 /* Sort form container */

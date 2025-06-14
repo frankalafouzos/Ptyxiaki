@@ -1,6 +1,6 @@
 {
-  "editor.fontSize": 20,
-  "terminal.integrated.fontSize": 20,
+  "editor.fontSize": 18,
+  "terminal.integrated.fontSize": 18,
   "workbench.colorCustomizations": {
   "terminal.background": "#0d1035",
   "terminal.foreground": "#a5a5a5c2",

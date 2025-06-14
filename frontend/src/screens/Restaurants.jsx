@@ -5,6 +5,7 @@ import FilterRestaurants from "../components/FilterRestaurants.component";
 import SortForm from "../components/SortRestaurants.component";
 import { Col, Row } from "react-bootstrap";
 import "../css/Restaurants.css";
+import { FaCircleXmark } from "react-icons/fa6";
 
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -25,6 +26,9 @@ const Restaurants = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [totalPages, setTotalPages] = useState(0);
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -50,6 +54,7 @@ const Restaurants = () => {
         locationFilter: locationFilter,
         minPrice: minPriceFilter,
         maxPrice: maxPriceFilter,
+        searchQuery: searchQuery,
       }).toString();
 
       try {
@@ -74,6 +79,7 @@ const Restaurants = () => {
     locationFilter,
     minPriceFilter,
     maxPriceFilter,
+    searchQuery,
   ]);
 
   return (
@@ -89,10 +95,38 @@ const Restaurants = () => {
           setMaxPriceFilter={setMaxPriceFilter}
           minPriceFilter={minPriceFilter}
           setMinPriceFilter={setMinPriceFilter}
+          Sort={sort} 
+          setSort={setSort}
         />
-
-        <SortForm Sort={sort} setSort={setSort} />
       </div>
+
+      {/* Search Field */}
+        <div className="search-wrapper">
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search by name, category, location..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // Reset to first page on new search
+              }}
+            />
+            {searchQuery && (
+              <button
+                className="clear-search"
+                onClick={() => {
+                  setSearchQuery("");
+                  setCurrentPage(1);
+                }}
+                type="button"
+                aria-label="Clear search"
+              >
+                <FaCircleXmark />
+              </button>
+            )}
+          </div>
+        </div>
 
       <PaginationComponent
         totalPages={totalPages}
