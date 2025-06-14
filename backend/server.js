@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose")
 const cookieParser = require("cookie-parser");
+const path = require("path");
 
 
 require("dotenv").config();
@@ -17,9 +18,16 @@ connection.once('open', () => {
     require('./agenda/expireOffers');
 })
 
+
 app.use(cookieParser());
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? true // Allow same origin in production
+    : ['http://localhost:3000', 'http://localhost:3001'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 const usersRouter = require('./routes/users');
@@ -38,21 +46,28 @@ const pendingEditsRoutes = require('./routes/pendingEditsRoutes');
 const offersRouter = require('./routes/offers');
 const restaurantRatingsRouter = require('./routes/restaurantRatings');
 
-app.use('/users', usersRouter);
-app.use('/restaurants', restaurantsRouter);
-app.use('/pendingRestaurants', pendingRestaurantsRouter);
-app.use('/bookings', bookingsRouter);
-app.use('/images', imagesRouter);
-app.use('/owners', ownersRouter);
-app.use('/admins', adminsRouter);
-app.use('/search', searchRouter);
-app.use('/locations', locationsRouter);
-app.use('/suggestions', suggestionsRouter);
-app.use('/notifications', notificationsRouter);
-app.use('/calendar', calendarRouter);
-app.use('/api/pending-edits', pendingEditsRoutes);
-app.use('/offers', offersRouter);
-app.use('/restaurantRatings', restaurantRatingsRouter);
+app.use('/api/restaurants', restaurantsRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/pendingRestaurants', pendingRestaurantsRouter);
+app.use('/api/bookings', bookingsRouter);
+app.use('/api/images', imagesRouter);
+app.use('/api/owners', ownersRouter);
+app.use('/api/admins', adminsRouter);
+app.use('/api/search', searchRouter);
+app.use('/api/locations', locationsRouter);
+app.use('/api/suggestions', suggestionsRouter);
+app.use('/api/notifications', notificationsRouter);
+app.use('/api/calendar', calendarRouter);
+app.use('/api/api/pending-edits', pendingEditsRoutes);
+app.use('/api/offers', offersRouter);
+app.use('/api/restaurantRatings', restaurantRatingsRouter);
+
+// Serve static files από το frontend build
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+});
 
 
 app.listen(port, () => {
