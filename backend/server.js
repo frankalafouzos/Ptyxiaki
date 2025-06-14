@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose")
 const cookieParser = require("cookie-parser");
+const path = require("path");
 
 
 require("dotenv").config();
@@ -17,9 +18,16 @@ connection.once('open', () => {
     require('./agenda/expireOffers');
 })
 
+
 app.use(cookieParser());
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? true // Allow same origin in production
+    : ['http://localhost:3000', 'http://localhost:3001'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 const usersRouter = require('./routes/users');
@@ -53,6 +61,13 @@ app.use('/calendar', calendarRouter);
 app.use('/api/pending-edits', pendingEditsRoutes);
 app.use('/offers', offersRouter);
 app.use('/restaurantRatings', restaurantRatingsRouter);
+
+// Serve static files από το frontend build
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+});
 
 
 app.listen(port, () => {
