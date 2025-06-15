@@ -15,6 +15,7 @@ import {
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState(
     localStorage.getItem("categoryFilter") || ""
   );
@@ -74,6 +75,7 @@ const Restaurants = () => {
         setRestaurants(data.restaurants);
         setImages(data.images);
         setTotalPages(data.totalPages);
+        setLoading(false);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -118,6 +120,14 @@ const Restaurants = () => {
       sort !== "Default"
     );
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center pt-5">
+        <div className="loader"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="main-container">
