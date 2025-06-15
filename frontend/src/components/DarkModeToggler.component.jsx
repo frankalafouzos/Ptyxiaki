@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
 
 const DarkModeToggle = () => {
     // Use localStorage to persist dark mode state
@@ -23,15 +22,34 @@ const DarkModeToggle = () => {
         setDarkMode((prevMode) => !prevMode);
     };
 
-    return ReactDOM.createPortal(
-        <div className="toggle-container">
-            <span className="toggle-label">{darkMode ? "Dark" : "Light"}</span>
-            <label className="toggle-switch">
-                <input type="checkbox" checked={darkMode} onChange={handleToggle} />
-                <span className="slider"></span>
-            </label>
-        </div>,
-        document.body // Attach it to the <body> outside of React's component tree
+    return (
+        <button 
+            onClick={handleToggle}
+            style={{
+                background: 'none',
+                border: '1px solid #dee2e6',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginLeft: '15px',
+                fontSize: '14px',
+                color: darkMode ? '#fff' : '#333',
+                backgroundColor: darkMode ? '#343a40' : '#fff',
+                transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => {
+                e.target.style.opacity = '0.8';
+            }}
+            onMouseOut={(e) => {
+                e.target.style.opacity = '1';
+            }}
+        >
+            <span>{darkMode ? "🌙" : "☀️"}</span>
+            <span>{darkMode ? "Dark" : "Light"}</span>
+        </button>
     );
 };
 

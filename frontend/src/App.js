@@ -174,7 +174,7 @@ function App() {
        
       <Footer />
     </Router>
-    <DarkModeToggle />
+    {/* <DarkModeToggle /> */}
     </>
   );
 }

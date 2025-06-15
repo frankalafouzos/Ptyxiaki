@@ -8,6 +8,7 @@ import {
 import { FaUser } from "react-icons/fa";
 import { FaUserPen } from "react-icons/fa6";
 import logo from "../imgs/Logo.png";
+import DarkModeToggle from "./DarkModeToggler.component";
 
 import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated';
 import useSignOut from 'react-auth-kit/hooks/useSignOut'
@@ -53,6 +54,7 @@ const Header = () => {
                   </Nav.Link>
                 </>
               )}
+              <DarkModeToggle />
 
             </Nav>
           </Navbar.Collapse>

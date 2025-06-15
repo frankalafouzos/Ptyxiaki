@@ -10,6 +10,7 @@ import { FaUserPen } from "react-icons/fa6";
 import logo from "../../imgs/Logo.png"; // Adjust the import path as necessary
 import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated';
 import useSignOut from 'react-auth-kit/hooks/useSignOut'
+import DarkModeToggle from "../DarkModeToggler.component"; // Adjust the import path as necessary
 
 const OwnerHeader = () => {
   const isAuthenticated = useIsAuthenticated();
@@ -57,6 +58,7 @@ const OwnerHeader = () => {
                   </Nav.Link>
                 </>
               )}
+              <DarkModeToggle />
             </Nav>
           </Navbar.Collapse>
         </Container>
