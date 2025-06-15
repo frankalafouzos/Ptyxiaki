@@ -14,6 +14,7 @@ const MakeABooking = () => {
   const [availability, setAvailability] = useState([]);
   const [claimedOffer, setClaimedOffer] = useState(null);
   const [offerExpired, setOfferExpired] = useState(false);
+  const [isOfferFromThisRestaurant, setIsOfferFromThisRestaurant] = useState(false)
 
   const [closedMessage, setClosedMessage] = useState("");
   const navigate = useNavigate();
@@ -21,7 +22,9 @@ const MakeABooking = () => {
   useEffect(() => {
     const claimed = sessionStorage.getItem("claimedOffer");
     if (claimed) {
-      const { offer, expiry } = JSON.parse(claimed);
+      const parsedClaimed = JSON.parse(claimed); // Parse the JSON string
+      const { offer, expiry } = parsedClaimed;
+      
       if (Date.now() > expiry) {
         setOfferExpired(true);
         sessionStorage.removeItem("claimedOffer");
@@ -31,6 +34,14 @@ const MakeABooking = () => {
           ...prev,
           offerClaimed: offer,
         }));
+      }
+      
+      const restaurantId = window.location.pathname.split("/").pop();
+      console.log("This")
+      console.log(parsedClaimed.offer.restaurantId._id, restaurantId); // Now this will work
+      
+      if(restaurantId === parsedClaimed.offer.restaurantId._id) { // Access the nested _id
+        setIsOfferFromThisRestaurant(true);
       }
     }
   }, []);
@@ -132,7 +143,7 @@ const MakeABooking = () => {
 
   return (
     <Container className="booking-container">
-      {claimedOffer && !offerExpired && (
+      {claimedOffer && !offerExpired && isOfferFromThisRestaurant &&(
         <Alert variant={isOutOfOfferWindow ? "danger" : "success"} className="mb-3">
           <div>
             <strong>Offer Applied:</strong> {claimedOffer.title}

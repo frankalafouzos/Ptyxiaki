@@ -51,15 +51,12 @@ function EditPassword() {
       toast.success("Profile edited successfully", {
         position: "top-center",
         autoClose: 2000,
-        // onClose: () =>
-        //   window.location.replace(process.env.REACT_APP_FRONTEND_URL + "/profilePage"),
       });
     } catch (error) {
       console.error("Edit profile error:", error.message);
       toast.error(error.message, {
         position: "top-center",
         autoClose: 2000,
-        // onClose: () => window.location.replace(process.env.REACT_APP_FRONTEND_URL + "/editPassword"),
       });
     }
   };
@@ -68,40 +65,48 @@ function EditPassword() {
     <div>
       <form onSubmit={handleSubmit} className={styles.form}>
         <h1 className={styles.title}>Edit Password</h1>
-        <div>
+        
+        <div className={styles.inputGroup}>
           <label htmlFor="currentPassword">Current Password:</label>
           <input
             type="password"
             id="currentPassword"
             value={currentPassword}
             onChange={handleCurrentPasswordChange}
+
           />
         </div>
-        <div>
+
+        <div className={styles.inputGroup}>
           <label htmlFor="newPassword">New Password:</label>
           <input
             type="password"
             id="newPassword"
             value={newPassword}
             onChange={handleNewPasswordChange}
+
           />
-          {newPassword === currentPassword && (
-            <div className="error-message">
-              Password cannot be the same with the existing one!
-            </div>
-          )}
+          <div className={styles.errorMessage} style={{ minHeight: "20px" }}>
+            {newPassword === currentPassword && newPassword && (
+              "Password cannot be the same with the existing one!"
+            )}
+          </div>
         </div>
-        <div>
+
+        <div className={styles.inputGroup}>
           <label htmlFor="confirmPassword">Confirm Password:</label>
           <input
             type="password"
             id="confirmPassword"
             value={confirmPassword}
             onChange={handleConfirmPasswordChange}
+
           />
-          {newPassword !== confirmPassword && (
-            <div className="error-message">Passwords do not match!</div>
-          )}
+          <div className={styles.errorMessage} style={{ minHeight: "20px" }}>
+            {newPassword !== confirmPassword && confirmPassword && (
+              "Passwords do not match!"
+            )}
+          </div>
         </div>
 
         <button type="submit">Update Password</button>
