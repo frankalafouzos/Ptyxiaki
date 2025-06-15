@@ -1,22 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "../css/Home.css";
 import SuggestedRestaurants from "../components/SuggestedRestaurants.component";
-import Image from '../imgs/Blurred_home_img.PNG';
 
 const Home = () => {
-  
   useEffect(() => {
     const handleScroll = () => {
       const content = document.querySelector('.content-section');
-      const position = content.getBoundingClientRect().top;
-      const windowHeight = window.innerHeight;
+      if (content) {
+        const position = content.getBoundingClientRect().top;
+        const windowHeight = window.innerHeight;
 
-      if (position < windowHeight - 100) {
-        content.classList.add('show');
+        if (position < windowHeight - 100) {
+          content.classList.add('show');
+        }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
+    
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };

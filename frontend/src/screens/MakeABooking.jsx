@@ -38,7 +38,7 @@ const MakeABooking = () => {
       
       const restaurantId = window.location.pathname.split("/").pop();
       console.log("This")
-      console.log(parsedClaimed.offer.restaurantId._id, restaurantId); // Now this will work
+      console.log(parsedClaimed.offer.restay, restaurantId); // Now this will work
       
       if(restaurantId === parsedClaimed.offer.restaurantId._id) { // Access the nested _id
         setIsOfferFromThisRestaurant(true);

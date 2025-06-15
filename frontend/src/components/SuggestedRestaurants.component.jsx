@@ -5,11 +5,11 @@ import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import Restaurant from "./Restaurant.component";
 
-const SuggestedRestaurants = () => {
+const SuggestedRestaurants = ({ onDataLoaded }) => {
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
   const [loadingTopRestaurants, setLoadingTopRestaurants] = useState(true);
   const [showSpinner, setShowSpinner] = useState(true);
-  const [fadeOut, setFadeOut] = useState(false); // Fade-out effect
+  const [fadeOut, setFadeOut] = useState(false);
   const [user, setUser] = useState(null);
   const [suggestedRestaurants, setSuggestedRestaurants] = useState([]);
   const [topRestaurants, setTopRestaurants] = useState([]);
@@ -18,17 +18,25 @@ const SuggestedRestaurants = () => {
   const role = JSON.parse(localStorage.getItem("role"))?.role || null;
   const [isUser, setIsUser] = useState(false);
 
+  // Check if all data is loaded
+  const isDataLoaded = !loadingTopRestaurants && (!isUser || !loadingSuggestions);
+
   // Hide spinner once both loading states are false
   useEffect(() => {
-    if (!loadingTopRestaurants && (!isUser || !loadingSuggestions)) {
+    if (isDataLoaded) {
       const fadeOutTimeout = setTimeout(() => setFadeOut(true), 500);
-      const spinnerTimeout = setTimeout(() => setShowSpinner(false), 1000);
+      const spinnerTimeout = setTimeout(() => {
+        setShowSpinner(false);
+        if (onDataLoaded) {
+          onDataLoaded();
+        }
+      }, 1000);
       return () => {
         clearTimeout(fadeOutTimeout);
         clearTimeout(spinnerTimeout);
       };
     }
-  }, [loadingTopRestaurants, loadingSuggestions, isUser]);
+  }, [isDataLoaded, onDataLoaded]);
 
   useEffect(() => {
     if (email && role === "user") {
@@ -104,87 +112,118 @@ const SuggestedRestaurants = () => {
     </Carousel>
   );
 
+  // Show only minimal loading spinner until all data is loaded
+  if (showSpinner) {
+    return (
+      <div>
+        <style>
+          {`
+            .loading-container {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              padding: 2rem 0;
+              background: transparent;
+              transition: opacity 0.5s ease-in-out;
+            }
+
+            .spinner {
+              width: 40px;
+              height: 40px;
+              border: 3px solid rgba(36, 30, 226, 0.2);
+              border-top: 3px solid #241ee2;
+              border-radius: 50%;
+              animation: spin 1s linear infinite;
+              margin-bottom: 1rem;
+            }
+
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+
+            .loading-text {
+              font-size: 16px;
+              font-weight: 500;
+              color: #333;
+              text-align: center;
+              margin: 0;
+            }
+
+            .fade-out {
+              opacity: 0;
+              transition: opacity 0.5s ease-in-out;
+            }
+          `}
+        </style>
+        <div className={`loading-container ${fadeOut ? "fade-out" : ""}`}>
+          <div className="spinner"></div>
+          <p className="loading-text">Loading restaurants...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show content only after all data is loaded
   return (
     <div>
       <style>
         {`
-                    .global-spinner {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        position: fixed;
-                        width: 100%;
-                        top: 0;
-                        left: 0;
-                        z-index: 9999;
-                        transition: opacity 0.5s ease-in-out;
-                    }
+          .restaurant-section {
+            margin-bottom: 4rem;
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+          }
 
-                    .spinner {
-                        width: 50px;
-                        height: 50px;
-                        border: 5px solid rgba(0, 0, 0, 0.1);
-                        border-top: 5px solid #241ee2;
-                        border-radius: 50%;
-                        animation: spin 1s linear infinite;
-                    }
+          .restaurant-section h2 {
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2rem;
+            color: #333;
+          }
 
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
+          @keyframes fadeInUp {
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
 
-                    .loading-spinner {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        font-size: 16px;
-                        font-weight: bold;
-                        color: #ff5733;
-                        padding: 10px;
-                        margin-top: 10px;
-                    }
+          .restaurant-section:nth-child(2) {
+            animation-delay: 0.3s;
+          }
 
-                    .fade-out {
-                        opacity: 0;
-                        transition: opacity 0.5s ease-in-out;
-                    }
-                `}
+          .no-restaurants {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            padding: 2rem 0;
+            margin: 2rem 0;
+          }
+        `}
       </style>
-      {showSpinner ? (
-        <div className={`global-spinner ${fadeOut ? "fade-out" : ""}`}>
-          <div className="spinner"></div>
+      
+      {isUser && suggestedRestaurants.length > 0 && (
+        <div className="restaurant-section">
+          <h2>Suggested Restaurants based on ChatGPT</h2>
+          {renderSuggestedCarousel(suggestedRestaurants)}
         </div>
-      ) : (
-        <>
-          {isUser && (
-            <>
-              <h2>Suggested Restaurants based on ChatGPT</h2>
-              {loadingSuggestions ? (
-                <>
-                  <div className="loading-spinner">
-                    ⏳ Finding the best options...
-                  </div>
-                  {topRestaurants.length > 0 &&
-                    renderTopCarousel(topRestaurants)}
-                </>
-              ) : suggestedRestaurants.length > 0 ? (
-                renderSuggestedCarousel(suggestedRestaurants)
-              ) : (
-                <p>No suggested restaurants available.</p>
-              )}
-            </>
-          )}
+      )}
 
+      {topRestaurants.length > 0 && (
+        <div className="restaurant-section">
           <h2>Top Restaurants</h2>
-          {loadingTopRestaurants ? (
-            <div className="loading-spinner">⏳ Loading top restaurants...</div>
-          ) : topRestaurants.length > 0 ? (
-            renderTopCarousel(topRestaurants)
-          ) : (
-            <p>No top restaurants available.</p>
-          )}
-        </>
+          {renderTopCarousel(topRestaurants)}
+        </div>
+      )}
+      
+      {/* Show message if no content */}
+      {(!isUser || suggestedRestaurants.length === 0) && topRestaurants.length === 0 && (
+        <div className="no-restaurants">
+          No restaurants available at the moment.
+        </div>
       )}
     </div>
   );

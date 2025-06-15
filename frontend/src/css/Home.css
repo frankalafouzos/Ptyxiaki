@@ -76,20 +76,13 @@ html {
   }
 }
 
-/* Content Section (Parallax Scrolling Effect) */
-.content-section {
-  padding: 50px 10%;
-  /* background-color: #a8d0f3; */
-  transform: translateY(50px);
-  opacity: 0;
-  transition: all 1s ease-in-out;
-}
+
 
 /* Apply animation when scrolling */
-.content-section.show {
+/* .content-section.show {
   transform: translateY(0);
   opacity: 1;
-}
+} */
 
 /* Section Title */
 .section-title {
@@ -116,12 +109,30 @@ html, body {
   }
 }
 
-/* Apply the scroll effect */
+/* Content Section (Parallax Scrolling Effect) */
+.content-section {
+  padding: 50px 10%;
+  background: transparent; /* Ensure transparent background */
+  transform: translateY(50px);
+  opacity: 0;
+  transition: all 1s ease-in-out;
+  box-sizing: border-box;
+}
+
 .suggested-restaurants {
+  position: relative;
+  background: transparent; /* Ensure transparent background */
   animation: scrollIn 1.2s ease-in-out forwards;
   opacity: 0;
 }
 
+/* Apply animation when scrolling */
+.content-section.show {
+  transform: translateY(0);
+  opacity: 1;
+}
   
+
+
 
 
