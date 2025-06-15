@@ -4,11 +4,11 @@ import { Form } from "react-bootstrap";
 
 const SortForm = ({ Sort, setSort }) => {
   return (
-    <Form className="SortContainer">
-      <Form.Group className="SortContent">
-        <Form.Label className="SortTitle">Sort</Form.Label>
+    <Form className="sort-container">
+      <Form.Group >
+        <Form.Label >Sort</Form.Label>
         <Form.Control
-          className="Sort"
+          className="sort-select"
           as="select"
           value={ Sort }
           onChange={(e) => setSort(e.target.value)}
