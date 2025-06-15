@@ -317,6 +317,7 @@
     .main-container {
         padding: 20px 10px;
         max-width: 95%;
+        font-size: small;
     }
     
     .restaurants-header {
@@ -338,7 +339,7 @@
 
     .filter-toggle-btn {
         padding: 0.6rem 0.8rem;
-        font-size: 0.9rem;
+        font-size: 0.5rem;
     }
 
     .restaurants-container {
@@ -351,6 +352,7 @@
     .main-container {
         padding: 15px 5px;
         max-width: 98%;
+        font-size: x-small;
     }
     
     .restaurants-header {
@@ -385,6 +387,7 @@
 @media (max-width: 480px) {
     .main-container {
         padding: 10px 2px;
+        font-size: xx-small;
     }
     
     .restaurants-header {
