@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Restaurant from "../components/Restaurant.component";
 import PaginationComponent from "../components/Pagination.component";
 import FilterRestaurants from "../components/FilterRestaurants.component";
@@ -17,6 +17,7 @@ const Restaurants = () => {
   const [fadeOut, setFadeOut] = useState(false);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterLoading, setFilterLoading] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState(
     localStorage.getItem("categoryFilter") || ""
   );
@@ -34,12 +35,22 @@ const Restaurants = () => {
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [totalPages, setTotalPages] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(""); // Debounced search query
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Toggle filter visibility
   const toggleFilters = () => {
     setIsFilterOpen(!isFilterOpen);
   };
+
+  // Debounce effect for search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -55,6 +66,11 @@ const Restaurants = () => {
 
   useEffect(() => {
     const fetchRestaurants = async () => {
+      // Show filter loading if it's not the initial load
+      if (!loading) {
+        setFilterLoading(true);
+      }
+      
       const queryParams = new URLSearchParams({
         page: currentPage,
         itemsPerPage: itemsPerPage,
@@ -65,7 +81,7 @@ const Restaurants = () => {
         locationFilter: locationFilter,
         minPrice: minPriceFilter,
         maxPrice: maxPriceFilter,
-        searchQuery: searchQuery,
+        searchQuery: debouncedSearchQuery, // Use debounced search query
       }).toString();
 
       try {
@@ -77,9 +93,12 @@ const Restaurants = () => {
         setImages(data.images);
         setTotalPages(data.totalPages);
         setLoading(false);
+        setFilterLoading(false);
         setFadeOut(true);     
       } catch (error) {
         console.error("Error:", error);
+        setLoading(false);
+        setFilterLoading(false);
       }
     };
 
@@ -92,13 +111,14 @@ const Restaurants = () => {
     locationFilter,
     minPriceFilter,
     maxPriceFilter,
-    searchQuery,
+    debouncedSearchQuery, // Use debounced search query in dependency array
   ]);
 
   // Handle resetting filters
   const resetFilters = () => {
     setSort("Default");
     setSearchQuery("");
+    setDebouncedSearchQuery(""); // Reset debounced search too
     setCategoryFilter("");
     setLocationFilter("");
     setMinPriceFilter("");
@@ -114,7 +134,7 @@ const Restaurants = () => {
   // Determine if any filters are applied
   const areFiltersApplied = () => {
     return (
-      searchQuery ||
+      debouncedSearchQuery || // Use debounced search query for filter check
       minPriceFilter ||
       maxPriceFilter ||
       categoryFilter ||
@@ -208,7 +228,7 @@ const Restaurants = () => {
 
         {/* Search Field */}
         <div className="search-wrapper">
-          <div className="search-container">
+          <div className={`search-container ${searchQuery !== debouncedSearchQuery ? 'search-loading' : ''}`}>
             <input
               type="text"
               placeholder="Search by name, category, location..."
@@ -218,11 +238,19 @@ const Restaurants = () => {
                 setCurrentPage(1);
               }}
             />
+            
+            {/* Search Loading Spinner */}
+            {searchQuery !== debouncedSearchQuery && (
+              <div className="search-loading-spinner"></div>
+            )}
+            
+            {/* Clear Search Button */}
             {searchQuery && (
               <button
                 className="clear-search"
                 onClick={() => {
                   setSearchQuery("");
+                  setDebouncedSearchQuery("");
                   setCurrentPage(1);
                 }}
                 type="button"
@@ -250,38 +278,50 @@ const Restaurants = () => {
         </div>
       )}
 
-      <PaginationComponent
-        totalPages={totalPages}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-      />
-
-      {restaurants.length === 0 ? (
-        <div className="error">
-          <h2>No restaurants found</h2>
+      {/* Show loading spinner when filtering, otherwise show content */}
+      {filterLoading ? (
+        <div className="filter-loading-container">
+          <div className="filter-loading-spinner">
+            <div className="spinner"></div>
+          </div>
+          <p className="loading-text">Updating results...</p>
         </div>
       ) : (
-        <div className="restaurants-container">
-          <Row className="row">
-            {restaurants.map((restaurant, index) => (
-              <Col key={restaurant._id} xs={12} sm={12} md={6} lg={6} xl={4} xxl={4}>
-                <Restaurant
-                  restaurant={restaurant}
-                  index={index}
-                  images={images}
-                  fromUsersDashboard={true}
-                />
-              </Col>
-            ))}
-          </Row>
+        <div>
+          <PaginationComponent
+            totalPages={totalPages}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+
+          {restaurants.length === 0 ? (
+            <div className="error">
+              <h2>No restaurants found</h2>
+            </div>
+          ) : (
+            <div className="restaurants-container">
+              <Row className="row">
+                {restaurants.map((restaurant, index) => (
+                  <Col key={restaurant._id} xs={12} sm={12} md={6} lg={6} xl={4} xxl={4}>
+                    <Restaurant
+                      restaurant={restaurant}
+                      index={index}
+                      images={images}
+                      fromUsersDashboard={true}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          )}
+
+          <PaginationComponent
+            totalPages={totalPages}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
         </div>
       )}
-
-      <PaginationComponent
-        totalPages={totalPages}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-      />
     </div>
   );
 };
