@@ -257,6 +257,49 @@ router.get('/:id/analytics', async (req, res) => {
   }
 });
 
+// Get owner with active restaurants
+router.post('/filterActiveRestaurants', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Get owner data
+    const owner = await Owner.findOne({ email: email });
+    if (!owner) {
+      return res.status(404).json({ error: 'Owner not found' });
+    }
+
+    // Get all active restaurants in one query
+    const activeRestaurants = await Restaurant.find({
+      _id: { $in: owner.restaurantsIds },
+      status: { $ne: 'Deleted' }
+    }).select('_id name status');
+
+    // Extract just the IDs for the frontend
+    const activeRestaurantIds = activeRestaurants.map(restaurant => restaurant._id);
+
+    const dashboardData = {
+      owner: {
+        id: owner._id,
+        email: owner.email,
+        restaurantsIds: owner.restaurantsIds,
+        activeRestaurantsIds: activeRestaurantIds
+      },
+      activeRestaurants: activeRestaurants
+    };
+
+    console.log(`Owner ${email} has ${activeRestaurantIds.length} active restaurants`);
+    res.json(dashboardData);
+
+  } catch (error) {
+    console.error('Error fetching owner dashboard:', error);
+    res.status(500).json({ error: 'Server error fetching dashboard data' });
+  }
+});
+
 router.post('/add', async (req, res) => {
   const { name, price, category, location, phone, email, description, tables, seatsPerTable, Bookingduration, openHour, closeHour, owner } = req.body;
   let imageID = crypto.randomUUID();

@@ -12,18 +12,17 @@ const OwnerDashboard = () => {
   const email = authUser.email;
   const [owner, setOwner] = useState(null);
   const [validRestaurants, setValidRestaurants] = useState([]);
-  // const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSpinner, setShowSpinner] = useState(true);
 
   useEffect(() => {
-    const fetchOwnerAndRestaurants = async () => {
+    const fetchOwnerDashboard = async () => {
       try {
-        console.log("Fetching user data for email:", email);
-        // setLoading(true);
+        console.log("Fetching dashboard data for email:", email);
         setShowSpinner(true);
+        
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/owners/ownerprofile`,
+          `${process.env.REACT_APP_API_URL}/restaurants/filterActiveRestaurants`,
           {
             method: "POST",
             headers: {
@@ -34,53 +33,26 @@ const OwnerDashboard = () => {
         );
 
         if (!response.ok) {
-          throw new Error("Owner not found");
+          throw new Error("Failed to fetch dashboard data");
         }
 
-        let ownerData = await response.json();
-        console.log("Received owner data:", ownerData);
-        setOwner(ownerData);
-
-        // Create array to store valid restaurant data
-        const activeRestaurants = [];
-
-        // Process each restaurant ID individually
-        for (const id of ownerData.restaurantsIds) {
-          try {
-            const restaurantResponse = await fetch(
-              `${process.env.REACT_APP_API_URL}/restaurants/${id}`
-            );
-
-            if (!restaurantResponse.ok) {
-              console.warn(`Restaurant ${id} not found or inaccessible`);
-              continue; // Skip to the next restaurant
-            }
-
-            const data = await restaurantResponse.json();
-            // Skip restaurants with status "deleted"
-            if (data.restaurant && data.restaurant.status !== "Deleted") {
-              activeRestaurants.push(id);
-            }
-          } catch (err) {
-            console.warn(`Error fetching restaurant ${id}:`, err);
-            // Continue with other restaurants
-          }
-        }
-
-        setValidRestaurants(activeRestaurants);
+        const dashboardData = await response.json();
+        console.log("Received dashboard data:", dashboardData);
+        
+        setOwner(dashboardData.owner);
+        setValidRestaurants(dashboardData.owner.activeRestaurantsIds);
+        
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching dashboard:", error);
         setError(error.message);
       } finally {
-        // setLoading(false);
         setShowSpinner(false);
       }
     };
 
-    fetchOwnerAndRestaurants();
+    fetchOwnerDashboard();
   }, [email]);
 
-  // if (loading) return <div>Loading...</div>;
   if (showSpinner) return <LoadingSpinner message="Loading your dashboard..." />;
   if (error) return <div>Error: {error}</div>;
 
