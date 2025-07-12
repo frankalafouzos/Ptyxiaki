@@ -66,7 +66,7 @@ const Restaurant = ({ restaurant, index, images }) => {
         "/restaurants/deleteAll/" +
         restaurant._id,
         {
-          method: "DELETE",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
