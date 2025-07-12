@@ -81,7 +81,7 @@ const OwnerMyRestaurants = () => {
     <div className="dashboard-container">
       <h1 className="dashboard-title">My Restaurants</h1>
       {restaurants.length > 0 ? (
-        <Row className="row">
+        <Row className="row justify-content-center">
           {restaurants.map((restaurant, index) => (
             <Col key={restaurant._id} sm={12} md={6} lg={6} xl={4} xxl={4}>
               <Restaurant
