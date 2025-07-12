@@ -4,6 +4,7 @@ import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { Col, Row } from "react-bootstrap";
 import "../../css/Dashboard.css";
 import "../../css/Spinner.css"
+import LoadingSpinner from "../../components/LoadingSpinner.component";
 import { Link } from "react-router-dom";
 
 const OwnerDashboard = () => {
@@ -80,9 +81,7 @@ const OwnerDashboard = () => {
   }, [email]);
 
   // if (loading) return <div>Loading...</div>;
-  if (showSpinner) return <div className={`global-spinner`}>
-      <div className="spinner"></div>
-    </div>;
+  if (showSpinner) return <LoadingSpinner message="Loading your dashboard..." />;
   if (error) return <div>Error: {error}</div>;
 
   return (

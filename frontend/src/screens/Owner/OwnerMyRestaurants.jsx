@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Row, Col } from "react-bootstrap";
 import Restaurant from "../../components/Restaurant.component";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import LoadingSpinner from "../../components/LoadingSpinner.component";
 
 const OwnerMyRestaurants = () => {
   const authUser = useAuthUser();
@@ -74,7 +75,7 @@ const OwnerMyRestaurants = () => {
     fetchOwnerAndRestaurants();
   }, [email]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <LoadingSpinner message="Loading your restaurants..." />;
   if (error) return <div>Error: {error}</div>;
 
   return (

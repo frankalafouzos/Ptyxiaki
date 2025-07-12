@@ -155,6 +155,108 @@ router.route('/:id').get(async (req, res) => {
   res.json({ restaurant, images });
 });
 
+// Get restaurant analytics/stats
+router.get('/:id/analytics', async (req, res) => {
+  try {
+    const restaurantId = req.params.id;
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+
+    console.log(`Fetching analytics for restaurant ${restaurantId}, year ${year}`);
+
+    // Get restaurant data
+    const restaurant = await Restaurant.findById(restaurantId);
+    if (!restaurant) {
+      return res.status(404).json({ error: 'Restaurant not found' });
+    }
+
+    // Get all bookings for this restaurant
+    const bookings = await Booking.find({ restaurantid: restaurantId });
+    console.log(`Found ${bookings.length} total bookings for restaurant`);
+
+    // Filter bookings by year
+    const filteredBookings = bookings.filter((booking) => {
+      const bookingYear = new Date(booking.date).getFullYear();
+      return bookingYear === year;
+    });
+    console.log(`Found ${filteredBookings.length} bookings for year ${year}`);
+
+    // Calculate all stats
+    const totalBookings = bookings.length;
+    const totalBookingsThisYear = filteredBookings.length;
+    
+    // Calculate total guests (all time)
+    const totalGuests = bookings.reduce((sum, booking) => {
+      return sum + (booking.partySize || 0);
+    }, 0);
+    
+    // Calculate total guests this year
+    const totalGuestsThisYear = filteredBookings.reduce((sum, booking) => {
+      return sum + (booking.partySize || 0);
+    }, 0);
+    
+    // Calculate average guests per booking (this year)
+    const averageGuestsPerBooking = totalBookingsThisYear > 0 
+      ? Math.round(totalGuestsThisYear / totalBookingsThisYear) 
+      : 0;
+    
+    // Calculate bookings per day (this year only)
+    const bookingsPerDay = filteredBookings.reduce((acc, booking) => {
+      const date = new Date(booking.date).toLocaleDateString('en-GB'); // DD/MM/YYYY format
+      if (!acc[date]) acc[date] = 0;
+      acc[date]++;
+      return acc;
+    }, {});
+    
+    // Calculate bookings per hour (all time for better data)
+    const hours = Array(24).fill(0);
+    bookings.forEach((booking) => {
+      const hour = Math.floor(booking.startingTime / 60);
+      if (hour >= 0 && hour < 24) {
+        hours[hour]++;
+      }
+    });
+
+    // Find busiest hour
+    const maxBookings = Math.max(...hours);
+    const busiestHour = maxBookings > 0 ? hours.indexOf(maxBookings) : null;
+
+    console.log('Analytics calculated:', {
+      totalBookings,
+      totalBookingsThisYear,
+      totalGuests,
+      totalGuestsThisYear,
+      averageGuestsPerBooking,
+      busiestHour,
+      bookingsPerDayCount: Object.keys(bookingsPerDay).length,
+      maxHourlyBookings: maxBookings
+    });
+
+    const analytics = {
+      restaurant: {
+        id: restaurant._id,
+        name: restaurant.name,
+        status: restaurant.status
+      },
+      stats: {
+        totalBookings,
+        totalBookingsThisYear,
+        totalGuests,
+        totalGuestsThisYear,
+        averageGuestsPerBooking,
+        busiestHour,
+        bookingsPerDay,
+        bookingsPerHour: hours
+      },
+      year
+    };
+
+    res.json(analytics);
+  } catch (error) {
+    console.error('Error fetching restaurant analytics:', error);
+    res.status(500).json({ error: 'Server error fetching analytics' });
+  }
+});
+
 router.post('/add', async (req, res) => {
   const { name, price, category, location, phone, email, description, tables, seatsPerTable, Bookingduration, openHour, closeHour, owner } = req.body;
   let imageID = crypto.randomUUID();

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner.component";
 import '../css/Offers.css';
 
 const Offers = () => {
@@ -53,7 +54,7 @@ const Offers = () => {
     window.location.href = "/booking/" + (offer.restaurantId?._id || offer.restaurantId);
   };
 
-  if (loading) return <div className="text-center mt-5">Loading offers...</div>;
+  if (loading) return <LoadingSpinner message="Loading offers..." />;
   if (error) return <div className="text-danger mt-5 text-center">{error}</div>;
 
   return (

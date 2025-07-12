@@ -1,14 +1,17 @@
-import React from "react"; 
+import React, { useState } from "react";
 import Profile from "../components/Profile.component";
 import UserBookings from "../components/UserBookings.component";
+import LoadingSpinner from "../components/LoadingSpinner.component";
 
-const profilePage = () => {
-    return (
-        <div>
-            <Profile />
-            <UserBookings display={5}/>
-        </div>
-    );
-}
+const ProfilePage = () => {
+  return (
+    <div>
 
-export default profilePage;
+          <Profile />
+          <UserBookings display={5}/>
+
+    </div>
+  );
+};
+
+export default ProfilePage;

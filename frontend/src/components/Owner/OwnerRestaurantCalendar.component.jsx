@@ -6,6 +6,7 @@ import { Container, Modal, Table, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../../css/Owner/OwnerRestaurantCalendar.css";
 import ViewOfferButton from "../DisplayOfferModal.component"; 
+import LoadingSpinner from "../../components/LoadingSpinner.component";
 
 const OwnerRestaurantCalendar = ({ restaurantId }) => {
   const [events, setEvents] = useState([]);
@@ -239,7 +240,7 @@ const OwnerRestaurantCalendar = ({ restaurantId }) => {
       </style>
       <h2 className="text-center my-4">Restaurant Capacity Calendar</h2>
       {loading ? (
-        <div className="text-center">Loading...</div>
+        <LoadingSpinner message="Loading your restaurant calendar..." />
       ) : (
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}

@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "../css/UserBookings.css";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import ViewOfferButton from "./DisplayOfferModal.component"; 
+import ViewOfferButton from "./DisplayOfferModal.component";
+import LoadingSpinner from "./LoadingSpinner.component";
 
-const UserBookings = ({ display }) => {
+const UserBookings = ({ display, onLoadingComplete }) => {
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const authUser = useAuthUser();
   const email = authUser.email;
 
@@ -12,6 +15,7 @@ const UserBookings = ({ display }) => {
     // Fetch bookings from the backend and update the state
     const fetchBookings = async () => {
       try {
+        setLoading(true);
         const response = await fetch(
           process.env.REACT_APP_API_URL + "/bookings/userbookings",
           {
@@ -21,16 +25,28 @@ const UserBookings = ({ display }) => {
             },
             body: JSON.stringify({ email: email }),
           }
-        ); // Replace with your backend API endpoint
+        );
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch bookings");
+        }
+        
         const data = await response.json();
         setBookings(data);
       } catch (error) {
         console.error("Error fetching bookings:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+        // Always notify parent component that loading is complete (success or error)
+        if (onLoadingComplete) {
+          onLoadingComplete(true);
+        }
       }
     };
 
     fetchBookings();
-  }, []);
+  }, [email, onLoadingComplete]);
 
   function deleteBooking(bookingId) {
     if (!window.confirm("Are you sure you want to delete this booking?")) {
@@ -84,6 +100,21 @@ const UserBookings = ({ display }) => {
         console.error("Error:", error);
         alert("Error deleting booking");
       });
+  }
+
+  if (loading) {
+    return <LoadingSpinner message="" />;
+  }
+  if (error) {
+    return (
+      <div className="Container">
+        <h2 className="title">Your Bookings</h2>
+        <div className="error-message">
+          <p>Error loading bookings: {error}</p>
+          <button onClick={() => window.location.reload()}>Try Again</button>
+        </div>
+      </div>
+    );
   }
 
   return (
