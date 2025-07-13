@@ -4,12 +4,21 @@ import UserBookings from "../components/UserBookings.component";
 import LoadingSpinner from "../components/LoadingSpinner.component";
 
 const ProfilePage = () => {
+  const [bookingsLoaded, setBookingsLoaded] = useState(false);
+
+  const handleBookingsLoaded = () => {
+    setBookingsLoaded(true);
+  };
+
   return (
     <div>
-
+        
+      {bookingsLoaded ? (
+        <>
           <Profile />
-          <UserBookings display={5}/>
-
+        </>
+      ):(<div></div>)}
+      <UserBookings display={5} onLoadingComplete={handleBookingsLoaded} />
     </div>
   );
 };
