@@ -170,7 +170,7 @@ const OwnerPendingEditsList = () => {
                 </Card.Body>
                 <Card.Footer>
                   <Link
-                    to={`/owner/pending-edits/${edit._id}`}
+                    to={`/owner/pending-edit/${edit._id}`}
                     className="btn btn-outline-primary w-100"
                   >
                     View Details

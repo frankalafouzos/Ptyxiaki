@@ -35,6 +35,35 @@ router.post('/upload/:id', upload.single('image'), async (req, res) => {
 });
 
 
+router.post('/upload-for-edit/:restaurantId', upload.single('image'), async (req, res) => {
+  console.log("Restaurant ID:", req.params.restaurantId);
+  console.log("File:", req.file);
+  console.log("Order:", req.query.order);
+
+  // Check if file was uploaded
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  try {
+    // Upload to S3 but don't save to Image model yet
+    const result = await uploadImage(req.file);
+    
+    // Return S3 details that can be stored in pending edits
+    res.status(200).json({ 
+      s3Key: result.Key,          // S3 object key
+      s3Url: result.Location,     // S3 URL
+      fileName: req.file.originalname,
+      order: req.query.order || 1,
+      size: req.file.size,
+      type: req.file.mimetype
+    });
+  } catch (error) {
+    console.error('Error uploading image to S3:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.route('/getRestaurantImages/:id').get(async (req, res) => {
   const restaurantId = req.params.id;
   console.log(restaurantId)

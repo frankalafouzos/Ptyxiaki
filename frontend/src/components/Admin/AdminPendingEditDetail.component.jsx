@@ -159,119 +159,151 @@ const AdminPendingEditDetail = () => {
         return JSON.stringify(value);
       }
 
-      if (field === "images_changes") {
-        // Enhanced image changes display with previews
-        const addedCount = value.added?.length || 0;
-        const deletedCount = value.deleted?.length || 0;
+      // Update the images_changes handling in formatFieldValue function:
+if (field === "images_changes") {
+  // Enhanced image changes display with previews
+  const addedCount = value.added?.length || 0;
+  const deletedCount = value.deleted?.length || 0;
 
-        return (
-          <div>
-            <p>
-              {addedCount} image(s) added, {deletedCount} image(s) removed
-            </p>
+  return (
+    <div>
+      <p>
+        {addedCount} image(s) added, {deletedCount} image(s) removed
+      </p>
 
-            {/* Display images being added */}
-            {addedCount > 0 && (
-              <div className="mb-3">
-                <h6 className="text-success">Images being added:</h6>
-                <div className="d-flex flex-wrap gap-2">
-                  {value.added.map((img, index) => (
-                    <div
-                      key={`added-${index}`}
-                      className="position-relative"
-                      style={{
-                        width: "120px",
-                        height: "120px",
-                        border: "2px solid #28a745",
-                        borderRadius: "4px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {img.url ? (
-                        <img
-                          src={img.url}
-                          alt={`New image ${index + 1}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                      ) : (
-                        <div className="d-flex justify-content-center align-items-center h-100 bg-light">
-                          <span className="text-muted small">
-                            Pending upload
-                          </span>
-                        </div>
-                      )}
-                      <Badge
-                        bg="success"
-                        className="position-absolute"
-                        style={{
-                          bottom: "5px",
-                          right: "5px",
-                        }}
-                      >
-                        Added
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+      {/* Display images being added */}
+      {addedCount > 0 && (
+        <div className="mb-3">
+          <h6 className="text-success">Images being added:</h6>
+          <div className="d-flex flex-wrap gap-2">
+            {value.added.map((img, index) => (
+              <div
+                key={`added-${index}`}
+                className="position-relative"
+                style={{
+                  width: "120px",
+                  height: "120px",
+                  border: "2px solid #28a745",
+                  borderRadius: "4px",
+                  overflow: "hidden",
+                }}
+              >
+                {img.s3Url ? (
+                  <img
+                    src={img.s3Url}
+                    alt={img.fileName || `New image ${index + 1}`}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <div className="d-flex justify-content-center align-items-center h-100 bg-light">
+                    <span className="text-muted small">
+                      Pending upload
+                    </span>
+                  </div>
+                )}
+                <Badge
+                  bg="success"
+                  className="position-absolute"
+                  style={{
+                    bottom: "5px",
+                    right: "5px",
+                  }}
+                >
+                  Added
+                </Badge>
+                {img.fileName && (
+                  <div 
+                    className="position-absolute bg-dark bg-opacity-75 text-white small px-1"
+                    style={{
+                      bottom: "0",
+                      left: "0",
+                      right: "0",
+                      fontSize: "10px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis"
+                    }}
+                  >
+                    {img.fileName}
+                  </div>
+                )}
               </div>
-            )}
-
-            {/* Display images being deleted */}
-            {deletedCount > 0 && (
-              <div>
-                <h6 className="text-danger">Images being removed:</h6>
-                <div className="d-flex flex-wrap gap-2">
-                  {value.deleted.map((img, index) => (
-                    <div
-                      key={`deleted-${index}`}
-                      className="position-relative"
-                      style={{
-                        width: "120px",
-                        height: "120px",
-                        border: "2px solid #dc3545",
-                        borderRadius: "4px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {img.url ? (
-                        <img
-                          src={img.url}
-                          alt={`Deleted image ${index + 1}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                      ) : (
-                        <div className="d-flex justify-content-center align-items-center h-100 bg-light">
-                          <span className="text-muted small">
-                            Image unavailable
-                          </span>
-                        </div>
-                      )}
-                      <Badge
-                        bg="danger"
-                        className="position-absolute"
-                        style={{
-                          bottom: "5px",
-                          right: "5px",
-                        }}
-                      >
-                        Removed
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            ))}
           </div>
-        );
-      }
+        </div>
+      )}
+
+      {/* Display images being deleted */}
+      {deletedCount > 0 && (
+        <div>
+          <h6 className="text-danger">Images being removed:</h6>
+          <div className="d-flex flex-wrap gap-2">
+            {value.deleted.map((img, index) => (
+              <div
+                key={`deleted-${index}`}
+                className="position-relative"
+                style={{
+                  width: "120px",
+                  height: "120px",
+                  border: "2px solid #dc3545",
+                  borderRadius: "4px",
+                  overflow: "hidden",
+                }}
+              >
+                {img.url ? (
+                  <img
+                    src={img.url}
+                    alt={`Deleted image ${index + 1}`}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: "0.7"
+                    }}
+                  />
+                ) : (
+                  <div className="d-flex justify-content-center align-items-center h-100 bg-light">
+                    <span className="text-muted small">
+                      Image unavailable
+                    </span>
+                  </div>
+                )}
+                <Badge
+                  bg="danger"
+                  className="position-absolute"
+                  style={{
+                    bottom: "5px",
+                    right: "5px",
+                  }}
+                >
+                  Removed
+                </Badge>
+                <div 
+                  className="position-absolute bg-dark bg-opacity-75 text-white small px-1"
+                  style={{
+                    bottom: "0",
+                    left: "0",
+                    right: "0",
+                    fontSize: "10px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
+                  }}
+                >
+                  ID: {img.id?.substring(0, 8)}...
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
       if (field === "closedDays") {
         // Format closed days changes

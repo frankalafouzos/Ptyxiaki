@@ -104,9 +104,22 @@ const trackImageChanges = (originalImages, uploadedImages, deletedImages) => {
 
 // Helper function to detect order changes between original and new images
 const detectOrderChanges = (originalOrder, newOrder) => {
-  if (originalOrder.length !== newOrder.length) return true;
-  for (let i = 0; i < originalOrder.length; i++) {
-    if (originalOrder[i].id !== newOrder[i].id || originalOrder[i].order !== newOrder[i].order) {
+  // Filter out new images (those without proper ObjectId) from order comparison
+  const validNewOrder = newOrder.filter(img => 
+    img.id && 
+    img.id.match(/^[0-9a-fA-F]{24}$/) // Valid MongoDB ObjectId pattern
+  );
+  
+  const validOriginalOrder = originalOrder.filter(img => 
+    img.id && 
+    img.id.match(/^[0-9a-fA-F]{24}$/)
+  );
+  
+  if (validOriginalOrder.length !== validNewOrder.length) return true;
+  
+  for (let i = 0; i < validOriginalOrder.length; i++) {
+    if (validOriginalOrder[i].id !== validNewOrder[i].id || 
+        validOriginalOrder[i].order !== validNewOrder[i].order) {
       return true;
     }
   }
@@ -179,57 +192,125 @@ const submitRestaurantEdit = async (
   orderChanges
 ) => {
   try {
-    // Make sure owner is defined
     if (!owner) {
       console.error("Owner ID is missing");
       throw new Error("Owner ID is required to submit edit");
     }
 
-    // Debug owner ID
     console.log("Owner ID being sent:", owner);
-    console.log("Owner ID type:", typeof owner);
+
+    // FIRST: Upload new images to S3 and get their S3 keys
+let newImageData = [];
+if (uploadedImages.length > 0) {
+  console.log("Uploading new images to S3...");
+  
+  for (const image of uploadedImages) {
+    console.log("Uploading file:", image);
+    console.log("File name:", image.name);
+    console.log("File size:", image.size);
+    console.log("File type:", image.type);
+    
+    // Check if image is a File object
+    if (!(image instanceof File)) {
+      console.error("Image is not a File object:", image);
+      // Try to extract the actual file from the image object
+      const actualFile = image.file || image.src || image;
+      if (actualFile instanceof File) {
+        console.log("Found actual file in image object");
+        image = actualFile;
+      } else {
+        console.error("Cannot find valid File object, skipping image");
+        continue;
+      }
+    }
+    
+    const imageFormData = new FormData();
+    imageFormData.append("image", image);
+    
+    // Debug FormData contents
+    for (let pair of imageFormData.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
+    
+    const order = image.order || 1;
+    
+    try {
+      const imageResponse = await fetch(
+        `${process.env.REACT_APP_API_URL}/images/upload-for-edit/${restaurantId}?order=${order}`,
+        {
+          method: "POST",
+          body: imageFormData,
+        }
+      );
+
+      if (!imageResponse.ok) {
+        const errorData = await imageResponse.json();
+        throw new Error(`Failed to upload image: ${errorData.error || imageResponse.statusText}`);
+      }
+
+      const s3Data = await imageResponse.json();
+      newImageData.push({
+        s3Key: s3Data.s3Key,
+        s3Url: s3Data.s3Url,
+        fileName: s3Data.fileName,
+        order: order,
+        size: s3Data.size,
+        type: s3Data.type,
+        pending: true  // Mark as pending
+      });
+      console.log("Image uploaded to S3:", s3Data.s3Key);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  }
+}
+    
 
     // Detect changes
     const changes = detectChanges(originalData, formData);
 
-    // Track image changes - ensure we always record if there are uploads/deletions
-    const hasImageChanges =
-      uploadedImages.length > 0 || deletedImages.length > 0;
-    const imageChanges = trackImageChanges(
-      originalData.images,
-      uploadedImages,
-      deletedImages
-    );
-
-    if (imageChanges || hasImageChanges) {
-      changes.images_changes = imageChanges || {
-        added: uploadedImages.length > 0 ? [{ pending: true }] : [],
-        deleted:
-          deletedImages.length > 0
-            ? deletedImages.map((img) => ({
-              id: img._id || img.id || "unknown",
-            }))
-            : [],
+    // Track image changes with S3 data
+    const hasImageChanges = uploadedImages.length > 0 || deletedImages.length > 0;
+    
+    if (hasImageChanges) {
+      const imageChanges = {
+        added: newImageData,  // S3 data instead of MongoDB IDs
+        deleted: deletedImages.map((img) => ({
+          id: img._id || img.id,
+          url: img.url || img.imageUrl || img.link,
+          path: img.path || "",
+        }))
       };
-      console.log("Image changes detected and added to request");
+      
+      changes.images_changes = imageChanges;
+      console.log("Image changes with S3 data:", imageChanges);
     }
 
     // Add capacity changes if any
     if (capacityChanges) {
       changes.capacity = capacityChanges;
-      console.log("Capacity changes added to request:", capacityChanges);
     }
 
     // Add closed days changes if any
     if (closedDaysChanges) {
       changes.closedDays = closedDaysChanges;
-      console.log("Closed days changes added to request:", closedDaysChanges);
     }
 
-        // Add image order changes if any
+    // For image order changes, only include existing images (not new ones yet)
     if (orderChanges) {
-      changes.images_order = orderChanges;
-      console.log("Image order changes added to request:", orderChanges);
+      // Only include existing images with valid MongoDB IDs in order changes
+      const validOrderChanges = {
+        old: orderChanges.old || [],
+        new: orderChanges.new.filter(img => 
+          img.id && img.id.match(/^[0-9a-fA-F]{24}$/)
+        )
+      };
+      
+      if (validOrderChanges.new.length > 0 || validOrderChanges.old.length > 0) {
+        changes.images_order = validOrderChanges;
+        console.log("Image order changes (existing images only):", validOrderChanges);
+      }
     }
 
     // Check if there are any changes
@@ -238,21 +319,15 @@ const submitRestaurantEdit = async (
       return null;
     }
 
-    // Log detected changes for debugging
     console.log("All detected changes:", changes);
 
-    // Create request payload with string ownerId
+    // Create request payload
     const requestPayload = {
       restaurantId,
       owner: owner.toString(),
       updatedData: formData,
-      changes, // This now includes all changes: basic fields, images, capacity, closed days
+      changes,
     };
-
-    console.log(
-      "Full request payload:",
-      JSON.stringify(requestPayload, null, 2)
-    );
 
     // Submit the edit request
     const response = await fetch(
@@ -266,8 +341,6 @@ const submitRestaurantEdit = async (
       }
     );
 
-    // Log raw response for debugging
-    console.log("Response status:", response.status, response.statusText);
     const responseText = await response.text();
     console.log("Raw response:", responseText);
 
@@ -276,18 +349,8 @@ const submitRestaurantEdit = async (
     }
 
     const result = JSON.parse(responseText);
-
-    // After successful submission, upload any new images if needed
-    if (result && result.pendingEdit && uploadedImages.length > 0) {
-      console.log("Uploading images for pending edit:", result.pendingEdit._id);
-      // We need to upload the images separately since they can't be sent as JSON
-      await uploadImages(uploadedImages, {
-        imageID: originalData.imageID,
-        _id: result.pendingEdit._id,
-      });
-    }
-
     return result;
+
   } catch (error) {
     console.error("Error submitting edit:", error);
     throw error;
@@ -554,144 +617,134 @@ const RestaurantForm = ({
     }
   };
 
-  const onSubmitEdit = async (e) => {
-    e.preventDefault();
-    console.log("Edit form submitted");
 
-    if (!restaurantData || !originalData) {
-      toast.error("Missing restaurant data");
+const onSubmitEdit = async (e) => {
+  e.preventDefault();
+  console.log("Edit form submitted");
+
+  if (!restaurantData || !originalData) {
+    toast.error("Missing restaurant data");
+    return;
+  }
+
+  try {
+    const updatedFormData = {
+      ...formData,
+      openHour: timeToMinutes(formData.openHour),
+      closeHour: timeToMinutes(formData.closeHour),
+    };
+
+    // Track capacity changes
+    const capacityChanges =
+      formData.tablesForTwo !== capacities?.tablesForTwo ||
+        formData.tablesForFour !== capacities?.tablesForFour ||
+        formData.tablesForSix !== capacities?.tablesForSix ||
+        formData.tablesForEight !== capacities?.tablesForEight
+        ? {
+          old: {
+            tablesForTwo: capacities?.tablesForTwo,
+            tablesForFour: capacities?.tablesForFour,
+            tablesForSix: capacities?.tablesForSix,
+            tablesForEight: capacities?.tablesForEight,
+          },
+          new: {
+            tablesForTwo: formData.tablesForTwo,
+            tablesForFour: formData.tablesForFour,
+            tablesForSix: formData.tablesForSix,
+            tablesForEight: formData.tablesForEight,
+          },
+        }
+        : null;
+
+    // Track closed days changes
+    const originalClosedDays = DefaultClosedDays || [];
+    const newClosedDays = formData.closedDays || [];
+
+    let hasClosedDaysChanges = false;
+    if (!originalClosedDays?.length && !newClosedDays?.length) {
+      hasClosedDaysChanges = false;
+    } else if (
+      (originalClosedDays?.length || 0) !== (newClosedDays?.length || 0)
+    ) {
+      hasClosedDaysChanges = true;
+    } else {
+      const sortedOriginal = [...(originalClosedDays || [])]
+        .sort()
+        .map(String);
+      const sortedNew = [...(newClosedDays || [])].sort().map(String);
+      hasClosedDaysChanges =
+        JSON.stringify(sortedOriginal) !== JSON.stringify(sortedNew);
+    }
+
+    const closedDaysChanges = hasClosedDaysChanges
+      ? {
+        old: originalClosedDays,
+        new: newClosedDays,
+      }
+      : null;
+
+    // Get ordered images from the ImageUploader
+    const orderedImageData = imageUploaderRef.current.getOrderedImages();
+    const { allImages, newImages } = orderedImageData;
+
+    console.log("=== DEBUG ImageUploader Output ===");
+    console.log("orderedImageData:", orderedImageData);
+    console.log("allImages:", allImages);
+    console.log("newImages:", newImages);
+    
+    // Use uploadedImages state instead of newImages from getOrderedImages
+    console.log("uploadedImages state:", uploadedImages);
+    console.log("=== END DEBUG ===");
+
+    // Only detect order changes for existing images (with valid ObjectIds)
+    const existingImagesOnly = allImages.filter(img => 
+      img.id && img.id.match(/^[0-9a-fA-F]{24}$/)
+    );
+
+    const orderChanged = detectOrderChanges(originalImageOrder, existingImagesOnly);
+
+    const orderChanges = orderChanged
+      ? {
+        old: originalImageOrder,
+        new: existingImagesOnly.map((img, index) => ({
+          id: img.id,
+          order: index + 1
+        })),
+      }
+      : null;
+
+    // Use the uploadedImages state instead of trying to extract from newImages
+    const imagesToUpload = uploadedImages.map((image, index) => {
+      // Attach order property to the file
+      image.order = existingImagesOnly.length + index + 1;
+      return image;
+    });
+
+    console.log("Final imagesToUpload array:", imagesToUpload);
+
+    // Submit all changes - images will be uploaded first to get real IDs
+    const result = await submitRestaurantEdit(
+      restaurantData._id,
+      updatedFormData,
+      originalData,
+      imagesToUpload, // Use uploadedImages state
+      deletedImages,
+      Owner._id,
+      capacityChanges,
+      closedDaysChanges,
+      orderChanges
+    );
+
+    if (!result) {
       return;
     }
 
-    try {
-
-      const updatedFormData = {
-        ...formData,
-        openHour: timeToMinutes(formData.openHour),
-        closeHour: timeToMinutes(formData.closeHour),
-      };
-
-      // Track capacity changes
-      const capacityChanges =
-        formData.tablesForTwo !== capacities?.tablesForTwo ||
-          formData.tablesForFour !== capacities?.tablesForFour ||
-          formData.tablesForSix !== capacities?.tablesForSix ||
-          formData.tablesForEight !== capacities?.tablesForEight
-          ? {
-            old: {
-              tablesForTwo: capacities?.tablesForTwo,
-              tablesForFour: capacities?.tablesForFour,
-              tablesForSix: capacities?.tablesForSix,
-              tablesForEight: capacities?.tablesForEight,
-            },
-            new: {
-              tablesForTwo: formData.tablesForTwo,
-              tablesForFour: formData.tablesForFour,
-              tablesForSix: formData.tablesForSix,
-              tablesForEight: formData.tablesForEight,
-            },
-          }
-          : null;
-
-      // Track closed days changes
-      const originalClosedDays = DefaultClosedDays || [];
-      const newClosedDays = formData.closedDays || [];
-
-      // Add debugging to see actual values
-      console.log("DefaultClosedDays:", DefaultClosedDays);
-      console.log("formData.closedDays:", formData.closedDays);
-
-      // Better comparison of arrays - normalize to strings for comparison
-      let hasClosedDaysChanges = false;
-      if (!originalClosedDays?.length && !newClosedDays?.length) {
-        // Both empty - no change
-        hasClosedDaysChanges = false;
-      } else if (
-        (originalClosedDays?.length || 0) !== (newClosedDays?.length || 0)
-      ) {
-        // Different lengths - definitely changed
-        hasClosedDaysChanges = true;
-      } else {
-        // Same length - ensure string comparison
-        const sortedOriginal = [...(originalClosedDays || [])]
-          .sort()
-          .map(String);
-        const sortedNew = [...(newClosedDays || [])].sort().map(String);
-        hasClosedDaysChanges =
-          JSON.stringify(sortedOriginal) !== JSON.stringify(sortedNew);
-      }
-
-      // Add extra debugging to see exact values being compared
-      console.log(
-        "Sorted Original:",
-        JSON.stringify([...(originalClosedDays || [])].sort())
-      );
-      console.log(
-        "Sorted New:",
-        JSON.stringify([...(newClosedDays || [])].sort())
-      );
-
-      const closedDaysChanges = hasClosedDaysChanges
-        ? {
-          old: originalClosedDays,
-          new: newClosedDays,
-        }
-        : null;
-
-      // Verify the result
-      console.log("Has closed days changes:", hasClosedDaysChanges);
-      console.log("Closed days changes:", closedDaysChanges);
-
-      console.log("Capacity changes:", capacityChanges);
-      console.log("Closed days changes:", closedDaysChanges);
-      console.log("Image changes - Deleted:", deletedImages);
-      console.log("Image changes - Uploaded:", uploadedImages);
-
-      // Get ordered images from the ImageUploader
-      const orderedImageData = imageUploaderRef.current.getOrderedImages();
-      const { allImages, existingImages, newImages } = orderedImageData;
-
-      const orderChanged = detectOrderChanges(originalImageOrder, allImages);
-
-      const orderChanges = orderChanged
-        ? {
-          old: originalImageOrder,
-          new: allImages,
-        }
-        : null;
-
-      // Add order property to each image before upload
-      const imagesToUpload = newImages.map((image, index) => {
-        // Attach order property to the image
-        image.order = index + 1;
-        return image;
-      });
-
-      // Submit all changes in a single request - pass capacity and closed days directly
-      const result = await submitRestaurantEdit(
-        restaurantData._id,
-        updatedFormData,
-        originalData,
-        imagesToUpload,
-        deletedImages,
-        Owner._id,
-        capacityChanges,
-        closedDaysChanges,
-        orderChanges
-      );
-
-      // If no changes or submission failed
-      if (!result) {
-        return;
-      }
-
-      toast.success("Restaurant edit submitted for approval");
-    } catch (error) {
-      console.error("Error during edit submission:", error);
-      toast.error(error.message || "Failed to submit edit");
-    }
-  };
-
+    toast.success("Restaurant edit submitted for approval");
+  } catch (error) {
+    console.error("Error during edit submission:", error);
+    toast.error(error.message || "Failed to submit edit");
+  }
+};
   return (
     <form
       onSubmit={screenType === "add" ? onSubmitAdd : onSubmitEdit}

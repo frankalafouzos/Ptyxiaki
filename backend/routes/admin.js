@@ -443,12 +443,39 @@ router.post('/approve-edit/:id', async (req, res) => {
     await restaurant.save();
 
     // --- IMAGE ORDER UPDATE LOGIC ---
-    if (pendingEdit.changes.images_order) {
-      const { new: newOrder } = pendingEdit.changes.images_order;
-      for (const img of newOrder) {
-        await Image.findByIdAndUpdate(img.id, { order: img.order });
+    if (pendingEdit.changes.images_changes) {
+      const { added, deleted } = pendingEdit.changes.images_changes;
+      
+      // Handle deleted images
+      if (deleted && deleted.length > 0) {
+        for (const img of deleted) {
+          try {
+            await Image.findByIdAndDelete(img.id);
+            console.log(`Deleted image: ${img.id}`);
+          } catch (error) {
+            console.error(`Failed to delete image ${img.id}:`, error);
+          }
+        }
       }
-      console.log('Image order updated for restaurant images.');
+      
+      // Handle added images - convert S3 data to Image records
+      if (added && added.length > 0) {
+        for (const s3Data of added) {
+          try {
+            const newImage = new Image({
+              ImageID: restaurant.imageID,
+              link: s3Data.s3Url,
+              order: s3Data.order
+            });
+            await newImage.save();
+            console.log(`Created image record for: ${s3Data.s3Key}`);
+          } catch (error) {
+            console.error(`Failed to create image record for ${s3Data.s3Key}:`, error);
+          }
+        }
+      }
+      
+      console.log('Image changes processed.');
     }
     // --- END IMAGE ORDER UPDATE LOGIC ---
 

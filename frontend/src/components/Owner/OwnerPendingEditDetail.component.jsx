@@ -19,6 +19,7 @@ const OwnerPendingEditDetail = () => {
           throw new Error("Failed to fetch edit details");
         }
         const data = await response.json();
+        console.log("Edit Details:", data);
         setEditDetails(data);
       } catch (error) {
         console.error("Error fetching edit details:", error);
@@ -27,7 +28,7 @@ const OwnerPendingEditDetail = () => {
         setLoading(false);
       }
     };
-
+    console.log("Fetching edit details for ID:", id);
     fetchEditDetails();
   }, [id]);
 
@@ -59,46 +60,125 @@ const OwnerPendingEditDetail = () => {
 
   // Format field name for display
   const formatFieldName = (field) => {
-    const fieldMappings = {
-      name: "Restaurant Name",
-      price: "Price",
-      category: "Category",
-      location: "Location",
-      phone: "Phone Number",
-      email: "Email",
-      description: "Description",
-      Bookingduration: "Booking Duration (min)",
-      openHour: "Opening Time",
-      closeHour: "Closing Time",
-      images_changes: "Image Changes",
-    };
-
-    return fieldMappings[field] || field;
+  const fieldMappings = {
+    name: "Restaurant Name",
+    price: "Price",
+    category: "Category",
+    location: "Location",
+    phone: "Phone Number",
+    email: "Email",
+    description: "Description",
+    Bookingduration: "Booking Duration (min)",
+    openHour: "Opening Time",
+    closeHour: "Closing Time",
+    images_changes: "Image Changes",
+    images_order: "Image Order", // Add this line
   };
+
+  return fieldMappings[field] || field;
+};
 
   // Format field value for display
-  const formatFieldValue = (field, value) => {
-    if (field === "openHour" || field === "closeHour") {
-      // Convert minutes to hours:minutes
-      const hours = Math.floor(value / 60);
-      const minutes = value % 60;
-      return `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}`;
-    }
+// Format field value for display
+const formatFieldValue = (field, value) => {
+  if (field === "openHour" || field === "closeHour") {
+    const hours = Math.floor(value / 60);
+    const minutes = value % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+  }
 
-    if (field === "images_changes") {
-      if (value.added && value.added.length > 0) {
-        return `Added ${value.added.length} image(s)`;
-      }
-      if (value.deleted && value.deleted.length > 0) {
-        return `Removed ${value.deleted.length} image(s)`;
-      }
-      return "No image changes";
-    }
+  if (field === "images_changes") {
+    return (
+      <div>
+        {value.added && value.added.length > 0 && (
+          <div className="mb-3">
+            <div className="text-success mb-2">
+              <strong>Added {value.added.length} image(s):</strong>
+            </div>
+            <div className="d-flex flex-wrap gap-2">
+              {value.added.map((image, index) => (
+                <div key={index} className="border rounded p-2" style={{ maxWidth: "150px" }}>
+                  <img
+                    src={image.s3Url}
+                    alt={image.fileName}
+                    className="img-fluid rounded mb-1"
+                    style={{ maxHeight: "80px", objectFit: "cover" }}
+                  />
+                  <div className="text-muted small text-center">
+                    {image.fileName}
+                  </div>
+                  <div className="text-muted small text-center">
+                    Order: {image.order}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {value.deleted && value.deleted.length > 0 && (
+          <div className="mb-3">
+            <div className="text-danger mb-2">
+              <strong>Deleted {value.deleted.length} image(s):</strong>
+            </div>
+            <div className="d-flex flex-wrap gap-2">
+              {value.deleted.map((image, index) => (
+                <div key={index} className="border rounded p-2 position-relative" style={{ maxWidth: "150px" }}>
+                  <img
+                    src={image.url}
+                    alt="Deleted image"
+                    className="img-fluid rounded mb-1 opacity-50"
+                    style={{ maxHeight: "80px", objectFit: "cover" }}
+                  />
+                  <div className="position-absolute top-50 start-50 translate-middle">
+                    <span className="badge bg-danger">DELETED</span>
+                  </div>
+                  <div className="text-muted small text-center">
+                    ID: {image.id.substring(0, 8)}...
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {(!value.added || value.added.length === 0) && 
+         (!value.deleted || value.deleted.length === 0) && (
+          <div className="text-muted">No image changes</div>
+        )}
+      </div>
+    );
+  }
 
-    return value;
-  };
+  if (field === "images_order") {
+    const oldCount = value.old ? value.old.length : 0;
+    const newCount = value.new ? value.new.length : 0;
+    
+    if (oldCount === 0 && newCount === 0) {
+      return "No order changes";
+    }
+    
+    if (oldCount > 0 && newCount === 0) {
+      return "Image order will be reset (all images removed from order)";
+    }
+    
+    if (oldCount === 0 && newCount > 0) {
+      return `New image order established (${newCount} images)`;
+    }
+    
+    return `Image order changed (${oldCount} → ${newCount} images)`;
+  }
+
+  // If value is an object, JSON.stringify it
+  if (typeof value === "object" && value !== null) {
+    return JSON.stringify(value);
+  }
+
+  return value;
+};
+
 
   if (loading) {
     return (
