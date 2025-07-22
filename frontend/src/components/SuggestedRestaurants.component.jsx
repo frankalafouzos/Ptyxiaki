@@ -59,7 +59,7 @@ const SuggestedRestaurants = ({ onDataLoaded }) => {
         console.error(error);
         setLoadingTopRestaurants(false);
       });
-  }, [email, role]);
+  }, []);
 
   useEffect(() => {
     if (isUser && user) {
