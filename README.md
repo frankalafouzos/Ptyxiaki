@@ -1,4 +1,4 @@
-# Ptyxiaki
+# Ptyxiaki / Book A Bite
 
 A full-stack project developed as part of my undergraduate thesis.
 
