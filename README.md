@@ -27,16 +27,27 @@ This repository contains the code and resources for my undergraduate thesis proj
 
 .
 ├── backend/ # Backend code
+
 ├── frontend/ # Frontend code
+
 ├── .vscode/ # VSCode settings
+
 ├── Book A Bite Home Page Wireframe.png
+
 ├── BookAlteUseCaseDiagram.png
+
 ├── README.md
+
 ├── Template.txt
+
 ├── UniqueFeaturesIdeas.txt
+
 ├── Useful.txt
+
 ├── package-lock.json
+
 ├── package.json
+
 └── Βιβλιογραφική περιγραφή.docx
 
 
