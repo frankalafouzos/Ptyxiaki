@@ -52,12 +52,12 @@ This repository contains the code and resources for my undergraduate thesis proj
     ```bash
     npm install
     ```
+    in all folders (root, frontend and backend)
 
 3. **Start the application:**
     ```bash
-    npm start
+    npm run dev
     ```
-    *(Adjust the above commands if you have separate backend/frontend start scripts.)*
 
 ## Technologies Used
 
