@@ -44,7 +44,7 @@ This repository contains the code and resources for my undergraduate thesis proj
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/ptyxiaki.git
+    git clone https://github.com/frankalafouzos/ptyxiaki.git
     cd ptyxiaki
     ```
 
